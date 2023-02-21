@@ -1,0 +1,2144 @@
+From: Grenat (Discord: Grenat#5220)
+Date: Fri, 21 Jan 2022 01:32:27 -0700
+Subject: [PATCH] Unimplemented Official Skills
+
+diff --git a/db/import-tmpl/skill_db.yml b/db/import-tmpl/skill_db.yml
+index 3b59e2bfb..266b3f9ef 100644
+--- a/db/import-tmpl/skill_db.yml
++++ b/db/import-tmpl/skill_db.yml
+@@ -140,3 +140,343 @@
+ Header:
+   Type: SKILL_DB
+   Version: 3
++
++Body:
++  - Id: 82
++    Name: WZ_FIREIVY
++    Description: Wind Ivy
++    MaxLevel: 5
++    Type: Magic
++    TargetType: Ground
++    Flags:
++      IsAutoShadowSpell: true
++      TargetHidden: true
++    Range: 9
++    Hit: Single
++    HitCount: 1
++    Element: Wind
++    ActiveInstance:
++      - Level: 1
++        Max: 1
++      - Level: 2
++        Max: 2
++      - Level: 3
++        Max: 3
++      - Level: 4
++        Max: 4
++      - Level: 5
++        Max: 5
++    CastCancel: true
++    CastTime: 5000
++    AfterCastActDelay: 1000
++    Duration1: 15000
++    Duration2: 2000
++    Requires:
++      SpCost: 50
++    Unit:
++      Id: Dummyskill
++      Layout: 1
++      Interval: 1000
++      Target: Enemy
++      Flag:
++        PathCheck: true
++  - Id: 360
++    Name: LK_FURY
++    Description: Fury
++    MaxLevel: 5
++    Type: Weapon
++    TargetType: Self
++    DamageFlags:
++      NoDamage: true
++    Hit: Single
++    HitCount: 1
++    Duration1: 60000
++    CastTime:
++      - Level: 1
++        Time: 1000
++      - Level: 2
++        Time: 750
++      - Level: 3
++        Time: 500
++      - Level: 4
++        Time: 250
++    AfterCastActDelay: 1000
++    Requires:
++      SpCost: 100
++  - Id: 377
++    Name: ASC_HALLUCINATION
++    Description: Hallucination Walk
++    MaxLevel: 5
++    Type: Weapon
++    TargetType: Self
++    DamageFlags:
++      Splash: true
++    Hit: Single
++    HitCount: 1
++    Duration1: 10000
++    Duration2: 5000
++    Cooldown: 10000
++    SplashArea: 7
++    CastTime:
++      - Level: 1
++        Time: 1000
++      - Level: 2
++        Time: 750
++      - Level: 3
++        Time: 500
++      - Level: 4
++        Time: 250
++    AfterCastActDelay: 1000
++    Requires:
++      SpCost: 50
++  - Id: 314
++    Name: BD_RAGNAROK
++    Description: Ragnarok
++    MaxLevel: 5
++    Type: Misc
++    TargetType: Self
++    DamageFlags:
++      NoDamage: true
++    Flags:
++      IsEnsemble: true
++    Hit: Single
++    HitCount: 1
++    Duration1: 60000
++    Duration2: 15000
++    Requires:
++      SpCost: 40
++      Weapon:
++        Musical: true
++        Whip: true
++    Unit:
++      Id: Ragnarok
++      Layout: 4
++      Interval: 2000
++      Flag:
++        Ensemble: true
++  - Id: 391
++    Name: ST_STEALBACKPACK
++    Description: Steal Backpack
++    MaxLevel: 5
++    Type: Weapon
++    TargetType: Attack
++    DamageFlags:
++      NoDamage: true
++    Duration1: 300000
++    Cooldown: 10000
++    CastTime:
++      - Level: 1
++        Time: 1000
++      - Level: 2
++        Time: 750
++      - Level: 3
++        Time: 500
++      - Level: 4
++        Time: 250
++    AfterCastActDelay: 1000
++    SplashArea:
++      - Level: 1
++        Area: 3
++      - Level: 2
++        Area: 3
++      - Level: 3
++        Area: 5
++      - Level: 4
++        Area: 5
++      - Level: 5
++        Area: 7
++    Requires:
++      SpCost: 50
++  - Id: 393
++    Name: CR_SYNTHESISPOTION
++    Description: Synthesis Potion
++    MaxLevel: 1
++    TargetType: Self
++    DamageFlags:
++      NoDamage: true
++    CastCancel: true
++    Hit: Single
++    SplashArea: 3
++    Duration1: 300000
++    Requires:
++      SpCost: 5
++  - Id: 245
++    Name: AM_DRILLMASTER
++    Description: Drill Master
++    MaxLevel: 10
++    Type: Weapon
++  - Id: 239
++    Name: AM_BIOTECHNOLOGY
++    Description: Biotechnology
++    MaxLevel: 10
++    Type: Weapon
++  - Id: 242
++    Name: AM_FLAMECONTROL
++    Description: Flame Control
++    MaxLevel: 1
++    Type: Weapon
++    TargetType: Attack
++    DamageFlags:
++      NoDamage: true
++    Hit: Single
++    HitCount: 1
++    SplashArea: 1
++    AfterCastActDelay: 1000
++  - Id: 246
++    Name: AM_HEALHOMUN
++    Description: Heal Homunculus
++    MaxLevel: 5
++    TargetType: Self
++    DamageFlags:
++      NoDamage: true
++    Hit: Single
++    HitCount: 1
++    AfterCastActDelay: 1000
++    Requires:
++      SpCost: 1
++      ItemCost:
++        - Item: White_Potion
++          Amount: 1
++        - Item: White_Potion
++          Amount: 1
++        - Item: White_Potion
++          Amount: 1
++        - Item: White_Potion
++          Amount: 1
++        - Item: White_Potion
++          Amount: 1
++  - Id: 653
++    Name: NPC_EARTHQUAKE
++    Description: Earthquake
++    MaxLevel: 10
++    Type: Magic
++    TargetType: Self
++    DamageFlags:
++      Splash: true
++    Flags:
++      TargetTrap: true
++    CopyFlags:
++      Skill:
++        Plagiarism: true
++        Reproduce: true
++    Hit: Multi_Hit
++    HitCount: -3
++    Element: Earth
++    CastCancel: true
++    SplashArea:
++      - Level: 1
++        Area: 5
++      - Level: 2
++        Area: 5
++      - Level: 3
++        Area: 7
++      - Level: 4
++        Area: 7
++      - Level: 5
++        Area: 9
++      - Level: 6
++        Area: 9
++      - Level: 7
++        Area: 11
++      - Level: 8
++        Area: 11
++      - Level: 9
++        Area: 11
++      - Level: 10
++        Area: 11
++    CastTime: 12000
++    AfterCastActDelay: 4000
++    AfterCastWalkDelay: 2500
++    Requires:
++      SpCost:
++        - Level: 1
++          Amount: 60
++        - Level: 2
++          Amount: 64
++        - Level: 3
++          Amount: 68
++        - Level: 4
++          Amount: 72
++        - Level: 5
++          Amount: 76
++        - Level: 6
++          Amount: 80
++        - Level: 7
++          Amount: 84
++        - Level: 8
++          Amount: 88
++        - Level: 9
++          Amount: 92
++        - Level: 10
++          Amount: 96
++    Duration1: 10000
++  - Id: 1831
++    Name: WZ_EARTHWALL
++    Description: Earth Wall
++    MaxLevel: 5
++    Type: Magic
++    TargetType: Ground
++    DamageFlags:
++      NoDamage: true
++    Range: 9
++    Hit: Single
++    HitCount: 1
++    CastTime: 500
++    Element: Earth
++    ActiveInstance:
++      - Level: 1
++        Max: 1
++      - Level: 2
++        Max: 2
++      - Level: 3
++        Max: 3
++      - Level: 4
++        Max: 4
++      - Level: 5
++        Max: 5
++    CastCancel: true
++    Requires:
++      SpCost: 30
++    Unit:
++      Id: Earthwall
++      Layout: 0
++      Interval: 1000
++      Flag:
++        PathCheck: true
++        NoKnockback: true
++  - Id: 388
++    Name: WS_SYSTEMCREATE
++    Description: System Creation
++    MaxLevel: 5
++    Type: Weapon
++    TargetType: Ground
++    Range: 9
++    DamageFlags:
++      NoDamage: true
++    CastTime: 5000
++    AfterCastActDelay: 1000
++    Duration1: 20000
++    Requires:
++      SpCost: 50
++      ItemCost:
++        - Item: Iron
++          Amount: 1
++  - Id: 1829
++    Name: AM_TWILIGHT4
++    Description: Twilight Alchemy 4
++    MaxLevel: 1
++    TargetType: Self
++    DamageFlags:
++      NoDamage: true
++    Flags:
++      IsSpirit: true
++    Hit: Single
++    CastTime: 3000
++    AfterCastActDelay: 10000
++    CastTimeFlags:
++      IgnoreDex: true
++    Requires:
++      SpCost: 200
++      ItemCost:
++        - Item: Medicine_Bowl
++          Amount: 200
+diff --git a/src/common/mmo.hpp b/src/common/mmo.hpp
+index 92fcfb8f5..b56b8f49a 100644
+--- a/src/common/mmo.hpp
++++ b/src/common/mmo.hpp
+@@ -83,7 +83,7 @@ typedef uint32 t_itemid;
+ #define MAX_BANK_ZENY SINT32_MAX ///Max zeny in Bank
+ #define MAX_FAME 1000000000 ///Max fame points
+ #define MAX_CART 100 ///Maximum item in cart
+-#define MAX_SKILL 1454 ///Maximum skill can be hold by Player, Homunculus, & Mercenary (skill list) AND skill_db limit
++#define MAX_SKILL 1464 ///Maximum skill can be hold by Player, Homunculus, & Mercenary (skill list) AND skill_db limit
+ #define DEFAULT_WALK_SPEED 150 ///Default walk speed
+ #define MIN_WALK_SPEED 20 ///Min walk speed
+ #define MAX_WALK_SPEED 1000 ///Max walk speed
+diff --git a/src/config/core.hpp b/src/config/core.hpp
+index bb44ce662..0fe64c9dd 100644
+--- a/src/config/core.hpp
++++ b/src/config/core.hpp
+@@ -11,6 +11,9 @@
+ 
+ #include "../custom/defines_pre.hpp"
+ 
++/// Unimplemented Skills
++#define FORGOTTEN_SKILLS
++
+ /// Max number of items on @autolootid list
+ #define AUTOLOOTITEM_SIZE 10
+ 
+diff --git a/src/config/packets.hpp b/src/config/packets.hpp
+index ddab1062c..83ff74a62 100644
+--- a/src/config/packets.hpp
++++ b/src/config/packets.hpp
+@@ -13,7 +13,7 @@
+ 	/// Do NOT edit this line! To set your client version, please do this instead:
+ 	/// In Windows: Add this line in your src\custom\defines_pre.hpp file: #define PACKETVER YYYYMMDD
+ 	/// In Linux: The same as above or run the following command: ./configure --enable-packetver=YYYYMMDD
+-	#define PACKETVER 20211103
++	#define PACKETVER 20200520
+ #endif
+ 
+ #ifndef PACKETVER_RE
+diff --git a/src/map/atcommand.cpp b/src/map/atcommand.cpp
+index 1c0a2a0a7..9ea45a438 100644
+--- a/src/map/atcommand.cpp
++++ b/src/map/atcommand.cpp
+@@ -5913,7 +5913,7 @@ ACMD_FUNC(storeall)
+ 				pet_return_egg( sd, sd->pd );
+ 			}
+ 			pc_equipswitch_remove(sd, i);
+-			storage_storageadd(sd, &sd->storage, i, sd->inventory.u.items_inventory[i].amount);
++			storage_storageadd(sd, &sd->storage, i, sd->inventory.u.items_inventory[i].amount, 0);
+ 		}
+ 	}
+ 	storage_storageclose(sd);
+diff --git a/src/map/battle.cpp b/src/map/battle.cpp
+index 515c8159b..058616bd8 100644
+--- a/src/map/battle.cpp
++++ b/src/map/battle.cpp
+@@ -1705,7 +1705,26 @@ int64 battle_calc_damage(struct block_list *src,struct block_list *bl,struct Dam
+ 
+ 		if( sc->data[SC__DEADLYINFECT] && (flag&(BF_SHORT|BF_MAGIC)) == BF_SHORT && damage > 0 && rnd()%100 < 30 + 10 * sc->data[SC__DEADLYINFECT]->val1 )
+ 			status_change_spread(bl, src, 1); // Deadly infect attacked side
+-
++#ifdef FORGOTTEN_SKILLS
++		struct status_data* tstatus = status_get_status_data(bl);
++		if ( sc->data[SC_FURY2] && damage > 0 ) {
++			if (tstatus) {
++				if ((( 2 * sc->data[SC_FURY2]->val1 * tstatus->hp) / 1000) > damage)
++					damage = 0;
++				else
++					damage -= ( 2 * sc->data[SC_FURY2]->val1 * tstatus->hp) / 1000;
++			}
++			if(tstatus && sc->data[SC_FURY2]->val2 < tstatus->vit/2) {
++				int furydmg = (2 * (int)damage) / 1000;
++				if(furydmg > 5)
++					furydmg = 5;
++				if(sc->data[SC_ATKPOTION])
++					furydmg += sc->data[SC_ATKPOTION]->val1;
++				sc_start(src, bl, SC_ATKPOTION, 100, furydmg, 7000);
++				sc->data[SC_FURY2]->val2 ++;
++			}
++		}
++#endif
+ 	} //End of target SC_ check
+ 
+ 	//SC effects from caster side.
+@@ -1794,6 +1813,15 @@ int64 battle_calc_damage(struct block_list *src,struct block_list *bl,struct Dam
+ 				pc_addsoulball(tsd, 5 + 3 * pc_checkskill(tsd, SP_SOULENERGY));
+ 			}
+ 		}
++#ifdef FORGOTTEN_SKILLS
++		struct status_data* sstatus = status_get_status_data(src);
++		if ( sc->data[SC_FURY2] ) {
++			if(sstatus->hp + ((sc->data[SC_FURY2]->val1 * (int)damage) / 100) > sstatus->max_hp)
++				status_heal(src, sstatus->max_hp, 0, 2);
++			else
++				status_heal(src, (sc->data[SC_FURY2]->val1 * (int)damage) / 100, 0, 2);
++		}
++#endif
+ 	} //End of caster SC_ check
+ 
+ 	//PK damage rates
+@@ -3957,6 +3985,11 @@ static int battle_calc_attack_skill_ratio(struct Damage* wd, struct block_list *
+ 		case KN_SPEARBOOMERANG:
+ 			skillratio += 50 * skill_lv;
+ 			break;
++#ifdef FORGOTTEN_SKILLS
++		case AM_FLAMECONTROL:
++			skillratio += 100;
++			break;
++#endif
+ #ifdef RENEWAL
+ 		case KN_BRANDISHSPEAR:
+ 			skillratio += -100 + 400 + 100 * skill_lv + sstatus->str * 3;
+@@ -6841,12 +6874,30 @@ struct Damage battle_calc_magic_attack(struct block_list *src,struct block_list
+ 					mflag &= ~NPC_EARTHQUAKE_FLAG; // Remove before NK_SPLASHSPLIT check
+ 				}
+ 
+-				if (src->type == BL_PC)
++				if (src->type == BL_PC) {
++#ifdef FORGOTTEN_SKILLS
++					if (sstatus->matk_max > sstatus->matk_min) {
++						MATK_ADD(sstatus->matk_min+rnd()%(sstatus->matk_max-sstatus->matk_min));
++					} else {
++						MATK_ADD(sstatus->matk_min);
++					}
++					skillratio += 100 + 25 * skill_lv;
++					if (mflag > 0) {
++						int split_ratio = (50 + mflag * 50) / mflag; // 0 / 25 / 34 / 38 / 40 / .. / .. / .. / .. / 45
++						skillratio += skillratio * split_ratio / 100;
++					}
++					skillratio = skillratio * (130 - distance_bl(src,target) * 3) / 100;
++					ad.damage += battle_calc_weapon_attack(src, target, skill_id, skill_lv, mflag).damage/2;
++
++					MATK_RATE(skillratio);
++#else
+ 					ad.damage = sstatus->str * 2 + battle_calc_weapon_attack(src, target, skill_id, skill_lv, mflag).damage;
+-				else
++#endif
++				} else {
+ 					ad.damage = battle_calc_base_damage(src, sstatus, &sstatus->rhw, sc, tstatus->size, 0);
+ 
+-				MATK_RATE(200 + 100 * skill_lv + 100 * (skill_lv / 2) + ((skill_lv > 4) ? 100 : 0));
++					MATK_RATE(200 + 100 * skill_lv + 100 * (skill_lv / 2) + ((skill_lv > 4) ? 100 : 0));
++				}
+ 
+ 				if (nk[NK_SPLASHSPLIT] && mflag > 1)
+ 					ad.damage /= mflag;
+@@ -6949,6 +7000,14 @@ struct Damage battle_calc_magic_attack(struct block_list *src,struct block_list
+ 						skillratio += 40 * skill_lv;
+ #endif
+ 						break;
++#ifdef FORGOTTEN_SKILLS
++					case WZ_FIREIVY:
++						skillratio += 255 + 25 * skill_lv;
++						break;
++					case AM_FLAMECONTROL:
++						skillratio += 100;
++						break;
++#endif
+ #ifdef RENEWAL
+ 					case WZ_EARTHSPIKE:
+ 						skillratio += 100;
+@@ -7855,6 +7914,36 @@ struct Damage battle_calc_misc_attack(struct block_list *src,struct block_list *
+ 				}
+ 			}
+ 			break;
++#ifdef FORGOTTEN_SKILLS
++		case BD_RAGNAROK:
++			{
++				md.damage = skill_lv;
++				short totaldef, totalmdef;
++				struct Damage atk, matk, atk2, matk2;
++				int partnerid = 0;
++				if(ssc && ssc->data[SC_DANCING])
++					partnerid = ssc->data[SC_DANCING]->val4;
++
++				struct block_list *partner = map_id2bl(partnerid);
++
++				atk = battle_calc_weapon_attack(src, target, skill_id, skill_lv, 0);
++				matk = battle_calc_magic_attack(src, target, skill_id, skill_lv, 0);
++
++				if(partner) {
++					atk2 = battle_calc_weapon_attack(partner, target, skill_id, skill_lv, 0);
++					matk2 = battle_calc_magic_attack(partner, target, skill_id, skill_lv, 0);
++				}
++
++				// (atk + matk + atk2 + matk2) * (3 + (.5 * skill level))
++				md.damage = ((5 * skill_lv) * (atk.damage + matk.damage + atk2.damage + matk2.damage)) / 100;
++
++				// modified def reduction, final damage = base damage - (edef + sdef + emdef + smdef)
++				totaldef = tstatus->def2 + (short)status_get_def(target);
++				totalmdef = tstatus->mdef + tstatus->mdef2;
++				md.damage -= totaldef + totalmdef;
++			}
++			break;
++#endif
+ #ifndef RENEWAL
+ 		case BA_DISSONANCE:
+ 			md.damage = 30 + skill_lv * 10;
+@@ -8209,6 +8298,20 @@ struct Damage battle_calc_attack(int attack_type,struct block_list *bl,struct bl
+ 
+ 	struct map_session_data *sd = BL_CAST(BL_PC, bl);
+ 
++#ifdef FORGOTTEN_SKILLS
++	struct status_change *tsc = status_get_sc(target);
++	if(bl->type == BL_HOM) {
++		TBL_HOM *hd = BL_CAST(BL_HOM,bl);
++		int level = 0;
++		if(hd && (level = pc_checkskill(hd->master,AM_DRILLMASTER)))
++			d.damage += (d.damage * level*2) / 100;
++	}
++	if(tsc && tsc->data[SC_HALLUCINATIONWALK2] && d.damage > 0 && rand()%10000 < tsc->data[SC_HALLUCINATIONWALK2]->val1) {
++		d.damage = d.damage2 = 0;
++		clif_specialeffect(target, 1462, AREA);
++	}
++#endif
++
+ 	if (sd && d.damage + d.damage2 > 1)
+ 		battle_vanish_damage(sd, target, d.flag);
+ 
+diff --git a/src/map/clif.cpp b/src/map/clif.cpp
+index 0ae1f47ce..d19e69f5f 100644
+--- a/src/map/clif.cpp
++++ b/src/map/clif.cpp
+@@ -367,6 +367,10 @@ static inline unsigned char clif_bl_type(struct block_list *bl, bool walking) {
+ 					return 0xd; //NPC_ABR_TYPE
+ 				case AI_BIONIC:
+ 					return 0xe; //NPC_BIONIC_TYPE
++#ifdef FORGOTTEN_SKILLS
++				case AI_BOMB:
++					return 0x7;
++#endif
+ 				default:
+ 					return 0x5; //NPC_MOB_TYPE
+ 			}
+@@ -1677,6 +1681,11 @@ int clif_spawn( struct block_list *bl, bool walking ){
+ 	if (vd->body_style)
+ 		clif_refreshlook(bl,bl->id,LOOK_BODY2,vd->body_style,AREA_WOS);
+ 
++#ifdef FORGOTTEN_SKILLS
++	for( int i = 0; i < 10; i++ )
++		if( bl->fixeffect[i] > 0 )
++			clif_specialeffect( bl, bl->fixeffect[i], AREA );
++#endif
+ 	switch (bl->type)
+ 	{
+ 	case BL_PC:
+@@ -1959,7 +1968,11 @@ static void clif_move2( struct block_list *bl, struct view_data *vd, struct unit
+ 		clif_refreshlook(bl,bl->id,LOOK_CLOTHES_COLOR,vd->cloth_color,AREA_WOS);
+ 	if(vd->body_style)
+ 		clif_refreshlook(bl,bl->id,LOOK_BODY2,vd->body_style,AREA_WOS);
+-
++#ifdef M5U00041
++	for( int i = 0; i < 10; i++ )
++		if( bl->fixeffect[i] > 0 )
++			clif_specialeffect( bl, bl->fixeffect[i], AREA_WOS );
++#endif
+ 	switch(bl->type) {
+ 	case BL_PC:
+ 		{
+@@ -4972,7 +4985,11 @@ void clif_getareachar_unit( struct map_session_data* sd,struct block_list *bl ){
+ 		clif_refreshlook(&sd->bl,bl->id,LOOK_CLOTHES_COLOR,vd->cloth_color,SELF);
+ 	if (vd->body_style)
+ 		clif_refreshlook(&sd->bl,bl->id,LOOK_BODY2,vd->body_style,SELF);
+-
++#ifdef M5U00041
++	for( i = 0; i < 10; i++ )
++		if( bl->fixeffect[i] > 0)
++			clif_specialeffect_single( bl, bl->fixeffect[i], sd->fd );
++#endif
+ 	switch (bl->type)
+ 	{
+ 	case BL_PC:
+@@ -5017,7 +5034,11 @@ void clif_getareachar_unit( struct map_session_data* sd,struct block_list *bl ){
+ 			else if(md->special_state.size==SZ_MEDIUM)
+ 				clif_specialeffect_single(bl,EF_BABYBODY2,sd->fd);
+ #if PACKETVER >= 20120404
++#ifdef FORGOTTEN_SKILLS
++			if (battle_config.monster_hp_bars_info && !map_getmapflag(bl->m, MF_HIDEMOBHPBAR) && md->special_state.ai != AI_BOMB) {
++#else
+ 			if (battle_config.monster_hp_bars_info && !map_getmapflag(bl->m, MF_HIDEMOBHPBAR)) {
++#endif
+ 				int i;
+ 				for(i = 0; i < DAMAGELOG_SIZE; i++)// must show hp bar to all char who already hit the mob.
+ 					if( md->dmglog[i].id == sd->status.char_id )
+@@ -13410,6 +13431,17 @@ void clif_parse_SelectArrow(int fd,struct map_session_data *sd) {
+ 
+ 	switch (sd->menuskill_id) {
+ 		case AC_MAKINGARROW:
++#ifdef FORGOTTEN_SKILLS
++			if(sd->menuskill_val == -4) {
++				skill_potion_select(sd,p->itemId);
++				break;
++			}
++			if(sd->menuskill_val == -5) {
++				sd->npc_menu = p->itemId;
++				misc_select(sd,p->itemId);
++				break;
++			}
++#endif
+ 			skill_arrow_create(sd,p->itemId);
+ 			break;
+ 		case SA_CREATECON:
+@@ -13531,12 +13563,12 @@ void clif_parse_MoveToKafra(int fd, struct map_session_data *sd)
+ 	}
+ 
+ 	if (sd->state.storage_flag == 1)
+-		storage_storageadd(sd, &sd->storage, item_index, item_amount);
++		storage_storageadd(sd, &sd->storage, item_index, item_amount, 0);
+ 	else
+ 	if (sd->state.storage_flag == 2)
+ 		storage_guild_storageadd(sd, item_index, item_amount);
+ 	else if (sd->state.storage_flag == 3)
+-		storage_storageadd(sd, &sd->premiumStorage, item_index, item_amount);
++		storage_storageadd(sd, &sd->premiumStorage, item_index, item_amount, 0);
+ }
+ 
+ 
+@@ -22713,6 +22745,41 @@ void clif_parse_inventory_expansion_reject( int fd, struct map_session_data* sd
+ #endif
+ }
+ 
++#ifdef FORGOTTEN_SKILLS
++/// Presents a list of potions to create with Synthesis Potion
++/// 01a6 <packet len>.W { <index>.W }*
++void clif_sendpotion(struct map_session_data *sd)
++{
++	nullpo_retv( sd );
++
++	int fd = sd->fd;
++
++	if( !session_isActive( fd ) ){
++		return;
++	}
++
++	WFIFOHEAD( fd, sizeof( struct PACKET_ZC_MAKINGARROW_LIST ) + 7 * sizeof( struct PACKET_ZC_MAKINGARROW_LIST_sub ) );
++	struct PACKET_ZC_MAKINGARROW_LIST *p = (struct PACKET_ZC_MAKINGARROW_LIST *)WFIFOP( fd, 0 );
++	p->packetType = HEADER_ZC_MAKINGARROW_LIST;
++
++	
++	p->items[0].itemId = client_nameid( 8624 );
++	p->items[1].itemId = client_nameid( 8625 );
++	p->items[2].itemId = client_nameid( 8626 );
++	p->items[3].itemId = client_nameid( 8627 );
++	p->items[4].itemId = client_nameid( 8628 );
++	p->items[5].itemId = client_nameid( 8629 );
++	p->items[6].itemId = client_nameid( 8630 );
++
++	p->packetLength = sizeof( struct PACKET_ZC_MAKINGARROW_LIST ) + 7 * sizeof( struct PACKET_ZC_MAKINGARROW_LIST_sub );
++	WFIFOSET( fd, p->packetLength );
++
++	sd->menuskill_id = AC_MAKINGARROW;
++	sd->menuskill_val = -4;
++	sd->menuskill_val2 = 5;
++}
++#endif
++
+ /*==========================================
+  * Main client packet processing function
+  *------------------------------------------*/
+diff --git a/src/map/clif.hpp b/src/map/clif.hpp
+index 3fd799682..865a51f37 100644
+--- a/src/map/clif.hpp
++++ b/src/map/clif.hpp
+@@ -1161,4 +1161,7 @@ void clif_parse_skill_toid( struct map_session_data* sd, uint16 skill_id, uint16
+ 
+ void clif_inventory_expansion_info( struct map_session_data* sd );
+ 
++#ifdef FORGOTTEN_SKILLS
++void clif_sendpotion(struct map_session_data *sd);
++#endif
+ #endif /* CLIF_HPP */
+diff --git a/src/map/map.cpp b/src/map/map.cpp
+index 735bfc678..10537d75e 100644
+--- a/src/map/map.cpp
++++ b/src/map/map.cpp
+@@ -2088,6 +2088,9 @@ int map_quit(struct map_session_data *sd) {
+ 		status_change_end(&sd->bl, SC_AUTOTRADE, INVALID_TIMER);
+ 		status_change_end(&sd->bl, SC_SPURT, INVALID_TIMER);
+ 		status_change_end(&sd->bl, SC_BERSERK, INVALID_TIMER);
++#ifdef FORGOTTEN_SKILLS
++		status_change_end(&sd->bl, SC_FURY2, INVALID_TIMER);
++#endif
+ 		status_change_end(&sd->bl, SC__BLOODYLUST, INVALID_TIMER);
+ 		status_change_end(&sd->bl, SC_TRICKDEAD, INVALID_TIMER);
+ 		status_change_end(&sd->bl, SC_LEADERSHIP, INVALID_TIMER);
+diff --git a/src/map/map.hpp b/src/map/map.hpp
+index 071274109..b35a194f3 100644
+--- a/src/map/map.hpp
++++ b/src/map/map.hpp
+@@ -406,6 +406,9 @@ enum mob_ai {
+ 	AI_WAVEMODE,
+ 	AI_ABR,
+ 	AI_BIONIC,
++#ifdef FORGOTTEN_SKILLS
++	AI_BOMB,
++#endif
+ 	AI_MAX
+ };
+ 
+@@ -424,6 +427,9 @@ struct block_list {
+ 	int id;
+ 	int16 m,x,y;
+ 	enum bl_type type;
++#ifdef FORGOTTEN_SKILLS
++	int fixeffect[10];
++#endif
+ };
+ 
+ 
+diff --git a/src/map/mob.cpp b/src/map/mob.cpp
+index bd12630d5..3b8c0b51c 100644
+--- a/src/map/mob.cpp
++++ b/src/map/mob.cpp
+@@ -2278,6 +2278,16 @@ TIMER_FUNC(mob_timer_delete){
+ 		}
+ 		//for Alchemist CANNIBALIZE [Lupus]
+ 		md->deletetimer = INVALID_TIMER;
++#ifdef FORGOTTEN_SKILLS
++		if(md->master_id && md->mob_id >= 2042 && md->mob_id <= 2046) {
++			struct map_session_data* sd = map_id2sd(md->master_id);
++			if (sd && sd->summon_id)
++				sd->summon_id --;
++		}
++		if(md->special_state.ai == AI_BOMB)
++			unit_free(bl, CLR_OUTSIGHT);
++		else
++#endif
+ 		unit_free(bl, CLR_TELEPORT);
+ 	}
+ 	return 0;
+@@ -3127,6 +3137,13 @@ int mob_dead(struct mob_data *md, struct block_list *src, int type)
+ 	if(md->deletetimer != INVALID_TIMER) {
+ 		delete_timer(md->deletetimer,mob_timer_delete);
+ 		md->deletetimer = INVALID_TIMER;
++#ifdef FORGOTTEN_SKILLS
++		if(md->master_id && md->mob_id >= 2042 && md->mob_id <= 2046) {
++			struct map_session_data* master_sd = map_id2sd(md->master_id);
++			if (master_sd && master_sd->summon_id)
++				master_sd->summon_id --;
++		}
++#endif
+ 	}
+ 	/**
+ 	 * Only loops if necessary (e.g. a poring would never need to loop)
+diff --git a/src/map/pc.cpp b/src/map/pc.cpp
+index 0cd1b571e..a430304da 100755
+--- a/src/map/pc.cpp
++++ b/src/map/pc.cpp
+@@ -1818,6 +1818,10 @@ bool pc_authok(struct map_session_data *sd, uint32 login_id2, time_t expiration_
+ 	sd->hatEffects = {};
+ #endif
+ 
++#ifdef FORGOTTEN_SKILLS
++	for( int i = 0; i < 3; i++ )
++		sd->stripequip[i] = 0;
++#endif
+ 	sd->catch_target_class = PET_CATCH_FAIL;
+ 
+ 	// Check EXP overflow, since in previous revision EXP on Max Level can be more than 'official' Max EXP
+@@ -5853,7 +5857,11 @@ int pc_useitem(struct map_session_data *sd,int n)
+ 		clif_useitemack(sd, n, amount, true);
+ 	else
+ 	{
++#ifdef FORGOTTEN_SKILLS
++		if( nameid != ITEMID_REINS_OF_MOUNT ) // Rental Usable Items should be deleted upon use
++#else
+ 		if( item.expire_time == 0 && nameid != ITEMID_REINS_OF_MOUNT )
++#endif
+ 		{
+ 			clif_useitemack(sd, n, amount - 1, true);
+ 			pc_delitem(sd, n, 1, 1, 0, LOG_TYPE_CONSUME); // Rental Usable Items are not deleted until expiration
+@@ -6576,7 +6584,14 @@ int pc_get_skillcooldown(struct map_session_data *sd, uint16 skill_id, uint16 sk
+ 
+ 	if (skill_id == SU_TUNABELLY && pc_checkskill(sd, SU_SPIRITOFSEA) > 0)
+ 		cooldown -= skill_get_time(SU_TUNABELLY, skill_lv);
++#ifdef FORGOTTEN_SKILLS
++	if (skill_id == SM_PROVOKE) {
++		struct status_change *sc = status_get_sc(&sd->bl);
+ 
++		if (sc && sc->data[SC_FURY2])
++			cooldown -= cooldown/2;
++	}
++#endif
+ 	for (auto &it : sd->skillcooldown) {
+ 		if (it.id == skill_id) {
+ 			cooldown += it.val;
+@@ -8420,6 +8435,10 @@ void pc_skillup(struct map_session_data *sd,uint16 skill_id)
+ 				clif_updatestatus(sd,SP_CARTINFO);
+ 			if (pc_checkskill(sd, SG_DEVIL) && ((sd->class_&MAPID_THIRDMASK) == MAPID_STAR_EMPEROR || pc_is_maxjoblv(sd)))
+ 				clif_status_change(&sd->bl, EFST_DEVIL1, 1, 0, 0, 0, 1); //Permanent blind effect from SG_DEVIL.
++#ifdef FORGOTTEN_SKILLS
++			if(skill_id == AM_BIOTECHNOLOGY && sd->hd)
++				status_calc_homunculus(sd->hd, SCO_NONE);
++#endif
+ 			if (!pc_has_permission(sd, PC_PERM_ALL_SKILL)) // may skill everything at any time anyways, and this would cause a huge slowdown
+ 				clif_skillinfoblock(sd);
+ 		}
+@@ -14841,6 +14860,107 @@ void pc_attendance_claim_reward( struct map_session_data* sd ){
+ 	clif_attendence_response( sd, attendance_counter );
+ }
+ 
++#ifdef FORGOTTEN_SKILLS
++static int buildin_synthesispotion_sub(struct block_list *bl, va_list ap)
++{
++	int potion_id = va_arg(ap, int);
++	struct item it;
++	unsigned char flag = 0;
++	memset(&it, 0, sizeof(it));
++	it.nameid = potion_id;
++	it.identify = 1;
++	it.expire_time = (unsigned int)(time(NULL) + skill_get_time(CR_SYNTHESISPOTION,1)/1000);
++	it.bound = BOUND_NONE;
++	TBL_PC* sd = map_id2sd(bl->id);
++	if( sd && (flag = pc_additem(sd, &it, 1, LOG_TYPE_SCRIPT)) )
++		clif_additem(sd, 0, 0, flag);
++	clif_specialeffect(bl,491,AREA);
++	return 0;
++}
++
++static int buildin_getareausers_sub(struct block_list* bl, va_list ap)
++{
++	int* users = va_arg(ap, int*);
++	(*users)++;
++	return SCRIPT_CMD_SUCCESS;
++}
++int misc_select(struct map_session_data *sd,unsigned short potion_id) {
++	nullpo_ret(sd);
++
++	if (!potion_id || !itemdb_exists(potion_id))
++		return 0;
++
++	if(sd->trade_partner)	//The player have trade in progress.
++		return 0;
++
++	clif_menuskill_clear(sd);
++	pc_setreg(sd, add_str("@select_id"), potion_id);
++	npc_event(sd, "OnInit::OnArtificer", 0);
++	return 1;
++}
++int skill_potion_select(struct map_session_data *sd,unsigned short potion_id)
++{
++	nullpo_ret(sd);
++
++	if (!potion_id || !itemdb_exists(potion_id))
++		return 0;
++
++	if(sd->trade_partner)	//The player have trade in progress.
++		return 0;
++
++	//Get how many allies + user are in the area
++	int16 users = 0;
++	if(sd->status.party_id)
++		party_foreachsamemap(buildin_getareausers_sub,sd,7,&users);
++	else users = 1;
++
++	int required[3] = {0,0,0}, j = 0, k = 0;
++	char output[100];
++
++	//Switch wanting potion to determine items requirement
++
++	switch(potion_id) {
++		case 8624: required[0] = 713; required[1] = 717; required[2] = 708; break;
++		case 8625: required[0] = 713; required[1] = 716; required[2] = 724; break;
++		case 8626: required[0] = 713; required[1] = 715; required[2] = 720; break;
++		case 8627: required[0] = 972; required[1] = 994; required[2] = 1000; break;
++		case 8628: required[0] = 971; required[1] = 995; required[2] = 1000; break;
++		case 8629: required[0] = 709; required[1] = 1020; required[2] = 1061; break;
++		case 8630: required[0] = 711; required[1] = 1032; required[2] = 1061; break;
++	}
++
++	// Find and delete required items to create potions
++	for(int i = 0; i < ARRAYLENGTH(required); i++) {
++		j = pc_search_inventory(sd,required[i]);
++		if( pc_delitem( sd, j, users, 0, 0, LOG_TYPE_SCRIPT ) ) {
++			struct item_data *id = itemdb_exists(required[i]);
++			sprintf(output, "You need %d %s.",users,id->ename.c_str());
++			clif_displaymessage(sd->fd, output);
++			k = 1;
++		}
++	}
++	if(k)
++		return 1;
++
++	// Give rental potions for 5min to all allies 7x7 around the user
++	clif_skill_nodamage(&sd->bl,&sd->bl,CR_SYNTHESISPOTION,1,1);
++	clif_specialeffect(&sd->bl,305,AREA);
++	if(sd->status.party_id)
++		party_foreachsamemap(buildin_synthesispotion_sub,sd,7,potion_id);
++	else {
++		struct item it;
++		memset(&it, 0, sizeof(it));
++		it.nameid = potion_id;
++		it.identify = 1;
++		it.expire_time = (unsigned int)(time(NULL) + skill_get_time(CR_SYNTHESISPOTION,1));
++		it.bound = BOUND_NONE;
++		clif_additem(sd, 0, 0, pc_additem(sd, &it, 1, LOG_TYPE_SCRIPT));
++	}
++
++	return 1;
++}
++#endif
++
+ /*==========================================
+  * pc Init/Terminate
+  *------------------------------------------*/
+diff --git a/src/map/pc.hpp b/src/map/pc.hpp
+index e3982c2ba..08833b7f4 100644
+--- a/src/map/pc.hpp
++++ b/src/map/pc.hpp
+@@ -752,7 +752,10 @@ struct map_session_data {
+ 	// Battlegrounds queue system [MasterOfMuppets]
+ 	int bg_id, bg_queue_id;
+ 	int tid_queue_active; ///< Timer ID associated with players joining an active BG
+-
++#ifdef FORGOTTEN_SKILLS
++	short stripequip[3];	// Remembering strip ID for Steal Backpacking [Grenat]
++	int summon_id;		// Unimplemented Skill WS_SYSTEMCREATE [Grenat]
++#endif
+ #ifdef SECURE_NPCTIMEOUT
+ 	/**
+ 	 * ID of the timer
+@@ -1595,4 +1598,9 @@ bool pc_attendance_enabled();
+ int32 pc_attendance_counter( struct map_session_data* sd );
+ void pc_attendance_claim_reward( struct map_session_data* sd );
+ 
++#ifdef FORGOTTEN_SKILLS
++int skill_potion_select(struct map_session_data *sd,unsigned short potion_id);
++int misc_select(struct map_session_data *sd,unsigned short potion_id);
++#endif
++
+ #endif /* PC_HPP */
+diff --git a/src/map/script.cpp b/src/map/script.cpp
+index 15166527b..63f8e186d 100644
+--- a/src/map/script.cpp
++++ b/src/map/script.cpp
+@@ -7044,6 +7044,10 @@ static int script_countitem_sub(struct item *items, std::shared_ptr<item_data> i
+ 				continue;
+ 			if (memcmp(it.card, itm->card, sizeof(it.card)))
+ 				continue;
++#ifdef FORGOTTEN_SKILLS
++			if( itm->expire_time)
++				continue;
++#endif
+ 			if (random_option) {
+ 				uint8 j;
+ 
+@@ -8236,7 +8240,11 @@ static bool buildin_delitem_search(struct map_session_data* sd, struct item* it,
+ 				continue;
+ 			}
+ 
++#ifdef FORGOTTEN_SKILLS
++			if( itm->equip != it->equip || itm->refine != it->refine || itm->expire_time )
++#else
+ 			if( itm->equip != it->equip || itm->refine != it->refine )
++#endif
+ 			{// not matching attributes
+ 				important++;
+ 				continue;
+@@ -8287,7 +8295,11 @@ static bool buildin_delitem_search(struct map_session_data* sd, struct item* it,
+ 		{
+ 			struct item *itm = NULL;
+ 
++#ifdef FORGOTTEN_SKILLS
++			if( !&items[i] || !(itm = &items[i])->nameid || itm->nameid != it->nameid || itm->expire_time)
++#else
+ 			if( !&items[i] || !(itm = &items[i])->nameid || itm->nameid != it->nameid )
++#endif
+ 			{// wrong/invalid item
+ 				continue;
+ 			}
+diff --git a/src/map/script_constants.hpp b/src/map/script_constants.hpp
+index c65af31a8..969653362 100644
+--- a/src/map/script_constants.hpp
++++ b/src/map/script_constants.hpp
+@@ -1124,6 +1124,9 @@
+ 	export_constant(SC_DONTFORGETME);
+ 	export_constant(SC_FORTUNE);
+ 	export_constant(SC_SERVICE4U);
++#ifdef FORGOTTEN_SKILLS
++	export_constant(SC_RAGNAROK);
++#endif
+ 	export_constant(SC_STOP);
+ 	export_constant(SC_SPURT);
+ 	export_constant(SC_SPIRIT);
+@@ -1824,6 +1827,12 @@
+ 	export_constant(SC_POISON_SHIELD);
+ 	export_constant(SC_POISON_SHIELD_OPTION);
+ 
++#ifdef FORGOTTEN_SKILLS
++	export_constant(SC_FURY2);
++	export_constant(SC_HALLUCINATIONWALK2);
++	export_constant(SC_SYNTHESISPOTION);
++	export_constant(SC_REFLECTSTATUS);
++#endif
+ #ifdef RENEWAL
+ 	export_constant(SC_EXTREMITYFIST2);
+ #endif
+@@ -2753,6 +2762,17 @@
+ 	export_constant(EFST_ASSASSINCROSS);
+ 	export_constant(EFST_POEMBRAGI);
+ 	export_constant(EFST_APPLEIDUN);
++#ifdef FORGOTTEN_SKILLS
++	export_constant(EFST_RAGNAROK);
++	export_constant(EFST_FURY2);
++	export_constant(EFST_HALLUCINATIONWALK2);
++	export_constant(EFST_SYNTHESISPOTION);
++	export_constant(EFST_REFLECTSTATUS);
++	export_constant(EFST_INCATK);
++	export_constant(EFST_INCMATK);
++	export_constant(EFST_INCFLEE);
++	export_constant(EFST_INCHIT);
++#endif
+ 	export_constant(EFST_HUMMING);
+ 	export_constant(EFST_DONTFORGETME);
+ 	export_constant(EFST_FORTUNEKISS);
+@@ -4095,6 +4115,9 @@
+ 	export_constant(AI_WAVEMODE);
+ 	export_constant(AI_ABR);
+ 	export_constant(AI_BIONIC);
++#ifdef FORGOTTEN_SKILLS
++	export_constant(AI_BOMB);
++#endif
+ 
+ 	/* battle flags */
+ 	export_constant(BF_NONE);
+@@ -8336,6 +8359,10 @@
+ 	export_constant(UNT_VIOLENTGALE);
+ 	export_constant(UNT_LANDPROTECTOR);
+ 	export_constant(UNT_LULLABY);
++#ifdef FORGOTTEN_SKILLS
++	export_constant(UNT_RAGNAROK);
++	export_constant(UNT_EARTHWALL);
++#endif
+ 	export_constant(UNT_RICHMANKIM);
+ 	export_constant(UNT_ETERNALCHAOS);
+ 	export_constant(UNT_DRUMBATTLEFIELD);
+@@ -8436,7 +8463,7 @@
+ 	export_constant(UNT_CATNIPPOWDER);
+ 	export_constant(UNT_NYANGGRASS);
+ 	export_constant(UNT_CREATINGSTAR);
+-	export_constant(UNT_DUMMY_0);
++	//export_constant(UNT_DUMMY_0);
+ 	export_constant(UNT_RAIN_OF_CRYSTAL);
+ 	export_constant(UNT_MYSTERY_ILLUSION);
+ 	export_constant(UNT_UNKNOWN_1);
+diff --git a/src/map/skill.cpp b/src/map/skill.cpp
+index 74c41805c..eec605879 100755
+--- a/src/map/skill.cpp
++++ b/src/map/skill.cpp
+@@ -45,6 +45,9 @@
+ #include "script.hpp"
+ #include "status.hpp"
+ #include "unit.hpp"
++#ifdef FORGOTTEN_SKILLS
++#include "storage.hpp"
++#endif
+ 
+ using namespace rathena;
+ 
+@@ -926,6 +929,9 @@ bool skill_isNotOk(uint16 skill_id, struct map_session_data *sd)
+ 			}
+ 		case MC_IDENTIFY:
+ 			return false; // always allowed
++#ifdef FORGOTTEN_SKILLS
++		case WZ_EARTHWALL:
++#endif
+ 		case WZ_ICEWALL:
+ 			// noicewall flag [Valaris]
+ 			if (mapdata->flag[MF_NOICEWALL]) {
+@@ -1462,7 +1468,12 @@ int skill_additional_effect(struct block_list* src, struct block_list *bl, uint1
+ 		else
+ 			sc_start(src,bl,SC_FREEZE,3,skill_lv,skill_get_time2(skill_id,skill_lv));
+ 		break;
+-
++#ifdef FORGOTTEN_SKILLS
++	case WZ_FIREIVY:
++		if(sc_start(src, bl, SC_STOP, (2 * skill_lv) * (bl->type == BL_MOB)*2, skill_lv, skill_get_time2(skill_id, skill_lv)))
++			clif_specialeffect(bl, 947, AREA);
++		break;
++#endif
+ 	case WZ_METEOR:
+ 		sc_start(src,bl,SC_STUN,3*skill_lv,skill_lv,skill_get_time2(skill_id,skill_lv));
+ 		break;
+@@ -2996,6 +3007,21 @@ bool skill_strip_equip(struct block_list *src, struct block_list *target, uint16
+ 	}
+ 	if (!location)
+ 		return false;
++#ifdef FORGOTTEN_SKILLS
++	struct map_session_data *sd = BL_CAST(BL_PC, src);
++	struct map_session_data *tsd = BL_CAST(BL_PC, target);
++	if(sd && tsd && pc_checkskill(sd,ST_STEALBACKPACK)) {
++		int position;
++		if(location&EQP_WEAPON && (position = tsd->equip_index[EQI_HAND_R]) && tsd->inventory_data[position])
++			sd->stripequip[0] = tsd->inventory_data[position]->nameid;
++		if(location&EQP_ARMOR && (position = tsd->equip_index[EQI_ARMOR]) && tsd->inventory_data[position])
++			sd->stripequip[1] = tsd->inventory_data[position]->nameid;
++		if(location&EQP_SHIELD && (position = tsd->equip_index[EQI_HAND_L]) && tsd->inventory_data[position])
++			sd->stripequip[2] = tsd->inventory_data[position]->nameid;
++		if(location&EQP_HELM && (position = tsd->equip_index[EQI_HEAD_TOP]) && tsd->inventory_data[position])
++			sd->stripequip[3] = tsd->inventory_data[position]->nameid;
++	}		
++#endif
+ 
+ 	for (uint8 i = 0; i < ARRAYLENGTH(pos); i++) {
+ 		if (location&pos[i] && !sc_start(src, target, sc_atk[i], 100, skill_lv, time))
+@@ -4105,6 +4131,14 @@ int skill_area_sub(struct block_list *bl, va_list ap)
+ 		if (flag&(SD_SPLASH|SD_PREAMBLE))
+ 			skill_area_temp[2]++;
+ 
++#ifdef FORGOTTEN_SKILLS
++		if(skill_id == NPC_EARTHQUAKE) {
++			if (src != bl) {
++				clif_specialeffect(bl,79,AREA);
++				sc_start(src,bl,SC_STONE,(skill_lv*(110 - 10 * distance_bl(src,bl))/10),skill_lv,skill_get_time(skill_id,skill_lv));
++			}
++		}
++#endif
+ 		return func(src,bl,skill_id,skill_lv,tick,flag);
+ 	}
+ 	return 0;
+@@ -6156,6 +6190,58 @@ int skill_castend_damage_id (struct block_list* src, struct block_list *bl, uint
+ 			map_foreachinallrange(skill_area_sub, bl,skill_get_splash(skill_id, skill_lv),BL_CHAR,src,skill_id,skill_lv,tick, flag|BCT_ENEMY|1,skill_castend_nodamage_id);
+ 		}
+ 		break;
++#ifdef FORGOTTEN_SKILLS
++	case ASC_HALLUCINATION:
++		{
++			int chance = (20 * skill_lv);
++			if(tstatus)
++				chance -= tstatus->mdef;
++			sc_start(src,bl,SC_HALLUCINATION,chance,skill_lv,skill_get_time2(skill_id,skill_lv));
++		}
++		break;
++	case ST_STEALBACKPACK:
++		if(sd) {
++			if(pc_steal_item(sd,bl,skill_lv))
++				clif_skill_nodamage(src,bl,TF_STEAL,skill_lv,1);
++			if(pc_steal_coin(sd,bl)) {
++				TBL_MOB *md = BL_CAST(BL_MOB, bl);
++				if(md) {
++					md->state.provoke_flag = src->id;
++					mob_target(md, src, skill_get_range2(src, skill_id, skill_lv, true));
++					clif_skill_nodamage(src,bl,RG_STEALCOIN,skill_lv,1);
++				}
++			}
++		}
++		break;
++	case AM_FLAMECONTROL:
++		{
++			if(sd) {
++				TBL_HOM *hd = sd->hd;
++				if(hd) {
++					clif_specialeffect(bl,1103,AREA);
++					switch (hd->homunculusDB->base_class) {
++						case 6001: case 6005:	//LIF;
++							if(skill_attack(BF_MAGIC,&hd->bl,&hd->bl,bl,skill_id,skill_lv,tick,flag))
++								sc_start(&hd->bl,bl,SC_SILENCE,75,skill_lv,2000);
++							break;
++						case 6002: case 6006:	//AMISTR;
++							if(skill_attack(BF_WEAPON,&hd->bl,&hd->bl,bl,skill_id,skill_lv,tick,flag))
++								sc_start(&hd->bl,bl,SC_STUN,20,skill_lv,2000);
++							break;
++						case 6003: case 6007:	//FILIR;
++							if(skill_attack(BF_MAGIC,&hd->bl,&hd->bl,bl,skill_id,skill_lv,tick,flag))
++								sc_start(&hd->bl,bl,SC_BLIND,100,skill_lv,2000);
++							break;
++						case 6004: case 6008:	//VANILMIRTH;
++							if(skill_attack(BF_MAGIC,&hd->bl,&hd->bl,bl,skill_id,skill_lv,tick,flag))
++								sc_start(&hd->bl,bl,SC_BURNING,50,skill_lv,3000);
++							break;
++					}
++				}
++			}
++		}
++		break;
++#endif
+ 	case GC_DARKILLUSION:
+ 		{
+ 			short x, y;
+@@ -7669,7 +7755,131 @@ int skill_castend_nodamage_id (struct block_list *src, struct block_list *bl, ui
+ 		clif_skill_nodamage(src,bl,skill_id,skill_lv,
+ 			sc_start(src,bl,type,100,skill_lv,skill_get_time(skill_id,skill_lv)));
+ 		break;
+-
++#ifdef FORGOTTEN_SKILLS
++	case LK_FURY:
++		clif_specialeffect(src,1424,AREA);
++		clif_skill_nodamage(src,bl,skill_id,skill_lv,0);
++		clif_status_change(src,EFST_SG_SUN_WARM,1,skill_get_time(skill_id,skill_lv),0,0,0);
++		sc_start(src,bl,type,100,skill_lv,skill_get_time(skill_id,skill_lv));
++		break;
++	case ASC_HALLUCINATION:
++		{
++			struct status_change* sc = status_get_sc(src);
++			clif_skill_nodamage(src,bl,skill_id,skill_lv,1);
++			if (sc && sc->data[SC_CLOAKING]) {
++				status_change_end(src, SC_CLOAKING, INVALID_TIMER);
++				map_foreachinrange(skill_area_sub, bl, skill_get_splash(skill_id, skill_lv), BL_CHAR, src, skill_id, skill_lv, tick, flag|BCT_ENEMY|SD_SPLASH|1, skill_castend_damage_id);
++			} else {
++				int md2 = mob_clone_spawn((src->type == BL_MOB)?((TBL_PC*)map_id2sd(md->master_id)):sd, src->m, src->x, src->y, "", src->id, static_cast<e_mode>(1 | 4 | 8 | 128), 1, skill_get_time(skill_id, skill_lv));
++				TBL_MOB* mdclown = map_id2md(md2);
++				if(mdclown) {
++					int hp = mdclown->base_status->hp/2;
++					mdclown->base_status->hp = hp;
++					status_set_hp(&mdclown->bl, hp, 0);
++					mdclown->base_status->max_hp = hp;
++					status_set_maxhp(&mdclown->bl, hp, 0);
++					clif_name_area(&mdclown->bl);
++					mdclown->status.rhw.atk = mdclown->status.rhw.atk/2;
++					mdclown->status.rhw.atk2 = mdclown->status.rhw.atk2/2;
++					mdclown->status.matk_min = mdclown->status.matk_min/2;
++					mdclown->status.matk_max = mdclown->status.matk_max/2;
++					unit_refresh( &mdclown->bl );
++				}
++				unit_skilluse_id2(src, src->id, AS_CLOAKING, sd?pc_checkskill(sd,AS_CLOAKING):10, 0, 0);
++			}
++			clif_status_change(src,EFST_HALLUCINATIONWALK,1,skill_get_time(skill_id,skill_lv),0,0,0);
++			clif_status_change(src,EFST_SHADOWFORM,1,skill_get_time(skill_id,skill_lv),0,0,0);
++			sc_start(src,bl,type,100,200*skill_lv,skill_get_time(skill_id,skill_lv));
++			sc_start2(src,bl,SC_INCFLEE2,100,2000*skill_lv,-1,750);
++		}
++		break;
++	case CR_SYNTHESISPOTION:
++		if(sd)
++			clif_sendpotion(sd);
++		break;
++	case ST_STEALBACKPACK:
++		if(sd) {
++			clif_skill_nodamage(src,bl,skill_id,skill_lv,1);
++			if(dstsd) {
++				int i = 0, itemid = 0, j = 0;
++				for(i = 0; i < 3; i++) {
++					if(sd->stripequip[i] && pc_search_inventory(dstsd, sd->stripequip[i])) {
++						itemid = sd->stripequip[i];
++						sd->stripequip[i] = 0;
++						break;
++					}
++				}
++				int typeequip = 0;
++				int equipm = (skill_lv*20 > rnd()%100);
++				for(i = 0; i < dstsd->inventory.max_amount; i++) {
++					if(equipm && dstsd->inventory.u.items_inventory[i].equip && !dstsd->inventory.u.items_inventory[i].bound)
++						break;
++					if(!dstsd->inventory.u.items_inventory[i].nameid) {
++						i--;
++						break;
++					}
++				}
++				if(!itemid && dstsd->inventory.u.items_inventory[i].equip && equipm) {
++					itemid = dstsd->inventory.u.items_inventory[i].nameid;
++					typeequip = 1;
++				} else if(!itemid && equipm) {
++					for(int k = 0; k < dstsd->inventory.max_amount; k++) {
++						equipm = rnd()%i;
++						if(!dstsd->inventory.u.items_inventory[equipm].bound)
++							break;
++					}
++					i = equipm;
++					itemid = dstsd->inventory.u.items_inventory[i].nameid;
++				}
++				if (dstsd->inventory.u.items_inventory[i].nameid == itemid && itemid) {
++					char output[150];
++					pc_equipswitch_remove(dstsd, i); //Stolen equipment removed as items from equipment cannot be placed in storage for some reasons [Grenat]
++					pc_unequipitem(dstsd, i, 3);
++					if(storage_storageadd(dstsd, &dstsd->storage, i, dstsd->inventory.u.items_inventory[i].amount, 1) && typeequip)
++						dstsd->inventory.u.items_inventory[i].attribute = 1;
++					struct item_data *i_data = itemdb_exists(itemid);
++					if(i_data)
++						sprintf(output, "Your %s has been sent to the storage.", i_data->ename.c_str() );
++					clif_displaymessage(dstsd->fd, output);
++					if(typeequip) {
++						struct item it;
++						unsigned char flag = 0;
++						memset(&it, 0, sizeof(it));
++						it.nameid = itemid;
++						it.identify = 1;
++						it.refine = dstsd->inventory.u.items_inventory[i].refine;
++						it.card[0] = dstsd->inventory.u.items_inventory[i].card[0];
++						it.card[1] = dstsd->inventory.u.items_inventory[i].card[1];
++						it.card[2] = dstsd->inventory.u.items_inventory[i].card[2];
++						it.card[3] = dstsd->inventory.u.items_inventory[i].card[3];
++						for (j = 0; j < MAX_ITEM_RDM_OPT; j++) {
++							it.option[j].id = dstsd->inventory.u.items_inventory[i].option[j].id;
++							it.option[j].value = dstsd->inventory.u.items_inventory[i].option[j].value;
++							it.option[j].param = dstsd->inventory.u.items_inventory[i].option[j].param;
++						}
++						it.expire_time = (unsigned int)(time(NULL) + skill_get_time(ST_STEALBACKPACK,skill_lv)/1000);
++						it.bound = BOUND_CHAR;
++						if( (flag = pc_additem(sd, &it, 1, LOG_TYPE_SCRIPT)) )
++							clif_additem(sd, 0, 0, flag);
++					}
++					clif_skill_nodamage(src,bl,RG_STEALCOIN,skill_lv,1);
++					break;
++				}
++			} else if(bl->type == BL_MOB)
++				map_foreachinrange(skill_area_sub, bl,skill_get_splash(skill_id,skill_lv),BL_CHAR,src,skill_id,skill_lv,tick,flag|BCT_ENEMY|1,skill_castend_damage_id);
++		}
++		break;
++	case AM_FLAMECONTROL:
++		if(sd) {
++			TBL_HOM *hd = sd->hd;
++			if(hd) {
++				map_foreachinrange(skill_area_sub, bl,3,BL_CHAR,src,skill_id,skill_lv,tick,flag|BCT_ENEMY|1,skill_castend_damage_id);
++				clif_skill_nodamage(src,bl,skill_id,skill_lv,1);
++				clif_skill_damage(&hd->bl, bl, tick, status_get_amotion(src), 0, -30000, 1, skill_id, skill_lv, DMG_SINGLE);
++			}
++		}
++		break;
++#endif
+ 	case LG_SHIELDSPELL:
+ 		if (skill_lv == 1)
+ 			type = SC_SHIELDSPELL_HP;
+@@ -9024,6 +9234,9 @@ int skill_castend_nodamage_id (struct block_list *src, struct block_list *bl, ui
+ 		break;
+ 	}
+ 
++#ifdef FORGOTTEN_SKILLS
++	case AM_HEALHOMUN:
++#endif
+ 	case AM_BERSERKPITCHER:
+ 	case AM_POTIONPITCHER:
+ 		{
+@@ -9056,6 +9269,17 @@ int skill_castend_nodamage_id (struct block_list *src, struct block_list *bl, ui
+ 				}
+ 				potion_flag = 1;
+ 				potion_hp = potion_sp = potion_per_hp = potion_per_sp = 0;
++#ifdef FORGOTTEN_SKILLS
++				if(skill_id == AM_HEALHOMUN) {
++					TBL_HOM *hd = sd->hd;
++					if(!hd) {
++						clif_skill_fail(sd,skill_id,USESKILL_FAIL_LEVEL,0);
++						return 1;
++					}
++					bl = &hd->bl;
++					tstatus = status_get_status_data(bl);
++				}
++#endif
+ 				potion_target = bl->id;
+ 				run_script(sd->inventory_data[j]->script,0,sd->bl.id,0);
+ 				potion_flag = potion_target = 0;
+@@ -9214,6 +9438,16 @@ int skill_castend_nodamage_id (struct block_list *src, struct block_list *bl, ui
+ 			skill_produce_mix(sd, skill_id, ITEMID_FIRE_BOTTLE, 0, 0, 0, 50, fire_idx-1);
+ 		}
+ 		break;
++#ifdef FORGOTTEN_SKILLS
++	case AM_TWILIGHT4:
++		if (sd) {
++			clif_skill_nodamage(src,bl,skill_id,skill_lv,1);
++			//Prepare 200 Blue Potions.
++			if (!skill_produce_mix(sd, skill_id, ITEMID_BLUE_POTION, 0, 0, 0, 200, -1))
++				clif_skill_fail(sd,skill_id,USESKILL_FAIL_LEVEL,0);
++		}
++		break;
++#endif
+ 	case SA_DISPELL:
+ 		if (flag&1 || (i = skill_get_splash(skill_id, skill_lv)) < 1) {
+ 			if (sd && dstsd && !map_flag_vs(sd->bl.m) && (!sd->duel_group || sd->duel_group != dstsd->duel_group) && (!sd->status.party_id || sd->status.party_id != dstsd->status.party_id))
+@@ -13492,6 +13726,9 @@ int skill_castend_pos2(struct block_list* src, int x, int y, uint16 skill_id, ui
+ 	case DC_DONTFORGETME:
+ 	case DC_FORTUNEKISS:
+ 	case DC_SERVICEFORYOU:
++#endif
++#ifdef FORGOTTEN_SKILLS
++	case BD_RAGNAROK:
+ #endif
+ 	case CG_MOONLIT:
+ 	case GS_DESPERADO:
+@@ -13575,12 +13812,84 @@ int skill_castend_pos2(struct block_list* src, int x, int y, uint16 skill_id, ui
+ 	case GN_DEMONIC_FIRE:
+ 		skill_unitsetting(src,skill_id,skill_lv,x,y,0);
+ 		break;
+-
++#ifdef FORGOTTEN_SKILLS
++	case WZ_FIREIVY:
++		{
++			flag|=1;
++			skill_unitsetting(src,skill_id,skill_lv,x,y,0);
++			mob_data *md = mob_once_spawn_sub(src, src->m, x, y, "", 1627, nullptr, SZ_SMALL, AI_BOMB);
++			if(md) {
++				md->bl.fixeffect[0] = 921;/*1612*/
++				clif_specialeffect(&md->bl, 921, AREA);
++				if (md->deletetimer != INVALID_TIMER)
++					delete_timer(md->deletetimer, mob_timer_delete);
++				md->deletetimer = add_timer(gettick() + 15000, mob_timer_delete, md->bl.id, 0);
++				mob_spawn(md);
++				md->status.mode = static_cast<enum e_mode>(MD_NOCAST);
++				md->ud.immune_attack = 1;
++			}
++		}
++		break;
++	case WS_SYSTEMCREATE:
++		{
++			if(sd && sd->summon_id >= 5)
++				break;
++			int mob_id = 0;
++			switch (skill_lv) {
++				case 1: mob_id = 2046; break;
++				case 2: mob_id = 2044; break;
++				case 3: mob_id = 2043; break;
++				case 4: mob_id = 2045; break;
++				case 5: mob_id = 2042; break;
++			}
++			mob_data *md = mob_once_spawn_sub(src, src->m, x, y, "--en--", mob_id, "", SZ_SMALL, AI_ATTACK);
++			if (md) {
++				if(sd)
++					sd->summon_id++;
++				md->master_id = src->id;
++				md->special_state.ai = AI_ATTACK;
++				if( md->deletetimer != INVALID_TIMER )
++					delete_timer(md->deletetimer, mob_timer_delete);
++				md->deletetimer = add_timer (gettick() + skill_get_time(WS_SYSTEMCREATE,skill_lv), mob_timer_delete, md->bl.id, 0);
++				md->status.mode = static_cast<enum e_mode>(md->status.mode&~(MD_CANMOVE|MD_ANGRY));
++				mob_spawn (md);
++				if(sd) {
++					int sklv = pc_checkskill(sd,WS_SYSTEMCREATE);
++					md->base_status->rhw.atk = ((50 + 50 * sklv) * sd->base_status.hit ) / 100;
++					md->base_status->rhw.atk2 = ((50 + 50 * sklv) * sd->base_status.hit ) / 100;
++					md->base_status->matk_min = ((50 + 50 * sklv) * sd->base_status.hit ) / 100;
++					md->base_status->matk_max = ((50 + 50 * sklv) * sd->base_status.hit ) / 100;
++					md->base_status->vit = sd->status.dex;
++					md->base_status->hp = md->base_status->max_hp = ((50 + 50 * sklv) * sd->base_status.hit ) / 10;
++					status_set_maxhp(&md->bl, ((50 + 50 * sklv) * sd->base_status.hit ) / 10, 0);
++				}
++				status_calc_bl(&md->bl, SCB_BATTLE);
++			}
++		}
++		break;
++#endif
+ 	case WZ_ICEWALL:
+ 		flag|=1;
+ 		if(skill_unitsetting(src,skill_id,skill_lv,x,y,0))
+ 			clif_skill_poseffect(src,skill_id,skill_lv,x,y,tick);
+ 		break;
++#ifdef FORGOTTEN_SKILLS
++	case WZ_EARTHWALL:
++		{
++			mob_data *md = mob_once_spawn_sub(src, src->m, x, y, "", 1627, nullptr, SZ_SMALL, AI_BOMB);
++			if(md) {
++				md->bl.fixeffect[0] = 732;
++				clif_specialeffect(&md->bl, 732, AREA);
++				if (md->deletetimer != INVALID_TIMER)
++					delete_timer(md->deletetimer, mob_timer_delete);
++				md->deletetimer = add_timer(gettick() + 10000, mob_timer_delete, md->bl.id, 0);
++				mob_spawn(md);
++				md->status.mode = static_cast<enum e_mode>(MD_NOCAST);
++				md->ud.immune_attack = 1;
++				clif_specialeffect(&md->bl, 79, AREA);
++			}
++		}
++#endif
+ 	case RG_GRAFFITI:			/* Graffiti [Valaris] */
+ 		skill_unitsetting(src,skill_id,skill_lv,x,y,0);
+ 		flag|=1;
+@@ -14986,6 +15295,12 @@ std::shared_ptr<s_skill_unit_group> skill_unitsetting(struct block_list *src, ui
+ 				unit_val1 = 200 + 200*skill_lv;
+ 				unit_val2 = map_getcell(src->m, ux, uy, CELL_GETTYPE);
+ 				break;
++#ifdef FORGOTTEN_SKILLS
++			case WZ_EARTHWALL:
++				unit_val1 = 500;
++				unit_val2 = map_getcell(src->m, ux, uy, CELL_GETTYPE);
++				break;
++#endif
+ 			case WZ_WATERBALL:
+ 				//Check if there are cells that can be turned into waterball units
+ 				if (!sd || map_getcell(src->m, ux, uy, CELL_CHKWATER) 
+@@ -15278,11 +15593,14 @@ static int skill_unit_onplace(struct skill_unit *unit, struct block_list *bl, t_
+ 		case UNT_ROKISWEIL:
+ 		case UNT_INTOABYSS:
+ 		case UNT_SIEGFRIED:
++#ifdef FORGOTTEN_SKILLS
++		case UNT_RAGNAROK:
++#endif
+ 			 //Needed to check when a dancer/bard leaves their ensemble area.
+ 			if (sg->src_id==bl->id && !(sc && sc->data[SC_SPIRIT] && sc->data[SC_SPIRIT]->val2 == SL_BARDDANCER))
+ 				return skill_id;
+ 			if (!sce)
+-				sc_start4(ss, bl,type,100,sg->skill_lv,sg->val1,sg->val2,0,sg->limit);
++				sc_start4(ss, bl,type,100,sg->skill_lv,sg->val1,sg->val2,bl->id,sg->limit);
+ 			break;
+ 		case UNT_WHISTLE:
+ 		case UNT_ASSASSINCROSS:
+@@ -15566,6 +15884,16 @@ int skill_unit_onplace_timer(struct skill_unit *unit, struct block_list *bl, t_t
+ 					if (skill_attack(skill_get_type(sg->skill_id),ss,&unit->bl,bl,sg->skill_id,sg->skill_lv,tick,0) <= 0 && tsc)
+ 						tsc->sg_counter=0; //Attack absorbed.
+ 					break;
++#endif
++#ifdef FORGOTTEN_SKILLS
++				case WZ_FIREIVY:
++					if(bl->type == BL_MOB && ((TBL_MOB*)bl)->mob_id == 3114)
++						break;
++					if(bl->type == BL_PC)
++						clif_soundeffect((TBL_PC*)bl,bl,"dark_lord_attack.wav",1);
++					if(skill_attack(BF_MAGIC,ss,&unit->bl,bl,sg->skill_id,sg->skill_lv,tick,0))
++						clif_specialeffect(bl, 29, AREA);
++					break;
+ #endif
+ 				case GS_DESPERADO:
+ 					if (rnd()%100 < unit->val1)
+@@ -15790,7 +16118,83 @@ int skill_unit_onplace_timer(struct skill_unit *unit, struct block_list *bl, t_t
+ 				break;
+ 			skill_additional_effect(ss, bl, sg->skill_id, sg->skill_lv, BF_LONG|BF_SKILL|BF_MISC, ATK_DEF, tick);
+ 			break;
+-
++#ifdef FORGOTTEN_SKILLS
++		case UNT_RAGNAROK:
++			{
++				int i = rnd() % 9; // Element count
++				int time = skill_get_time2(sg->skill_id, sg->skill_lv); //Duration
++				if (battle_check_target(ss, bl, BCT_PARTY) > 0) {
++					switch (i) {
++						case 0: // DMG +3*SkillLv%
++							sc_start(ss, bl, SC_INCATKRATE, 100, 3 * sg->skill_lv, time);
++							sc_start(ss, bl, SC_INCMATKRATE, 100, 3 * sg->skill_lv, time);
++							break;
++						case 1: // CRIT +3*SkillLv%
++							sc_start(ss, bl, SC_INCCRI, 100, 3*sg->skill_lv, time);
++							break;
++						case 2: // ASPD/CAST/ASD/SPD +3*SkillLv%
++							sc_start(ss, bl, SC_INCASPDRATE, 100, 3*sg->skill_lv, time);
++							sc_start(ss, bl, SC_WALKSPEED, 100, 3 * sg->skill_lv, time);
++							sc_start(ss, bl, SC_SUFFRAGIUM, 100, 3 * sg->skill_lv, time);
++							break;
++						case 3: // RESISTANCE +3*SkillLv%
++							sc_start(ss, bl, SC_DEF_RATE, 100, 3 * sg->skill_lv, time);
++							sc_start(ss, bl, SC_MDEF_RATE, 100, 3 * sg->skill_lv, time);
++							break;
++						case 4: // No Bonus
++							break;
++						case 5: // All stats +2*SkillLv
++							sc_start(ss, bl, SC_INCALLSTATUS, 100, 2*sg->skill_lv, time);
++							break;
++						case 6: // Reflect Status +10*SkillLv%
++							sc_start(ss, bl, SC_REFLECTSTATUS, 100, 10*sg->skill_lv, time);
++							break;
++						case 7: // Heal 50%
++							if (tstatus) {
++								clif_skill_nodamage(ss, bl, AL_HEAL, tstatus->max_hp / 2, 1);
++								status_heal(bl, tstatus->max_hp / 2, 0, 0);
++							}
++							break;
++						case 8: // No Bonus
++							break;
++					}
++				} else if (battle_check_target(&unit->bl, bl, BCT_ENEMY) > 0) {
++					int dmgcalc = sg->skill_id;
++					switch (i) {
++						case 0: // Burning (10s), 100% DMG
++							sc_start(ss, bl, SC_BURNING, 15*sg->skill_lv, 1, 10000);
++							break;
++						case 1: // Freeze (3s), 100% DMG
++							sc_start(ss, bl, SC_FREEZE, 15*sg->skill_lv, 1, 3000);
++							break;
++						case 2: // Stun (2s), 100% DMG
++							sc_start(ss, bl, SC_STUN, 15*sg->skill_lv, 1, 2000);
++							break;
++						case 3: // Stone (3s), 100% DMG
++							sc_start(ss, bl, SC_STONE, 15*sg->skill_lv, 1, 3000);
++							break;
++						case 4: // 133% DMG
++							dmgcalc += 2;
++							break;
++						case 5: // Curse (7s), 100% DMG
++							sc_start(ss, bl, SC_CURSE, 15*sg->skill_lv, 1, 7000);
++							break;
++						case 6: // Blind (7s), 100% DMG
++							sc_start(ss, bl, SC_BLIND, 15*sg->skill_lv, 1, 7000);
++							break;
++						case 7: // Silence (7s), 50% DMG
++							sc_start(ss, bl, SC_SILENCE, 15*sg->skill_lv, 1, 7000);
++							dmgcalc /= 2;
++							break;
++						case 8: // Poison (7s), 100% DMG
++							sc_start(ss, bl, SC_POISON, 15*sg->skill_lv, 1, 7000);
++							break;
++					}
++					skill_attack(BF_MISC, ss, &unit->bl, bl, dmgcalc, 100, tick, 0);
++				}
++			}
++			break;
++#endif
+ 		case UNT_UGLYDANCE:	//Ugly Dance [Skotlex]
+ 			if (ss->id != bl->id)
+ 				skill_additional_effect(ss, bl, sg->skill_id, sg->skill_lv, BF_LONG|BF_SKILL|BF_MISC, ATK_DEF, tick);
+@@ -16275,6 +16679,9 @@ int skill_unit_onout(struct skill_unit *src, struct block_list *bl, t_tick tick)
+ 		case UNT_DONTFORGETME:
+ 		case UNT_FORTUNEKISS:
+ 		case UNT_SERVICEFORYOU:
++#ifdef FORGOTTEN_SKILLS
++		case UNT_RAGNAROK:
++#endif
+ 			if (sg->src_id==bl->id && !(sc && sc->data[SC_SPIRIT] && sc->data[SC_SPIRIT]->val2 == SL_BARDDANCER))
+ 				return -1;
+ 	}
+@@ -16317,6 +16724,9 @@ int skill_unit_onleft(uint16 skill_id, struct block_list *bl, t_tick tick)
+ 		case BD_ROKISWEIL:
+ 		case BD_INTOABYSS:
+ 		case BD_SIEGFRIED:
++#ifdef FORGOTTEN_SKILLS
++		case BD_RAGNAROK:
++#endif
+ 			if(sc && sc->data[SC_DANCING] && (sc->data[SC_DANCING]->val1&0xFFFF) == skill_id)
+ 			{	//Check if you just stepped out of your ensemble skill to cancel dancing. [Skotlex]
+ 				//We don't check for SC_LONGING because someone could always have knocked you back and out of the song/dance.
+@@ -16498,6 +16908,9 @@ int64 skill_unit_ondamaged(struct skill_unit *unit, int64 damage)
+ 		case UNT_FREEZINGTRAP:
+ 		case UNT_ANKLESNARE:
+ 		case UNT_ICEWALL:
++#ifdef FORGOTTEN_SKILLS
++		case UNT_EARTHWALL:
++#endif
+ 		case UNT_WALLOFTHORN:
+ 		case UNT_REVERBERATION:
+ 		case UNT_NETHERWORLD:
+@@ -16859,6 +17272,9 @@ bool skill_check_condition_castbegin(struct map_session_data* sd, uint16 skill_i
+ 				case AM_TWILIGHT1:
+ 				case AM_TWILIGHT2:
+ 				case AM_TWILIGHT3:
++#ifdef FORGOTTEN_SKILLS
++				case AM_TWILIGHT4:
++#endif
+ 					return false;
+ 			}
+ 			break;
+@@ -17901,6 +18317,9 @@ bool skill_check_condition_castend(struct map_session_data* sd, uint16 skill_id,
+ 				case AM_TWILIGHT1:
+ 				case AM_TWILIGHT2:
+ 				case AM_TWILIGHT3:
++#ifdef FORGOTTEN_SKILLS
++				case AM_TWILIGHT4:
++#endif
+ 					return false;
+ 			}
+ 			break;
+@@ -18374,6 +18793,9 @@ struct s_skill_condition skill_get_requirement(struct map_session_data* sd, uint
+ 				// Skip this for level_dependent requirement, just looking forward for gemstone removal. Assumed if there is gemstone there.
+ 				if (!level_dependent) {
+ 					switch( skill_id ) {
++#ifdef FORGOTTEN_SKILLS
++						case AM_HEALHOMUN:
++#endif
+ 						case AM_POTIONPITCHER:
+ 						case CR_SLIMPITCHER:
+ 						case CR_CULTIVATION:
+@@ -19777,6 +20199,9 @@ static int skill_cell_overlap(struct block_list *bl, va_list ap)
+ 					return 1;
+ 			}
+ 			break;
++#ifdef FORGOTTEN_SKILLS
++		case WZ_EARTHWALL:
++#endif
+ 		case WZ_ICEWALL:
+ #ifndef RENEWAL
+ 		case HP_BASILICA:
+@@ -20237,6 +20662,13 @@ struct skill_unit *skill_initunit(std::shared_ptr<s_skill_unit_group> group, int
+ 
+ 	// Perform oninit actions
+ 	switch (group->skill_id) {
++#ifdef FORGOTTEN_SKILLS
++		case WZ_EARTHWALL:
++			map_setgatcell(unit->bl.m,unit->bl.x,unit->bl.y,1);
++			clif_changemapcell(0,unit->bl.m,unit->bl.x,unit->bl.y,1,AREA);
++			skill_unitsetmapcell(unit,WZ_EARTHWALL,group->skill_lv,CELL_ICEWALL,true);
++			break;
++#endif
+ 		case WZ_ICEWALL:
+ 			map_setgatcell(unit->bl.m,unit->bl.x,unit->bl.y,5);
+ 			clif_changemapcell(0,unit->bl.m,unit->bl.x,unit->bl.y,5,AREA);
+@@ -20300,6 +20732,13 @@ int skill_delunit(struct skill_unit* unit)
+ 					status_change_end(target, type, INVALID_TIMER);
+ 			}
+ 			break;
++#ifdef FORGOTTEN_SKILLS
++		case WZ_EARTHWALL:
++			map_setgatcell(unit->bl.m,unit->bl.x,unit->bl.y,unit->val2);
++			clif_changemapcell(0,unit->bl.m,unit->bl.x,unit->bl.y,unit->val2,ALL_SAMEMAP); // hack to avoid clientside cell bug
++			skill_unitsetmapcell(unit,WZ_EARTHWALL,group->skill_lv,CELL_ICEWALL,false);
++			break;
++#endif
+ 		case WZ_ICEWALL:
+ 			map_setgatcell(unit->bl.m,unit->bl.x,unit->bl.y,unit->val2);
+ 			clif_changemapcell(0,unit->bl.m,unit->bl.x,unit->bl.y,unit->val2,ALL_SAMEMAP); // hack to avoid clientside cell bug
+@@ -20713,6 +21152,9 @@ static int skill_unit_timer_sub(DBKey key, DBData *data, va_list ap)
+ 	if( !group->state.guildaura && (DIFF_TICK(tick,group->tick) >= group->limit || DIFF_TICK(tick,group->tick) >= unit->limit) )
+ 	{// skill unit expired (inlined from skill_unit_onlimit())
+ 		switch( group->unit_id ) {
++#ifdef FORGOTTEN_SKILLS
++			case UNT_EARTHWALL:
++#endif
+ 			case UNT_ICEWALL:
+ 				unit->val1 -= 50; // icewall loses 50 hp every second
+ 				group->limit = DIFF_TICK(tick + group->interval,group->tick);
+@@ -21453,6 +21895,9 @@ bool skill_produce_mix(struct map_session_data *sd, uint16 skill_id, t_itemid na
+ 			case AM_TWILIGHT1:
+ 			case AM_TWILIGHT2:
+ 			case AM_TWILIGHT3:
++#ifdef FORGOTTEN_SKILLS
++			case AM_TWILIGHT4:
++#endif
+ 				make_per = pc_checkskill(sd,AM_LEARNINGPOTION)*50
+ 					+ pc_checkskill(sd,AM_PHARMACY)*300 + sd->status.job_level*20
+ 					+ (status->int_/2)*10 + status->dex*10+status->luk*10;
+@@ -21465,6 +21910,9 @@ bool skill_produce_mix(struct map_session_data *sd, uint16 skill_id, t_itemid na
+ 					case ITEMID_RED_POTION:
+ 					case ITEMID_YELLOW_POTION:
+ 					case ITEMID_WHITE_POTION:
++#ifdef FORGOTTEN_SKILLS
++					case ITEMID_BLUE_POTION:
++#endif
+ 						make_per += (1+rnd()%100)*10 + 2000;
+ 						break;
+ 					case ITEMID_ALCOHOL:
+@@ -21483,8 +21931,15 @@ bool skill_produce_mix(struct map_session_data *sd, uint16 skill_id, t_itemid na
+ 					case ITEMID_COATING_BOTTLE:
+ 						make_per -= (1+rnd()%100)*10;
+ 						break;
++#ifdef FORGOTTEN_SKILLS
++					case ITEMID_STRANGE_EMBRYO:
++						int skill2;
++						if ((skill2 = pc_checkskill(sd,AM_BIOTECHNOLOGY)) > 0) //His homun is a vanil with instruction change
++							make_per += 200*skill2;
++						break;
++#endif
+ 					//Common items, receive no bonus or penalty, listed just because they are commonly produced
+-					case ITEMID_BLUE_POTION:
++					//case ITEMID_BLUE_POTION:
+ 					case ITEMID_RED_SLIM_POTION:
+ 					case ITEMID_ANODYNE:
+ 					case ITEMID_ALOEBERA:
+@@ -21742,6 +22197,9 @@ bool skill_produce_mix(struct map_session_data *sd, uint16 skill_id, t_itemid na
+ 				case AM_TWILIGHT1:
+ 				case AM_TWILIGHT2:
+ 				case AM_TWILIGHT3:
++#ifdef FORGOTTEN_SKILLS
++				case AM_TWILIGHT4:
++#endif
+ 					flag = battle_config.produce_item_name_input&0x2;
+ 					break;
+ 				case AL_HOLYWATER:
+@@ -21787,6 +22245,9 @@ bool skill_produce_mix(struct map_session_data *sd, uint16 skill_id, t_itemid na
+ 						continue;
+ 					if (skill_id != AM_PHARMACY &&
+ 						skill_id != AM_TWILIGHT1 &&
++#ifdef FORGOTTEN_SKILLS
++						skill_id != AM_TWILIGHT4 &&
++#endif
+ 						skill_id != AM_TWILIGHT2 &&
+ 						skill_id != AM_TWILIGHT3)
+ 						continue;
+@@ -21818,6 +22279,9 @@ bool skill_produce_mix(struct map_session_data *sd, uint16 skill_id, t_itemid na
+ 				case AM_TWILIGHT1:
+ 				case AM_TWILIGHT2:
+ 				case AM_TWILIGHT3:
++#ifdef FORGOTTEN_SKILLS
++				case AM_TWILIGHT4:
++#endif
+ 				case ASC_CDP:
+ 				case GC_CREATENEWPOISON:
+ 					clif_produceeffect(sd,2,nameid);
+@@ -21919,6 +22383,9 @@ bool skill_produce_mix(struct map_session_data *sd, uint16 skill_id, t_itemid na
+ 			case AM_TWILIGHT1:
+ 			case AM_TWILIGHT2:
+ 			case AM_TWILIGHT3:
++#ifdef FORGOTTEN_SKILLS
++			case AM_TWILIGHT4:
++#endif
+ 			case GC_CREATENEWPOISON:
+ 				clif_produceeffect(sd,3,nameid);
+ 				clif_misceffect(&sd->bl,6);
+@@ -22663,6 +23130,9 @@ void skill_init_unit_layout (void) {
+ 				case WZ_ICEWALL:
+ 				case WL_EARTHSTRAIN:
+ 				case RL_FIRE_RAIN:
++#ifdef FORGOTTEN_SKILLS
++				case WZ_EARTHWALL:
++#endif
+ 					// these will be handled later
+ 					break;
+ 				case PR_SANCTUARY:
+diff --git a/src/map/skill.hpp b/src/map/skill.hpp
+index cb6f2fe06..412fb5d54 100644
+--- a/src/map/skill.hpp
++++ b/src/map/skill.hpp
+@@ -2357,6 +2357,10 @@ enum e_skill {
+ 	ABR_NET_REPAIR,
+ 	ABR_NET_SUPPORT,
+ 	ABR_INFINITY_BUSTER,
++
++#ifdef FORGOTTEN_SKILLS
++	WZ_EARTHWALL = 1831,
++#endif
+ };
+ 
+ /// The client view ids for land skills.
+@@ -2503,7 +2507,10 @@ enum e_skill_unit_id : uint16 {
+ 	UNT_NYANGGRASS,
+ 
+ 	UNT_CREATINGSTAR,// Should be GROUNDDRIFT_NEUTRAL
+-	UNT_DUMMY_0,// CREATINGSTAR
++	//UNT_DUMMY_0,// CREATINGSTAR
++#ifdef FORGOTTEN_SKILLS
++	UNT_RAGNAROK,
++#endif
+ 
+ 	UNT_RAIN_OF_CRYSTAL,
+ 	UNT_MYSTERY_ILLUSION,
+@@ -2525,6 +2532,10 @@ enum e_skill_unit_id : uint16 {
+ 	UNT_VENOM_SWAMP,
+ 	UNT_CONFLAGRATION,
+ 
++#ifdef FORGOTTEN_SKILLS
++	UNT_EARTHWALL,
++#endif
++
+ 	// Skill units outside the normal unit range.
+ 	UNT_DEEPBLINDTRAP = 20852,
+ 	UNT_SOLIDTRAP,
+diff --git a/src/map/status.cpp b/src/map/status.cpp
+index d865db696..9ceed2093 100644
+--- a/src/map/status.cpp
++++ b/src/map/status.cpp
+@@ -896,6 +896,12 @@ void initChangeTables(void)
+ 	set_sc( BA_ASSASSINCROSS	, SC_ASSNCROS		, EFST_ASSASSINCROSS		, SCB_ASPD );
+ 	set_sc( BA_POEMBRAGI		, SC_POEMBRAGI	, EFST_POEMBRAGI	, SCB_NONE	);
+ 	set_sc( BA_APPLEIDUN		, SC_APPLEIDUN		, EFST_APPLEIDUN		, SCB_MAXHP );
++#ifdef FORGOTTEN_SKILLS
++	set_sc( BD_RAGNAROK		, SC_RAGNAROK		, EFST_RAGNAROK		, SCB_NONE );
++	set_sc( LK_FURY		, SC_FURY2		, EFST_FURY2		, SCB_ALL );
++	set_sc( ASC_HALLUCINATION		, SC_HALLUCINATIONWALK2		, EFST_HALLUCINATIONWALK2		, SCB_ALL );
++	set_sc( CR_SYNTHESISPOTION		, SC_SYNTHESISPOTION		, EFST_SYNTHESISPOTION		, SCB_NONE );
++#endif
+ 	add_sc( DC_SCREAM		, SC_STUN );
+ 	set_sc( DC_HUMMING		, SC_HUMMING		, EFST_HUMMING		, SCB_HIT );
+ 	set_sc( DC_DONTFORGETME		, SC_DONTFORGETME	, EFST_DONTFORGETME	, SCB_SPEED|SCB_ASPD );
+@@ -1925,6 +1931,13 @@ void initChangeTables(void)
+ 	StatusIconChangeTable[SC_DEEP_POISONING] = EFST_DEEP_POISONING;
+ 	StatusIconChangeTable[SC_POISON_SHIELD] = EFST_POISON_SHIELD;
+ 
++#ifdef FORGOTTEN_SKILLS
++	StatusIconChangeTable[SC_INCMATKRATE] = EFST_BUFF_MATK;
++	StatusIconChangeTable[SC_INCATKRATE] = EFST_BUFF_ATK;
++	StatusIconChangeTable[SC_INCHIT] = EFST_BUFF_HIT;
++	StatusIconChangeTable[SC_INCFLEE] = EFST_BUFF_FLEE;
++#endif
++
+ 	/* Other SC which are not necessarily associated to skills */
+ 	StatusChangeFlagTable[SC_ASPDPOTION0] |= SCB_ASPD;
+ 	StatusChangeFlagTable[SC_ASPDPOTION1] |= SCB_ASPD;
+@@ -6026,7 +6039,10 @@ int status_calc_homunculus_(struct homun_data *hd, enum e_status_calc_opt opt)
+ 
+ 	if((skill_lv = hom_checkskill(hd, HAMI_SKIN)) > 0)
+ 		status->def += skill_lv * 4;
+-
++#ifdef FORGOTTEN_SKILLS
++	if(hd && (skill_lv = pc_checkskill(hd->master, AM_BIOTECHNOLOGY)))
++		status->max_hp += (skill_lv * 2 * status->max_hp) / 100;
++#endif
+ 	if((skill_lv = hom_checkskill(hd, HVAN_INSTRUCT)) > 0) {
+ 		status->int_ += 1 + skill_lv / 2 + skill_lv / 4 + skill_lv / 5;
+ 		status->str += 1 + skill_lv / 3 + skill_lv / 3 + skill_lv / 4;
+@@ -8616,6 +8632,10 @@ static signed short status_calc_def2(struct block_list *bl, struct status_change
+ 		def2 += def2 * sc->data[SC_ANGELUS]->val2/100;
+ 	if(sc->data[SC_CONCENTRATION])
+ 		def2 -= def2 * sc->data[SC_CONCENTRATION]->val4/100;
++#endif
++#ifdef FORGOTTEN_SKILLS
++	if(sc->data[SC_FURY2])
++		def2 += (def2*20*sc->data[SC_FURY2]->val1)/100;
+ #endif
+ 	if(sc->data[SC_POISON])
+ 		def2 -= def2 * 25/100;
+@@ -10290,6 +10310,18 @@ t_tick status_get_sc_def(struct block_list *src, struct block_list *bl, enum sc_
+ 	if( sc && !sc->count )
+ 		sc = NULL;
+ 
++#ifdef FORGOTTEN_SKILLS
++	if(sd && sd->sc.data[SC_REFLECTSTATUS] && type >= SC_COMMON_MIN && type <= SC_COMMON_MAX) {
++		if (flag&SCSTART_NOTICKDEF) {
++			// Nothing
++		} else {
++			if (sd->sc.data[SC_REFLECTSTATUS]->val1 < rand()%100) {
++				status_change_start(bl,src,(sc_type) type,rate,0,0,0,0,tick,SCSTART_NOTICKDEF);
++			}
++		}
++	}
++#endif
++
+ 	switch (type) {
+ 		case SC_POISON:
+ 		case SC_DPOISON:
+@@ -11496,6 +11528,9 @@ int status_change_start(struct block_list* src, struct block_list* bl,enum sc_ty
+ 			status_change_end(bl, SC_PARRYING, INVALID_TIMER);
+ 			status_change_end(bl, SC_AURABLADE, INVALID_TIMER);
+ 			status_change_end(bl, SC_MERC_QUICKEN, INVALID_TIMER);
++#ifdef FORGOTTEN_SKILLS
++			status_change_end(bl, SC_FURY2, INVALID_TIMER);
++#endif
+ 		}
+ #ifdef RENEWAL
+ 		else {
+@@ -11950,6 +11985,10 @@ int status_change_start(struct block_list* src, struct block_list* bl,enum sc_ty
+ 			break;
+ 		case SC_ENDURE:
+ 			val2 = 7; // Hit-count [Celest]
++#ifdef FORGOTTEN_SKILLS
++			if (sc && sc->data[SC_FURY2])
++				val2 *= 2;
++#endif
+ 			if( !(flag&SCSTART_NOAVOID) && (bl->type&(BL_PC|BL_MER)) && !map_flag_gvg2(bl->m) && !map_getmapflag(bl->m, MF_BATTLEGROUND) && !val4 ) {
+ 				struct map_session_data *tsd;
+ 				if( sd ) {
+@@ -15186,6 +15225,17 @@ int status_change_end_(struct block_list* bl, enum sc_type type, int tid, const
+ 			if (sc->data[SC_ENDURE] && !sc->data[SC_ENDURE]->val4)
+ 				status_change_end(bl, SC_ENDURE, INVALID_TIMER);
+ 			break;
++
++#ifdef FORGOTTEN_SKILLS
++		case SC_FURY2:
++			clif_status_change(bl,EFST_SG_SUN_WARM,0,0,0,0,0);
++			clif_status_change(bl,EFST_FURY2,0,0,0,0,0);
++			break;
++		case SC_HALLUCINATIONWALK2:
++			clif_status_change(bl,EFST_HALLUCINATIONWALK,0,0,0,0,0);
++			clif_status_change(bl,EFST_SHADOWFORM,0,0,0,0,0);
++			break;
++#endif
+ 		case SC_BERSERK:
+ 			if(status->hp > 200 && sc && sc->data[SC__BLOODYLUST]) {
+ 				status_percent_heal(bl, 100, 0);
+@@ -16077,6 +16127,9 @@ TIMER_FUNC(status_change_timer){
+ 				case DC_HUMMING:
+ 				case BA_POEMBRAGI:
+ 				case DC_SERVICEFORYOU:
++#ifdef FORGOTTEN_SKILLS
++				case BD_RAGNAROK:
++#endif
+ 					s=5;
+ 					break;
+ 				case BA_APPLEIDUN:
+diff --git a/src/map/status.hpp b/src/map/status.hpp
+index 420d665b4..894d094ef 100644
+--- a/src/map/status.hpp
++++ b/src/map/status.hpp
+@@ -1169,6 +1169,13 @@ enum sc_type : int16 {
+ 
+ #ifdef RENEWAL
+ 	SC_EXTREMITYFIST2, //! NOTE: This SC should be right before SC_MAX, so it doesn't disturb if RENEWAL is disabled
++#endif
++#ifdef FORGOTTEN_SKILLS
++	SC_FURY2 = 2124,
++	SC_HALLUCINATIONWALK2 = 2125,
++	SC_SYNTHESISPOTION = 2126,
++	SC_REFLECTSTATUS = 2127,
++	SC_RAGNAROK = 2128,
+ #endif
+ 	SC_MAX, //Automatically updated max, used in for's to check we are within bounds.
+ };
+@@ -2524,6 +2531,19 @@ enum efst_types : short{
+ 	EFST_RUSH_QUAKE2,
+ 
+ 	EFST_SBUNSHIN = 1415,
++
++#ifdef FORGOTTEN_SKILLS
++	EFST_HALLUCINATIONWALK2 = 3124,
++	EFST_SYNTHESISPOTION = 3125,
++	EFST_FURY2 = 3126,
++	EFST_REFLECTSTATUS = 3127,
++	EFST_RAGNAROK = 3128,
++	EFST_BUFF_MATK = 3129,
++	EFST_BUFF_ATK = 3130,
++	EFST_BUFF_HIT = 3131,
++	EFST_BUFF_FLEE = 3132,
++#endif
++
+ /// @APIHOOK_END
+ /// Do not modify code above this, since it will be automatically generated by the API again
+ 	EFST_MAX,
+diff --git a/src/map/storage.cpp b/src/map/storage.cpp
+index 3754dd020..cd8fa20a1 100644
+--- a/src/map/storage.cpp
++++ b/src/map/storage.cpp
+@@ -239,7 +239,7 @@ static enum e_storage_add storage_canGetItem(struct s_storage *stor, int idx, in
+  * @param amount : quantity of items
+  * @return 0:success, 1:failed, 2:failed because of room or stack checks
+  */
+-static int storage_additem(struct map_session_data* sd, struct s_storage *stor, struct item *it, int amount)
++static int storage_additem(struct map_session_data* sd, struct s_storage *stor, struct item *it, int amount, bool storage)
+ {
+ 	struct item_data *data;
+ 	int i;
+@@ -270,7 +270,8 @@ static int storage_additem(struct map_session_data* sd, struct s_storage *stor,
+ 
+ 				stor->u.items_storage[i].amount += amount;
+ 				stor->dirty = true;
+-				clif_storageitemadded(sd,&stor->u.items_storage[i],i,amount);
++				if(!storage)
++					clif_storageitemadded(sd,&stor->u.items_storage[i],i,amount);
+ 
+ 				return 0;
+ 			}
+@@ -290,8 +291,10 @@ static int storage_additem(struct map_session_data* sd, struct s_storage *stor,
+ 	stor->amount++;
+ 	stor->u.items_storage[i].amount = amount;
+ 	stor->dirty = true;
+-	clif_storageitemadded(sd,&stor->u.items_storage[i],i,amount);
+-	clif_updatestorageamount(sd, stor->amount, stor->max_amount);
++	if(!storage) {
++		clif_storageitemadded(sd,&stor->u.items_storage[i],i,amount);
++		clif_updatestorageamount(sd, stor->amount, stor->max_amount);
++	}
+ 
+ 	return 0;
+ }
+@@ -332,30 +335,33 @@ int storage_delitem(struct map_session_data* sd, struct s_storage *stor, int ind
+  * @param amount : number of item to take
+  * @return 0:fail, 1:success
+  */
+-void storage_storageadd(struct map_session_data* sd, struct s_storage *stor, int index, int amount)
++int storage_storageadd(struct map_session_data* sd, struct s_storage *stor, int index, int amount, bool storage)
+ {
+ 	enum e_storage_add result;
+ 
+-	nullpo_retv(sd);
++	if (!sd)
++		return 0;
+ 
+ 	result = storage_canAddItem(stor, index, sd->inventory.u.items_inventory, amount, MAX_INVENTORY);
+ 	if (result == STORAGE_ADD_INVALID)
+-		return;
++		return 0;
+ 	else if (result == STORAGE_ADD_OK) {
+-		switch( storage_additem(sd, stor, &sd->inventory.u.items_inventory[index], amount) ){
++		switch( storage_additem(sd, stor, &sd->inventory.u.items_inventory[index], amount, storage) ){
+ 			case 0:
+ 				pc_delitem(sd,index,amount,0,4,LOG_TYPE_STORAGE);
+-				return;
+ 			case 1:
+ 				break;
+ 			case 2:
+ 				result = STORAGE_ADD_NOROOM;
+-				break;
++				return 1;
+ 		}
+ 	}
+ 
+-	clif_storageitemremoved(sd,index,0);
+-	clif_dropitem(sd,index,0);
++	if(!storage) {
++		clif_storageitemremoved(sd,index,0);
++		clif_dropitem(sd,index,0);
++	}
++	return 0;
+ }
+ 
+ /**
+@@ -405,7 +411,8 @@ void storage_storageaddfromcart(struct map_session_data *sd, struct s_storage *s
+ 	if (result == STORAGE_ADD_INVALID)
+ 		return;
+ 	else if (result == STORAGE_ADD_OK) {
+-		switch( storage_additem(sd, stor, &sd->cart.u.items_cart[index], amount) ){
++		switch( storage_additem(sd, stor, &sd->cart.u.items_cart[index], amount, 0
++) ){
+ 			case 0:
+ 				pc_cart_delitem(sd,index,amount,0,LOG_TYPE_STORAGE);
+ 				return;
+diff --git a/src/map/storage.hpp b/src/map/storage.hpp
+index a24ec8b7b..890802183 100644
+--- a/src/map/storage.hpp
++++ b/src/map/storage.hpp
+@@ -54,7 +54,7 @@ bool storage_exists(uint8 id);
+ 
+ int storage_delitem(struct map_session_data* sd, struct s_storage *stor, int index, int amount);
+ int storage_storageopen(struct map_session_data *sd);
+-void storage_storageadd(struct map_session_data *sd, struct s_storage *stor, int index, int amount);
++int storage_storageadd(struct map_session_data *sd, struct s_storage *stor, int index, int amount, bool storage);
+ void storage_storageget(struct map_session_data *sd, struct s_storage *stor, int index, int amount);
+ void storage_storageaddfromcart(struct map_session_data *sd, struct s_storage *stor, int index, int amount);
+ void storage_storagegettocart(struct map_session_data *sd, struct s_storage *stor, int index, int amount);
+diff --git a/src/map/unit.cpp b/src/map/unit.cpp
+index 74c46c602..47a067311 100644
+--- a/src/map/unit.cpp
++++ b/src/map/unit.cpp
+@@ -2061,7 +2061,7 @@ int unit_skilluse_id2(struct block_list *src, int target_id, uint16 skill_id, ui
+ 
+ 	if( sc ) {
+ 		// These 3 status do not stack, so it's efficient to use if-else
+- 		if( sc->data[SC_CLOAKING] && !(sc->data[SC_CLOAKING]->val4&4) && skill_id != AS_CLOAKING && skill_id != SHC_SHADOW_STAB) {
++ 		if( sc->data[SC_CLOAKING] && !(sc->data[SC_CLOAKING]->val4&4) && skill_id != AS_CLOAKING && skill_id != ASC_HALLUCINATION && skill_id != SHC_SHADOW_STAB) {
+ 			status_change_end(src, SC_CLOAKING, INVALID_TIMER);
+ 
+ 			if (!src->prev)

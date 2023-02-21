@@ -1,0 +1,18 @@
+	[SKID.GD_CHARGESHOUT_FLAG] = {
+		"^339999Charge Shout Flag",
+		"^777777Places the staging flag in the target location. Last for 5 minutes.",
+		"______________________________________",
+		"^339999Max Level: ^7777771              ^339999Skill Form: ^6666CCSupport, Guild Master only ^000000"
+	},
+	[SKID.GD_CHARGESHOUT_BEATING] = {
+		"^339999Charge Shout Beating",
+		"^777777Teleport to staging flag placed by guild member immediately. guild members must be in the same castle to use this skill.",
+		"______________________________________",
+		"^339999Max Level: ^7777771              ^339999Skill Form: ^6666CCSupport ^000000"
+	},
+	[SKID.GD_EMERGENCY_MOVE] = {
+		"^339999Emergency Move",
+		"^777777Increases the movement speed of all nearby guild members by 25%.",
+		"______________________________________",
+		"^339999Max Level: ^7777771              ^339999Skill Form: ^6666CCSupport, Guild Master only ^000000"
+	},

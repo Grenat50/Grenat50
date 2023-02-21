@@ -1,0 +1,24 @@
+	[SKID.GD_CHARGESHOUT_BEATING] = {
+		"gd_chargeshout_beating",
+		SkillName = "Chargeshout Beating",
+		MaxLv = 5,
+		SpAmount = { 1 },
+		bSeperateLv = false,
+		AttackRange = { 15 }
+	},
+	[SKID.GD_CHARGESHOUT_FLAG] = {
+		"gd_chargeshout_flag",
+		SkillName = "Chargeshout Flag",
+		MaxLv = 5,
+		SpAmount = { 1 },
+		bSeperateLv = false,
+		AttackRange = { 15 }
+	},
+	[SKID.GD_EMERGENCY_MOVE] = {
+		"GD_EMERGENCY_MOVE",
+		SkillName = "Emergency Move",
+		MaxLv = 5,
+		SpAmount = { 1 },
+		bSeperateLv = false,
+		AttackRange = { 15 }
+	},

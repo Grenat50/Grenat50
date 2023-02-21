@@ -1,0 +1,1558 @@
+//===== Mystic Project Script ================================
+//= Enchantment System
+//===== By: ==================================================
+//= Grenat
+//===== Current Version: =====================================
+//= 1.0
+//===== Description: ========================================= 
+//= System scripts.
+//= Chuby Itaki - Equipment Quality System (TODO: Requirements)
+//= Payle Itaki - Equipment Enchant System
+//= Mina Henzo - Weapon Quality System
+//= Babel - Weapon Enchant System
+//===== Additional Comments: =================================
+//= 1.0 Initial script released.
+//============================================================
+
+//============================================================
+// = Weapon Enchantment (Inscriptions) scripts.
+//============================================================
+bab_scene02,58,47,3	script	Gabriel#mystic	661,{
+	disable_items;
+	//=======================================================
+	//= Config
+	//=======================================================
+	//= Inscription Enchant System
+	setarray .@Up_Babel_Pts,50,100,150,200,300,450,600,850,1000; 	// Number of Babel pts required to upgrade inscription (Default: 50/100/150/200/300/450/600/850/1000)
+	mes "[Gabriel]";
+	mes "Hello "+strcharinfo(0)+" !";
+	mes "I can help you upgrade your weapon in exchange of Babel pts obtained during the trial.";
+	next;
+	dispbottom "Babel Points: "+#reputbabel+"";
+	switch(select("- Enchant my weapon (50pts):- Upgrade my Inscription:- Choose favorite inscriptions:- Transfer my inscription (1000pts):- Remove my inscription:- Informations:- Leave")) {
+		case 1:
+			mes "[Gabriel]";
+			if(getequipcardid(EQI_HAND_R,3) > 10400 && getequipcardid(EQI_HAND_R,3) <= 10880) {
+				mes "You already have an inscription.";
+				next;
+				mes "[Gabriel]";
+				mes "Would you like to renew your inscription ?";
+				mes "This will erase the current inscription forever.";
+				next;
+				.@erase = select("- No, I'm good.:- Yes, please.");
+				mes "[Gabriel]";
+				if(.@erase == 1) {
+					mes "That's what I thought !";
+					close;
+				}
+				mes "[Gabriel]";
+			}
+			if(!Inscription[1]) {
+				mes "You did not choose any favorite Babel inscriptions.";
+				mes "You can pick 3 babel inscriptions.";
+				mes "Enchanting your weapon will grant you more chances to get your favorite inscriptions.";
+				next;
+				switch(select("- Select three favorite inscriptions:- Later.")) {
+					case 1:
+						callfunc "favorite_inscription";
+						break;
+					case 2: close;
+				}
+				mes "[Gabriel]";
+			}
+			if(#reputbabel<50) {
+				mes "I'm sorry, you don't have enough Babel pts to get an inscription.";
+				next;
+				mes "[Gabriel]";
+				mes "Please participate to the trial more often so you will get more pts.";
+				close;
+			}
+			if(getequipid(EQI_HAND_R) < 1) {
+				mes "It looks like you don't have any equipped weapon.";
+				close;
+			}
+			if(getequipcardid(EQI_HAND_R,3) > 0 && getequipcardid(EQI_HAND_R,3) < 10400 || getequipcardid(EQI_HAND_R,3) > 10880) {
+				mes "I see you already have a card on the last slot of your weapon.";
+				mes "^ff0000Careful, it will be removed during the process. Babel enchantments take the last slot of your weapon.^000000";
+				next;
+				if(select("- I keep the card.:- I don't care, remove it.") == 1) {
+					mes "[Gabriel]";
+					mes "That's what I thought. You can remove the card through Granny Georgette in Midgard City.";
+					close;
+				}
+				mes "[Gabriel]";
+			}
+			mes "Alright ! Let's see what we've got here.";
+			close2;
+			.@itemid = getequipid(EQI_HAND_R);
+			.@refine = getequiprefinerycnt(EQI_HAND_R);
+			if(!checkweight(.@itemid,1)) {
+				dispbottom "Failed. Overweight.";
+				end;
+			}
+			specialeffect2 EF_MAPPILLAR;
+			setarray .@array,10401,10411,10421,10431,10441,10451,10461,10471,10481,10491,10501,10511,10521,10531,10541,10551,10561,10571,10581,10591,10601,10611,10621,10631,10641,10651,10661,10671,10681,10691,10701,10711,10721,10731,10741,10751,10761,10771,10781,10791,10801,10811,10821,10831,10841,10851,10861;
+			for(.@i = 0; .@i < 3; .@i++) {
+				.@addpart = rand(0,(getarraysize(.@array)-1));
+				if(.@array[.@addpart] == inscription[1] || .@array[.@addpart] == inscription[2] || .@array[.@addpart] == inscription[3])
+					break;
+			}
+			setarray .@card[0],getequipcardid(EQI_HAND_R,0),getequipcardid(EQI_HAND_R,1),getequipcardid(EQI_HAND_R,2),getequipcardid(EQI_HAND_R,3);
+			setarray getd(".@OptID[0]"),getequiprandomoption(EQI_HAND_R,0,ROA_ID),getequiprandomoption(EQI_HAND_R,1,ROA_ID),getequiprandomoption(EQI_HAND_R,2,ROA_ID),getequiprandomoption(EQI_HAND_R,3,ROA_ID),getequiprandomoption(EQI_HAND_R,4,ROA_ID);
+			setarray getd(".@OptVal[0]"),getequiprandomoption(EQI_HAND_R,0,ROA_VALUE),getequiprandomoption(EQI_HAND_R,1,ROA_VALUE),getequiprandomoption(EQI_HAND_R,2,ROA_VALUE),getequiprandomoption(EQI_HAND_R,3,ROA_VALUE),getequiprandomoption(EQI_HAND_R,4,ROA_VALUE);
+			setarray getd(".@OptParam[0]"),getequiprandomoption(EQI_HAND_R,0,ROA_PARAM),getequiprandomoption(EQI_HAND_R,1,ROA_PARAM),getequiprandomoption(EQI_HAND_R,2,ROA_PARAM),getequiprandomoption(EQI_HAND_R,3,ROA_PARAM),getequiprandomoption(EQI_HAND_R,4,ROA_PARAM);
+			#reputbabel -= 50;
+			delequip EQI_HAND_R;
+			getitem3 .@itemid,1,1,.@refine,0,.@card[0],.@card[1],.@card[2],.@array[.@addpart],.@OptID,.@OptVal,.@OptParam;
+			if(.@card[3] > 0 && .@card[3] < 10400 || .@card[3] > 10880)
+				getitem .@card[3],1;
+			end;
+
+		case 2:
+			mes "[Gabriel]";
+			if(getequipcardid(EQI_HAND_R,3) < 10400 || getequipcardid(EQI_HAND_R,3) > 10880) {
+				mes "It looks like you don't have any inscription !";
+				next;
+				mes "[Gabriel]";
+				mes "Please enchant your weapon first, then upgrade the inscription you'll obtain.";
+				close;
+			}
+			switch (getequipcardid(EQI_HAND_R,3)) {
+				case 10401: case 10411: case 10421: case 10431: case 10441: case 10451: case 10461: case 10471: case 10481: case 10491: case 10501: case 10511: case 10521: case 10531: case 10541: case 10551: case 10561: case 10571: case 10581: case 10591: case 10601: case 10611: case 10621: case 10631: case 10641: case 10651: case 10661: case 10671: case 10681: case 10691: case 10701: case 10711: case 10721: case 10731: case 10741: case 10751: case 10761: case 10771: case 10781: case 10791: case 10811: case 10821: case 10831: case 10841: case 10851: case 10861: case 10871: 
+					.@id = 0;
+					break;
+				case 10402: case 10412: case 10422: case 10432: case 10442: case 10452: case 10462: case 10472: case 10482: case 10492: case 10502: case 10512: case 10522: case 10532: case 10542: case 10552: case 10562: case 10572: case 10582: case 10592: case 10602: case 10612: case 10622: case 10632: case 10642: case 10652: case 10662: case 10672: case 10682: case 10692: case 10702: case 10712: case 10722: case 10732: case 10742: case 10752: case 10762: case 10772: case 10782: case 10792: case 10812: case 10822: case 10832: case 10842: case 10852: case 10862: case 10872: 
+					.@id = 1;
+					break;
+				case 10403: case 10413: case 10423: case 10433: case 10443: case 10453: case 10463: case 10473: case 10483: case 10493: case 10503: case 10513: case 10523: case 10533: case 10543: case 10553: case 10563: case 10573: case 10583: case 10593: case 10603: case 10613: case 10623: case 10633: case 10643: case 10653: case 10663: case 10673: case 10683: case 10693: case 10703: case 10713: case 10723: case 10733: case 10743: case 10753: case 10763: case 10773: case 10783: case 10793: case 10813: case 10823: case 10833: case 10843: case 10853: case 10863: case 10873: 
+					.@id = 2;
+					break;
+				case 10404: case 10414: case 10424: case 10434: case 10444: case 10454: case 10464: case 10474: case 10484: case 10494: case 10504: case 10514: case 10524: case 10534: case 10544: case 10554: case 10564: case 10574: case 10584: case 10594: case 10604: case 10614: case 10624: case 10634: case 10644: case 10654: case 10664: case 10674: case 10684: case 10694: case 10704: case 10714: case 10724: case 10734: case 10744: case 10754: case 10764: case 10774: case 10784: case 10794: case 10814: case 10824: case 10834: case 10844: case 10854: case 10864: case 10874: 
+					.@id = 3;
+					break;
+				case 10405: case 10415: case 10425: case 10435: case 10445: case 10455: case 10465: case 10475: case 10485: case 10495: case 10505: case 10515: case 10525: case 10535: case 10545: case 10555: case 10565: case 10575: case 10585: case 10595: case 10605: case 10615: case 10625: case 10635: case 10645: case 10655: case 10665: case 10675: case 10685: case 10695: case 10705: case 10715: case 10725: case 10735: case 10745: case 10755: case 10765: case 10775: case 10785: case 10795: case 10815: case 10825: case 10835: case 10845: case 10855: case 10865: case 10875: 
+					.@id = 4;
+					break;
+				case 10406: case 10416: case 10426: case 10436: case 10446: case 10456: case 10466: case 10476: case 10486: case 10496: case 10506: case 10516: case 10526: case 10536: case 10546: case 10556: case 10566: case 10576: case 10586: case 10596: case 10606: case 10616: case 10626: case 10636: case 10646: case 10656: case 10666: case 10676: case 10686: case 10696: case 10706: case 10716: case 10726: case 10736: case 10746: case 10756: case 10766: case 10776: case 10786: case 10796: case 10816: case 10826: case 10836: case 10846: case 10856: case 10866: case 10876: 
+					.@id = 5;
+					break;
+				case 10407: case 10417: case 10427: case 10437: case 10447: case 10457: case 10467: case 10477: case 10487: case 10497: case 10507: case 10517: case 10527: case 10537: case 10547: case 10557: case 10567: case 10577: case 10587: case 10597: case 10607: case 10617: case 10627: case 10637: case 10647: case 10657: case 10667: case 10677: case 10687: case 10697: case 10707: case 10717: case 10727: case 10737: case 10747: case 10757: case 10767: case 10777: case 10787: case 10797: case 10817: case 10827: case 10837: case 10847: case 10857: case 10867: case 10877: 
+					.@id = 6;
+					break;
+				case 10408: case 10418: case 10428: case 10438: case 10448: case 10458: case 10468: case 10478: case 10488: case 10498: case 10508: case 10518: case 10528: case 10538: case 10548: case 10558: case 10568: case 10578: case 10588: case 10598: case 10608: case 10618: case 10628: case 10638: case 10648: case 10658: case 10668: case 10678: case 10688: case 10698: case 10708: case 10718: case 10728: case 10738: case 10748: case 10758: case 10768: case 10778: case 10788: case 10798: case 10818: case 10828: case 10838: case 10848: case 10858: case 10868: case 10878: 
+					.@id = 7;
+					break;
+				case 10409: case 10419: case 10429: case 10439: case 10449: case 10459: case 10469: case 10479: case 10489: case 10499: case 10509: case 10519: case 10529: case 10539: case 10549: case 10559: case 10569: case 10579: case 10589: case 10599: case 10609: case 10619: case 10629: case 10639: case 10649: case 10659: case 10669: case 10679: case 10689: case 10699: case 10709: case 10719: case 10729: case 10739: case 10749: case 10759: case 10769: case 10779: case 10789: case 10799: case 10819: case 10829: case 10839: case 10849: case 10859: case 10869: case 10879: 
+					.@id = 8;
+					break;
+				case 10410: case 10420: case 10430: case 10440: case 10450: case 10460: case 10470: case 10480: case 10490: case 10500: case 10510: case 10520: case 10530: case 10540: case 10550: case 10560: case 10570: case 10580: case 10590: case 10600: case 10610: case 10620: case 10630: case 10640: case 10650: case 10660: case 10670: case 10680: case 10690: case 10700: case 10710: case 10720: case 10730: case 10740: case 10750: case 10760: case 10770: case 10780: case 10790: case 10810: case 10820: case 10830: case 10840: case 10850: case 10860: case 10870: case 10880: 
+					.@max++;
+			}
+			if(.@max) {
+				mes "You have reach the limit of upgrade for this inscription.";
+				close;
+			}
+			if(#reputbabel < .@Up_Babel_Pts[.@id]) {
+				mes "In order to upgrade your "+getitemname(getequipcardid(EQI_HAND_R,3))+" to "+getitemname((getequipcardid(EQI_HAND_R,3)+1))+", you will need "+.@Up_Babel_Pts[.@id]+" Babel pts.";
+				close;
+			}
+			mes "Would you like to upgrade your "+getitemname(getequipcardid(EQI_HAND_R,3))+" to "+getitemname((getequipcardid(EQI_HAND_R,3)+1))+" ?";
+			next;
+			switch(select("- Not now.:- Yes, please.")) {
+				case 1:
+					mes "[Gabriel]";
+					mes "Alright. Please, come back when you are ready.";
+					close;
+				case 2:
+					mes "[Gabriel]";
+					mes "Alright ! Let's do it.";
+					break;
+			}
+			close2;
+			.@itemid = getequipid(EQI_HAND_R);
+			if(!checkweight(.@itemid,1)) {
+				dispbottom "Failed. Overweight.";
+				end;
+			}
+			#reputbabel -= .@Up_Babel_Pts[.@id];
+			.@inscription = (getequipcardid(EQI_HAND_R,3)+1);
+			.@refine = getequiprefinerycnt(EQI_HAND_R);
+			specialeffect2 EF_MAPPILLAR;
+			setarray .@card[0],getequipcardid(EQI_HAND_R,0),getequipcardid(EQI_HAND_R,1),getequipcardid(EQI_HAND_R,2);
+			setarray getd(".@OptID[0]"),getequiprandomoption(EQI_HAND_R,0,ROA_ID),getequiprandomoption(EQI_HAND_R,1,ROA_ID),getequiprandomoption(EQI_HAND_R,2,ROA_ID),getequiprandomoption(EQI_HAND_R,3,ROA_ID),getequiprandomoption(EQI_HAND_R,4,ROA_ID);
+			setarray getd(".@OptVal[0]"),getequiprandomoption(EQI_HAND_R,0,ROA_VALUE),getequiprandomoption(EQI_HAND_R,1,ROA_VALUE),getequiprandomoption(EQI_HAND_R,2,ROA_VALUE),getequiprandomoption(EQI_HAND_R,3,ROA_VALUE),getequiprandomoption(EQI_HAND_R,4,ROA_VALUE);
+			setarray getd(".@OptParam[0]"),getequiprandomoption(EQI_HAND_R,0,ROA_PARAM),getequiprandomoption(EQI_HAND_R,1,ROA_PARAM),getequiprandomoption(EQI_HAND_R,2,ROA_PARAM),getequiprandomoption(EQI_HAND_R,3,ROA_PARAM),getequiprandomoption(EQI_HAND_R,4,ROA_PARAM);
+			delequip EQI_HAND_R;
+			getitem3 .@itemid,1,1,.@refine,0,.@card[0],.@card[1],.@card[2],.@inscription,.@OptID,.@OptVal,.@OptParam;
+			end;
+		case 3:
+			callfunc "favorite_inscription";
+			end;
+		case 4:
+			mes "[Gabriel]";
+			if(getequipcardid(EQI_HAND_R,3) < 10400 || getequipcardid(EQI_HAND_R,3) > 10880) {
+				mes "It looks like you don't have any inscription !";
+				next;
+				mes "[Gabriel]";
+				mes "Please enchant your weapon first.";
+				close;
+			}
+			if(#reputbabel<1000) {
+				mes "I'm sorry, you don't have enough Babel pts to transfer your inscription.";
+				next;
+				mes "[Gabriel]";
+				mes "Please participate to the trial more often so you will get more pts.";
+				close;
+			}
+			mes "Select the weapon you'd like the inscription to be transfered.";
+			.@selection = inventoryselect(0x8, 0x2);
+			switch (.@selection) {
+				case -1:
+					mes "[Gabriel]";
+					mes "Ah, you don't have any!";
+					close;
+				case 0:
+					mes "[Gabriel]";
+					mes "That's a shame!";
+					close;
+				case 1:
+					mes "[Gabriel]";
+					if(@select_amount > 1) {
+						mes "You can have only one of this weapon in your inventory.";
+						close;
+					}
+					if(getequipcardid(EQI_HAND_R,3) < 10400 || getequipcardid(EQI_HAND_R,3) > 10880) {
+						mes "You don't have any inscription on that weapon. It has to be equipped on the right-hand.";
+						close;
+					}
+					mes "Would you like to transfer "+getitemname(getequipcardid(EQI_HAND_R,3))+" from "+getequipname(EQI_HAND_R)+" to "+getitemname(@select_id)+" ?";
+					next;
+					if(select("- No, I changed my mind.:- Yes, confirm !") == 1)
+						close;
+					.@itemid = getequipid(EQI_HAND_R);
+					if(!checkweight(.@itemid,1)) {
+						dispbottom "Failed. Overweight.";
+						end;
+					}
+					if(!countitem(@select_id)) {
+						dispbottom "Failed. An error has occured.";
+						end;
+					}
+					#reputbabel -= 1000;
+					.@inscription = getequipcardid(EQI_HAND_R,3);
+					.@refine = getequiprefinerycnt(EQI_HAND_R);
+					specialeffect2 EF_MAPPILLAR;
+					setarray .@card[0],getequipcardid(EQI_HAND_R,0),getequipcardid(EQI_HAND_R,1),getequipcardid(EQI_HAND_R,2);
+					setarray getd(".@OptID[0]"),getequiprandomoption(EQI_HAND_R,0,ROA_ID),getequiprandomoption(EQI_HAND_R,1,ROA_ID),getequiprandomoption(EQI_HAND_R,2,ROA_ID),getequiprandomoption(EQI_HAND_R,3,ROA_ID),getequiprandomoption(EQI_HAND_R,4,ROA_ID);
+					setarray getd(".@OptVal[0]"),getequiprandomoption(EQI_HAND_R,0,ROA_VALUE),getequiprandomoption(EQI_HAND_R,1,ROA_VALUE),getequiprandomoption(EQI_HAND_R,2,ROA_VALUE),getequiprandomoption(EQI_HAND_R,3,ROA_VALUE),getequiprandomoption(EQI_HAND_R,4,ROA_VALUE);
+					setarray getd(".@OptParam[0]"),getequiprandomoption(EQI_HAND_R,0,ROA_PARAM),getequiprandomoption(EQI_HAND_R,1,ROA_PARAM),getequiprandomoption(EQI_HAND_R,2,ROA_PARAM),getequiprandomoption(EQI_HAND_R,3,ROA_PARAM),getequiprandomoption(EQI_HAND_R,4,ROA_PARAM);
+					getitem3 getequipid(EQI_HAND_R),1,1,.@refine,0,.@card[0],.@card[1],.@card[2],0,.@OptID,.@OptVal,.@OptParam;
+					delequip EQI_HAND_R;
+					deletearray @inventorylist_id[0],(getarraysize(@inventorylist_id));
+					getinventorylist;
+					copyarray @inventorylist_id[0],@inventorylist_id[0],@inventorylist_count;
+					for( .@i = 0; .@i<= @inventorylist_count; .@i++) {
+						if(@inventorylist_id[.@i] == @select_id) {
+							.@refine = @inventorylist_refine[.@i];
+							.@card1 = @inventorylist_card1[.@i];
+							.@card2 = @inventorylist_card2[.@i];
+							.@card3 = @inventorylist_card3[.@i];
+							.@card4 = @inventorylist_card4[.@i];
+							setarray .@OptID[0],@inventorylist_option_id1[.@i],@inventorylist_option_id2[.@i],@inventorylist_option_id3[.@i];
+							setarray .@OptVal[0],@inventorylist_option_value1[.@i],@inventorylist_option_value2[.@i],@inventorylist_option_value3[.@i];
+							setarray .@OptParam[0],@inventorylist_option_parameter1[.@i],@inventorylist_option_parameter2[.@i],@inventorylist_option_parameter3[.@i];
+							delitem @select_id,1;
+							getitem3 @select_id,1,1,.@refine,0,0,0,0,.@inscription,.@OptID,.@OptVal,.@OptParam;
+							break;
+						}
+					}
+			}
+			end;
+		case 5:
+			mes "[Gabriel]";
+			if(getequipcardid(EQI_HAND_R,3) < 10400 || getequipcardid(EQI_HAND_R,3) > 10880) {
+				mes "It looks like you don't have any inscription !";
+				next;
+				mes "[Gabriel]";
+				mes "Please enchant your weapon first, then upgrade the inscription you'll obtain.";
+				close;
+			}
+			mes "You have "+getitemname(getequipcardid(EQI_HAND_R,3))+" in your weapon.";
+			mes "^ff0000Are you sure you want to remove it permanently ?^000000";
+			switch(select("- No, I keep it.:- Yes, please")) {
+				case 1:
+					mes "Alright !";
+					close;
+				case 2:
+					break;
+			}
+			mes "Okay. Let's do it !";
+			close2;
+			.@itemid = getequipid(EQI_HAND_R);
+			if(!checkweight(.@itemid,1)) {
+				dispbottom "Failed. Overweight.";
+				end;
+			}
+			.@refine = getequiprefinerycnt(EQI_HAND_R);
+			setarray .@card[0],getequipcardid(EQI_HAND_R,0),getequipcardid(EQI_HAND_R,1),getequipcardid(EQI_HAND_R,2);
+			setarray getd(".@OptID[0]"),getequiprandomoption(EQI_HAND_R,0,ROA_ID),getequiprandomoption(EQI_HAND_R,1,ROA_ID),getequiprandomoption(EQI_HAND_R,2,ROA_ID),getequiprandomoption(EQI_HAND_R,3,ROA_ID),getequiprandomoption(EQI_HAND_R,4,ROA_ID);
+			setarray getd(".@OptVal[0]"),getequiprandomoption(EQI_HAND_R,0,ROA_VALUE),getequiprandomoption(EQI_HAND_R,1,ROA_VALUE),getequiprandomoption(EQI_HAND_R,2,ROA_VALUE),getequiprandomoption(EQI_HAND_R,3,ROA_VALUE),getequiprandomoption(EQI_HAND_R,4,ROA_VALUE);
+			setarray getd(".@OptParam[0]"),getequiprandomoption(EQI_HAND_R,0,ROA_PARAM),getequiprandomoption(EQI_HAND_R,1,ROA_PARAM),getequiprandomoption(EQI_HAND_R,2,ROA_PARAM),getequiprandomoption(EQI_HAND_R,3,ROA_PARAM),getequiprandomoption(EQI_HAND_R,4,ROA_PARAM);
+			delequip EQI_HAND_R;
+			getitem3 .@itemid,1,1,.@refine,0,.@card[0],.@card[1],.@card[2],0,.@OptID,.@OptVal,.@OptParam;
+			break;
+		case 6:
+			mes "[Gabriel]";
+			mes "The trial makes you earn some pts that you can exchange for an inscriptions.";
+			mes "An inscription is placed on your weapon.";
+			next;
+			mes "[Gabriel]";
+			mes "It can be refine up to +10.";
+			mes "For example, you can have <ITEM>^0000FFHermod Inscription Lv 10^000000<INFO>10420</INFO></ITEM> or <ITEM>^0000FFIdunn Inscription Lv10^000000<INFO>10540</INFO></ITEM> attached to your weapon.";
+			next;
+			mes "[Gabriel]";
+			mes "However, the inscription is random.";
+			mes "You see, I'm sending your weapon to the Beyond and who knows which God is going to put an inscription on it.";
+			next;
+			mes "[Gabriel]";
+			mes "It worth to try though ! Ha ha";
+			close;
+		case 7:
+			mes "[Gabriel]";
+			mes "Have a wonderful day my friend ! May the gods be with you.";
+			close;
+	}
+}
+
+function	script	favorite_inscription	{
+	mes "<URL>Babel Inscriptions<INFO>https://mysticprojectro.com/wiki/index.php/Trial_of_Babel/</INFO></URL>";
+	mes "You can find all inscriptions effects here.";
+	mes "[Favorite Inscriptions]";
+	if(inscription[1]) mes getitemname(inscription[1]);
+	if(inscription[2]) mes getitemname(inscription[2]);
+	if(inscription[3]) mes getitemname(inscription[3]);
+	next;
+	for(.@i2 = 1; .@i2 < 4; .@i2++) {
+		.@menu$ = "";
+		setarray .@nameid,10401,10411,10421,10431,10441,10451,10461,10471,10481,10491,10501,10511,10521,10531,10541,10551,10561,10571,10581,10591,10601,10611,10621,10631,10641,10651,10661,10671,10681,10691,10701,10711,10721,10731,10741,10751,10761,10771,10781,10791,10801,10811,10821,10831,10841,10851,10861;
+		for(.@i = 0; .@i < getarraysize(.@nameid); .@i++)
+			.@menu$ += getitemname(.@nameid[.@i])+":";
+		.@menu$ += "Cancel.";
+		.@inscription[.@i2] = select(.@menu$)-1;
+		if(.@inscription[.@i2] == 46)
+			end;
+		if((.@inscription[2] && .@inscription[1] == .@inscription[2]) || (.@inscription[3] && .@inscription[1] == .@inscription[3]) || (.@inscription[2] > 0 && .@inscription[2] == .@inscription[3])) {
+			message strcharinfo(0),"cannot choose twice the same inscription.";
+			.@i2--;
+			continue;
+		}
+		mes "Inscription "+.@i2+": "+getitemname(.@nameid[.@inscription[.@i2]])+"";
+	}
+	next;
+	switch(select("- Cancel.:- Everything is correct.")) {
+		case 1: end;
+		case 2:
+			if(.@inscription[1] == .@inscription[2] || .@inscription[1] == .@inscription[3] || .@inscription[2] == .@inscription[3]) {
+				message strcharinfo(0),"cannot choose twice the same inscription.";
+				end;
+			}
+			inscription[1] = .@nameid[.@inscription[1]];
+			inscription[2] = .@nameid[.@inscription[2]];
+			inscription[3] = .@nameid[.@inscription[3]];
+			break;
+	}
+	return;
+}
+
+//============================================================
+// = Weapon Quality scripts.
+//============================================================
+mid_in01,69,21,5	script	Mina Henzo#mystic	19757,{
+	callfunc "locked_content","Enchant System",$episode_midgard,"Midgard North: A New Beginning",1;
+	disable_items;
+	mes "[Mina Henzo]";
+	mes "Oh ! Some visitors !";
+	mes "With each person I meet, I find myself imagining that it could be the fruit of fate, and that I will have great things to achieve with.";
+	mes "Ha ha, maybe I'm a little too enthusiastic !";
+	next;
+	mes "[Mina Henzo]";
+	mes "Alright, how can I help you ?";
+	mes " ";
+	mes "[^5555ff"+strcharinfo(0)+"^000000]";	
+	mes "I'm here to...";
+	next;
+	switch(select("- Enchant a Weapon (Quality System):- Merge Weapons Lv 4:- Informations:- Leave")) {
+		case 1:
+			mes "[Mina Henzo]";
+			mes "Ah ! Well, here we are tackling my favorite subject !";
+			mes "Weapon enchantment ! And not just any: the Henzo family services !";
+			mes "^5555ff1st Quality: 100,000zeny, 3x Rough Moonstone, 85% chance of success^000000";
+			mes "^5555ff2nd Quality: 200,000zeny, 3x Moonstone, 85% chance of success^000000";
+			mes "^5555ff3rd Quality: 300,000zeny, 3x Grand Moonstone, 85% chance of success^000000";
+			mes "Does not break stuff in case of failure.";
+			next;
+			callfunc "Quality_System",2,"Mina Henzo";
+			end;
+		case 2:
+			mes "[Mina Henzo]";
+			mes "Alright, let's merge your 2 weapons Lv 4 first.";
+			next;
+			mes "[Mina Henzo]";
+			mes "Be careful !";
+			mes "^ff0000The weapon lv 4 that stays with cards and bonuses is the one you've equipped.";
+			mes "Do you understand?^000000";
+			next;
+			switch(select("- Hold on.:- Yes I do understand, take it")) {
+				case 1: 
+					mes "[Mina Henzo]";
+					mes "Okay, come back when you're ready."; 
+					close;
+				case 2: break;
+			}
+			.@id = getequipid(EQI_HAND_R);
+			if(.@id <= 0) {
+				mes "[Mina Henzo]";
+				mes "You don't have any weapon equipped.";
+				close;
+			}
+			if(countitem(.@id) < 2) {
+				mes "[Mina Henzo]";
+				mes "You need two weapons lv 4 of the same kind to proceed.";
+				close;
+			}
+			if(countitem(.@id) > 2) {
+				mes "[Mina Henzo]";
+				mes "You can't have more than 2 at the time ! Please put one in the storage first.";
+				close;
+			}
+			if(getequipweaponlv(EQI_HAND_R) !=4) {
+				mes "[Mina Henzo]";
+				mes "This only works for Weapon Lv 4.";
+				close;
+			}
+			.@rand = ((getequiprandomoption(EQI_HAND_R,0,ROA_ID))?1:0)+((getequiprandomoption(EQI_HAND_R,1,ROA_ID))?1:0)+((getequiprandomoption(EQI_HAND_R,2,ROA_ID))?1:0);
+			if(.@rand >= 3) {
+				mes "[Mina Henzo]";
+				mes "You already reached 3 qualities. I can't add anymore ! Here is your weapon back.";
+				close;
+			}
+			switch(.@rand) {
+				case 3:
+					mes "[Mina Henzo]";
+					mes "You already reached 3 qualities. I can't add anymore ! Here is your weapon back.";
+					close;
+				case 1:
+					if(countitem(8183) < 1) {
+						mes "[Mina Henzo]";
+						mes "You need 1 <ITEM>^0000FFMoonstone^000000<INFO>8183</INFO></ITEM> in order to get a third quality.";
+						close;
+					}
+					delitem 8184,1;
+					break;
+				case 2:
+					if(countitem(8184) < 2) {
+						mes "[Mina Henzo]";
+						mes "You need 2 <ITEM>^0000FFGrand Moonstone^000000<INFO>8184</INFO></ITEM> in order to get a third quality.";
+						close;
+					}
+					delitem 8184,1;
+					break;
+			}
+			callfunc "Merge_System",.@id;
+			end;
+		case 3:
+			mes "[Mina Henzo]";
+			mes "Well, my grand-father and I are practicing the art of forging the best weapon but also enchanting any weapon !";
+			mes "My Grand-Father Hatori Henzo has studied weapons all his life.";
+			next;
+			mes "[Mina Henzo]";
+			mes "If you want to forge a Weapon Lv 5, you should talk to grand-pa.";
+			next;
+			mes "[Mina Henzo]";
+			mes "If you want to add up to 3 quality to any weapon, I can do it if you have the right requirement !";
+			next;
+			mes "[Mina Henzo]";
+			mes "Also, I can merge two weapons lv 4 together into a powerful one by enchanting it using the Quality System. If you decide to do it, just know that the one that goes away is the one equipped.";
+			close;
+		case 4:
+			mes "[Mina Henzo]";
+			mes "Thank you for visiting us, I'm going back to my researches. Have a good day !";
+			close;
+	}
+}
+
+//============================================================
+// = Equipment Quality scripts.
+//============================================================
+-	shop	dismantleequip	-1,734:-1
+mid_in01,76,11,2	script	Chuby Itaki#mystic	19760,{
+	callfunc "locked_content","Quality System",$episode_midgard,"Midgard North: A New Beginning",1;
+	disable_items;
+	mes "[Chuby Itaki]";
+	mes "Hi !";
+	mes "I'm Payle's brother. We work together on upgrading stuff !";
+	mes "Obviously, we can't compete with Henzo's family so we decided to do only equipments !";
+	next;
+	mes "[Chuby Itaki]";
+	mes "How can I help you today ?";
+	next;
+	if(isbegin_quest(49213)) {
+		mes "[Chuby Itaki]";
+		mes "Oh ! You have the moonstones.";
+		mes "Thank you so much.";
+		next;
+		mes "[Chuby Itaki]";
+		mes "If you need anything, please let me know.";
+		close2;
+		callfunc "blockpj",1;
+		callfunc("setnavi",1);
+		unittalk getcharid(3),"Nava: Hey "+strcharinfo(0)+", listen!",bc_self;
+		sleep2 2000;
+		unittalk getcharid(3),"Nava: It's time for the yggdrasil and Royal Jelly recolt!",bc_self;
+		sleep2 3500;
+		unittalk getcharid(3),"Nava: You may find them in High Garden, behind the Midgard Castle.",bc_self;
+		sleep2 1500;
+		callfunc "blockpj",0;
+		BaseExp += callfunc("get_rate_xp",20);
+		JobExp += callfunc("get_rate_xp",20);
+		Zeny += callfunc("get_rate_zeny",5)/2;
+		callfunc "END_QUEST", 49213,OPT_2;
+		callfunc "SET_QUEST", 49214;
+		callfunc("setnavi",0);
+		end;
+	}
+	if(isbegin_quest(49211)) {
+		callfunc("setnavi",1,0);
+		mes "[Chuby Itaki]";
+		mes "A request for me ?";
+		next;
+		mes "[^5555ff"+strcharinfo(0)+"^000000]";
+		mes "Yes, a man intercepted me at the bazaar across and gave me this.";
+		next;
+		mes "^ff0000You show the cotton shirt to Chuby Itaki*^000000";
+		next;
+		mes "[Chuby Itaki]";
+		mes "I see... Not satisfied you say ?";
+		next;
+		mes "[Chuby Itaki]";
+		mes "Well, you see, I'm using a new technique which grant random options on equipment. I can add up to 3 qualities.";
+		next;
+		mes "[Chuby Itaki]";
+		mes "However, I've got this ingredient from the outdoor market, which wasn't the right one. Could you please go and find Robert?";
+		mes "Tell him that I need <ITEM>^0000FFMoonstone^000000<INFO>8183</INFO></ITEM> and not Bradium.";
+		next;
+		.@BaseExp += callfunc("get_rate_xp",20);
+		.@JobExp += callfunc("get_rate_xp",20);
+		.@Zeny += callfunc("get_rate_zeny",7)/2;
+		mes "[^5555FF QUEST LOG ^000000]";
+		mes "Level Quest :^5555FF 20 ^000000";
+		mes "Subject :^5555FF Enchanting System ^000000";
+		mes "Quest: Help Chuby Itaki to find moonstones.";
+		mes "Reward: "+.@BaseExp+" XP and "+.@Zeny+" Zenys";
+		next;
+		switch(select("- Accept.:- Refuse.")) {
+			case 1:
+				mes "[Chuby Itaki]";
+				mes "Thank you. Please come back when you will have moonstones.";
+				callfunc "END_QUEST", 49211,OPT_2;
+				callfunc "SET_QUEST", 49212;
+				@countquest = -1;
+				close2;
+				callfunc("setnavi",0);
+				end;
+			case 2:
+				mes "[Chuby Itaki]";
+				mes "Oh, that's sad. Alright.";
+				callfunc("setnavi",0);
+				close;
+		}
+	}
+	switch(select("- Quality System:- Dismantle Equipments:- Buy Moonstones:- Storage:- Informations:- Leave")) {
+	case 6:
+		mes "[Chuby Itaki]";
+		mes "You don't know what you're missing !";
+		mes "Come back next time.";
+		close;
+	case 5:
+		mes "[Chuby Itaki]";
+		mes "Qualities are our last invention. It gives ^5555ffRandom Bonuses^000000 to an equipment ! Isn't amazing ?! You can have up to 3 randoms bonuses on an equipment.";
+		mes "All you need is to give me Moonstones. You can get them by disintegrating ^ff0000Map Items^000000 equipments. They keep falling from heaven, someone says it comes from the Moon.";
+		mes "There is a chance to fail, but, your equipment won't be broken. :-)";
+		next;
+		mes "I can dismantle ^ff0000Map Items^000000 stuff with qualities at anytime ! You will get one <ITEM>^0000FFMoonstone^000000<INFO>8183</INFO></ITEM> per equipment.";
+		mes "One equipment with one quality gives you one <ITEM>^0000FFRough Moonstone^000000<INFO>8182</INFO></ITEM>.";
+		mes "One equipment with two qualities gives you one <ITEM>^0000FFMoonstone^000000<INFO>8183</INFO></ITEM>.";
+		mes "One equipment with three qualities gives you one <ITEM>^0000FFGrand Moonstone^000000<INFO>8184</INFO></ITEM>.";
+		close;
+	case 4:
+		callfunc("F_CheckKafCode");	//check your storage password, if set
+		close2;
+		openstorage;
+		end;
+	case 3:
+		mes "[Chuby Itaki]";
+		mes "Alrighty ! I can sell you some moonstones.";
+		close2;
+		callshop "dismantle",1;
+		end;
+	case 2:
+		mes "[Chuby Itaki]";
+		mes "Alright ! What would you like to dismantle ?";
+		close2;
+		callshop "dismantleequip",2,2;
+		npcshopattach "dismantleequip";
+		end;
+OnSellItem:
+		for(.@i = 0; .@i < getarraysize(@sold_nameid); .@i++) {
+			.@i2 = ((@sold_option_id1[.@i])?1:0) + ((@sold_option_id2[.@i])?1:0) + ((@sold_option_id3[.@i])?1:0);
+			if(.@i2 > 0 && (getiteminfo(@sold_nameid[.@i],2) == 4 || getiteminfo(@sold_nameid[.@i],2) == 5) ) {
+				setarray .@id,@sold_option_id1[.@i],@sold_option_id2[.@i],@sold_option_id3[.@i],@sold_option_id4[.@i],@sold_option_id5[.@i];
+				setarray .@val,@sold_option_val1[.@i],@sold_option_val2[.@i],@sold_option_val3[.@i],@sold_option_val4[.@i],@sold_option_val5[.@i];
+				setarray .@param,@sold_option_param1[.@i],@sold_option_param2[.@i],@sold_option_param3[.@i],@sold_option_param4[.@i],@sold_option_param5[.@i];
+				delitem3 @sold_nameid[.@i],1,@sold_identify[.@i],@sold_refine[.@i],@sold_attribute[.@i],@sold_card1[.@i],@sold_card2[.@i],@sold_card3[.@i],@sold_card4[.@i],.@id,.@val,.@param;
+				getitem 8181+.@i2,2;
+			}
+		}
+		end;
+	case 1:
+		mes "[Chuby Itaki]";
+		mes "Which equipment would you like me to work on today ?";
+		mes "^5555ff1st Quality: 100,000zeny, 3x Rough Moonstone, 85% chance of success^000000";
+		mes "^5555ff2nd Quality: 200,000zeny, 3x Moonstone, 85% chance of success^000000";
+		mes "^5555ff3rd Quality: 300,000zeny, 3x Grand Moonstone, 85% chance of success^000000";
+		mes "Does not break stuff in case of failure.";
+		next;
+		setarray .@name$[0],"- Armor","- I changed my mind";
+		if($quality_config & OPT_1) .@name$[2] = "- Garment"; else .@name$[2] = "^ff0000- Garment^000000";
+		if($quality_config & OPT_2) .@name$[3] = "- Shoes"; else .@name$[3] = "^ff0000- Shoes^000000";
+		if($quality_config & OPT_3) .@name$[4] = "- Shield"; else .@name$[4] = "^ff0000- Shield^000000";
+		if($quality_config & OPT_4) .@name$[5] = "- Accessories"; else .@name$[5] = "^ff0000- Accessories^000000";
+		switch(select(.@name$[0],.@name$[2],.@name$[3],.@name$[4],.@name$[5],.@name$[1])) {
+			case 1: .@equip = 16; break;
+			case 2: if($quality_config & OPT_1) .@equip = 4; else .@notyet = 1; break;
+			case 3: if($quality_config & OPT_2) .@equip = 64; else .@notyet = 1; break;
+			case 4: if($quality_config & OPT_3) .@equip = 32; else .@notyet = 1; break;
+			case 5: if($quality_config & OPT_4) .@equip = 136; else .@notyet = 1; break;
+			case 6:
+				mes "[Chuby Itaki]";
+				mes "Please come back when you have any interest in enchanting your equipments.";
+				close;
+		}
+		if(.@notyet) {
+			mes "[Chuby Itaki]";
+			mes "Hmm... I'm still working on making it possible on this type of equipment, but it will be soon available ! Sorry for the inconvenience.";
+			close;
+		}
+		callfunc "Quality_System",.@equip,"Chuby Itaki";
+		end;
+	}
+}
+
+//============================================================
+// = Equipment Enchant scripts.
+//============================================================
+mid_in01,74,21,5	script	Payle Itaki#mystic	73,{
+	callfunc "locked_content","Kugan",$episode_midgard,"Midgard North: A New Beginning",1;
+	disable_items;
+	mes "[Payle Itaki]";
+	mes "I'm in charge of Enchanting an equipment. I've been studying ways to maximize its capability.";
+	next;
+	switch(select("- Enchant System:- Storage:- Informations:- Leave")) {
+	case 4:
+		mes "[Payle Itaki]";
+		mes "You don't know what you're missing !";
+		mes "Come back next time.";
+		close;
+	case 3:
+		mes "[Payle Itaki]";
+		mes "Enchanting is an awesome skill that infuses a mysterious status powers into the equipment's hidden socket.";
+		next;
+		mes "[Payle Itaki]";
+		mes "In order for me to infuse this power, I need you to bring any <ITEM>^0000FFUncommon Soul^000000<INFO>8009</INFO></ITEM>, <ITEM>^0000FFRare Soul^000000<INFO>8010</INFO></ITEM>, or";
+		mes "<ITEM>^0000FFPure Soul^000000<INFO>8011</INFO></ITEM>, and 400,000z. The chance to succeed depends on the soul's quality.";
+		next;
+		mes "[Payle Itaki]";
+		mes "There is a chance to ^ff0000break^000000 the equipment permanently, unless you bring me an <ITEM>^0000FFSoul Protection^000000<INFO>7619</INFO></ITEM> which protects your equipment.";
+/* Old system required one piece of the same equipment but not with the new UI interface
+		next;
+		mes "[Payle Itaki]";
+		mes "However, you have to keep in mind that if there are two equipments of the same kind in your possession, this won't work, so bring ^5555ffONE^000000 only.";
+*/
+		close;
+	case 2:
+		callfunc("F_CheckKafCode");	//check your storage password, if set
+		close2;
+		openstorage;
+		end;
+	case 1:
+		dispbottom "Be carefull, your equipment can break if you don't use an Soul Protection. All 10 fragments of souls will be transformed into one soul.";
+		@brilliant = 0; @bsblessing = 0; @shining = 0;
+		if(countitem(8005)) {
+			mes "[Payle Itaki]";
+			mes "Ohhhh ! What do I see over there !";
+			mes "You have a Brilliant Soul ! It doubles the chance to suceed. Do you want to use it ?";
+			next;
+			switch(select("- Yes, please.:- Not for now.")) {
+				case 1: @brilliant = 1; break;
+				case 2: break;
+			}
+		}
+		if(countitem(8272)) {
+			mes "[Payle Itaki]";
+			mes "Ohhhh ! What do I see over there !";
+			mes "You have a Soul Protection ! It protects your stuff from breaking. Do you want to use it ?";
+			next;
+			switch(select("- Yes, please.:- Not for now.")) {
+				case 1: @bsblessing = 1; break;
+				case 2: break;
+			}
+		}
+		if(countitem(8006)) {
+		mes "[Payle Itaki]";
+		mes "Jeeeez ! A Shining Soul ! Do you want to use it and decide which stat will be focused on?";
+		next;
+		switch(select("- Yes !:- Not this time.")) {
+			case 1: 
+				mes "[Payle Itaki]";
+				mes "Which stat do you want the most ?";
+				next;
+				switch(select("- Str:- Agi:- Vit:- Int:- Dex:- Luk")) {
+					case 1: .@bonus$ = "STR"; @shining = 1; break;
+					case 2: .@bonus$ = "AGI"; @shining = 2; break;
+					case 3: .@bonus$ = "VIT"; @shining = 3; break;
+					case 4: .@bonus$ = "INT"; @shining = 4; break;
+					case 5: .@bonus$ = "DEX"; @shining = 5; break;
+					case 6: .@bonus$ = "LUK"; @shining = 6; break;
+				}
+				mes "[Payle Itaki]";
+				mes "Okay, I'll try to get you some "+.@bonus$+".";
+				next;
+			case 2: break;
+			}
+		}
+		close2;
+		for (.@i = 0; .@i < 3; .@i++) {
+			if(.@num = callfunc("countone",8159+.@i) >= 10) {
+				callfunc "delone",8159+.@i,.@num;
+				getitem 8009+.@i,.@num/10;
+			}
+		}
+		enchantui;
+		end;
+	}
+	end;
+OnEnchant:
+	.@refine[@itemid] = @inventorylist_refine;
+	.@attribute[@itemid] = @inventorylist_attribute;
+	.@card1[@itemid] = @inventorylist_card1;
+	.@card2[@itemid] = @inventorylist_card2;
+	.@card3[@itemid] = @inventorylist_card3;
+	setarray getd(".@OptID"+@itemid+"[0]"),@inventorylist_option_id1,@inventorylist_option_id2,@inventorylist_option_id3;
+	setarray getd(".@OptVal"+@itemid+"[0]"),@inventorylist_option_value1,@inventorylist_option_value2,@inventorylist_option_value3;
+	setarray getd(".@OptParam"+@itemid+"[0]"),@inventorylist_option_parameter1,@inventorylist_option_parameter2,@inventorylist_option_parameter3;
+	@inventorylist_refine = 0; @inventorylist_attribute = 0; @inventorylist_card1 = 0; @inventorylist_card2 = 0; @inventorylist_card3 = 0; @inventorylist_card4 = 0;
+	@inventorylist_option_id1 = 0; @inventorylist_option_id2 = 0; @inventorylist_option_id3 = 0;
+	@inventorylist_option_value1 = 0; @inventorylist_option_value2 = 0; @inventorylist_option_value3 = 0;
+	@inventorylist_option_parameter1 = 0; @inventorylist_option_parameter2 = 0; @inventorylist_option_parameter3 = 0;
+	if(@brilliant) .@s$ = "_up";
+	if(@shining) .@shining = @shining;
+	.@soul = (@soul >= 8009)+(@soul >= 8010)+(@soul >= 8011);
+	@soul = 0; @brilliant = 0; @shining = 0; @enriched = 0; @bsblessing = 0;
+	copyarray .@rand2[0],getd(".Soul_lv"+.@soul+""+.@s$+"[0]"),5;
+	.@rand = rand(100);
+	if(.@rand < .@rand2[4]) {
+		.@addpart = rand(10947,10976);
+		switch (.@shining) {
+			case 1: .@addpart = rand(10947,10951); break;
+			case 2: .@addpart = rand(10952,10956); break;
+			case 3: .@addpart = rand(10957,10961); break;
+			case 4: .@addpart = rand(10962,10966); break;
+			case 5: .@addpart = rand(10967,10971); break;
+			case 6: .@addpart = rand(10972,10976); break;
+		}
+	}
+	.@rand = rand(100);
+	if(.@rand <= .@rand2[3] && !.@addpart) {
+		.@addpart = rand(10941,10946);
+		switch (.@shining) {
+			case 1: .@addpart = 10941; break;
+			case 2: .@addpart = 10942; break;
+			case 3: .@addpart = 10943; break;
+			case 4: .@addpart = 10944; break;
+			case 5: .@addpart = 10945; break;
+			case 6: .@addpart = 10946; break;
+		}
+	}
+	.@rand = rand(100);
+	if(.@rand <= .@rand2[2] && !.@addpart) {
+		.@addpart = rand(10921,10940);
+		switch (.@shining) {
+			case 1: .@addpart = rand(10921,10930); break;
+			case 2:
+				.@addpart = rand(1,10);
+				switch (.@addpart) {
+					case 1: case 2: case 3: case 4: .@addpart = rand(10921,10924); break;
+					case 5: case 6: case 7: case 8: case 9: case 10: .@addpart = rand(10931,10936); break;
+				}
+				break;
+			case 3:
+				.@addpart = rand(1,10);
+				switch (.@addpart) {
+					case 1: case 2: case 3: .@addpart = rand(10925,10927); break;
+					case 4: case 5: case 6: .@addpart = rand(10931,10933); break;
+					case 7: case 8: case 9: .@addpart = rand(10937,10939); break;
+					case 10: .@addpart = 10921; break;
+				}
+				break;
+			case 4:
+				.@addpart = rand(1,10);
+				switch (.@addpart) {
+					case 1: .@addpart = 10922; break;
+					case 2: .@addpart = 10925; break;
+					case 3: .@addpart = 10928; break;
+					case 4: .@addpart = 10929; break;
+					case 5: .@addpart = 10931; break;
+					case 6: .@addpart = 10934; break;
+					case 7: .@addpart = 10935; break;
+					case 8: .@addpart = 10937; break;
+					case 9: .@addpart = 10938; break;
+					case 10: .@addpart = 10940; break;
+				}
+				break;
+			case 5:
+				.@addpart = rand(1,10);
+				switch (.@addpart) {
+					case 1: .@addpart = 10923; break;
+					case 2: .@addpart = 10926; break;
+					case 3: .@addpart = 10928; break;
+					case 4: .@addpart = 10930; break;
+					case 5: .@addpart = 10932; break;
+					case 6: .@addpart = 10934; break;
+					case 7: .@addpart = 10936; break;
+					case 8: .@addpart = 10937; break;
+					case 9: .@addpart = 10939; break;
+					case 10: .@addpart = 10940; break;
+				}
+				break;
+			case 6:
+				.@addpart = rand(1,10);
+				switch (.@addpart) {
+					case 1: .@addpart = 10924; break;
+					case 2: .@addpart = 10927; break;
+					case 3: .@addpart = 10929; break;
+					case 4: .@addpart = 10930; break;
+					case 5: .@addpart = 10933; break;
+					case 6: .@addpart = 10935; break;
+					case 7: .@addpart = 10936; break;
+					case 8: .@addpart = 10938; break;
+					case 9: .@addpart = 10939; break;
+					case 10: .@addpart = 10940; break;
+				}
+				break;
+		}
+	}
+	.@rand = rand(100);
+	if(.@rand <= .@rand2[1] && !.@addpart) {
+		.@addpart = rand(10906,10920);
+		switch (.@shining) {
+			case 1: .@addpart = rand(10906,10910); break;
+			case 2: .@addpart = rand(1,5);
+				switch (.@addpart) {
+					case 1: case 2: case 3: case 4:  .@addpart = rand(10911,10914); break;
+					case 5: .@addpart = 10906; break;
+				}
+				break;
+			case 3: .@addpart = rand(1,5);
+				switch (.@addpart) {
+					case 1: case 2: case 3:  .@addpart = rand(10915,10917); break;
+					case 4: .@addpart = 10911; break;
+					case 5: .@addpart = 10907; break;
+				}
+				break;
+			case 4: .@addpart = rand(1,5);
+				switch (.@addpart) {
+					case 1: case 2: .@addpart = rand(10918,10919); break;
+					case 3: .@addpart = 10908; break;
+					case 4: .@addpart = 10912; break;
+					case 5: .@addpart = 10915; break;
+				}
+				break;
+			case 5: .@addpart = rand(1,5);
+				switch (.@addpart) {
+					case 1: .@addpart = 10910; break;
+					case 2: .@addpart = 10914; break;
+					case 3: .@addpart = 10917; break;
+					case 4: case 5: .@addpart = rand(10919,10920); break;
+				}
+				break;
+		}
+	}
+	.@rand = rand(100);
+	if(.@rand <= .@rand2[0] && !.@addpart) {
+		.@addpart = rand(10900,10905);
+		switch (.@shining) {
+			case 1: .@addpart = 10900; break;
+			case 2: .@addpart = 10901; break;
+			case 3: .@addpart = 10902; break;
+			case 4: .@addpart = 10903; break;
+			case 5: .@addpart = 10904; break;
+			case 6: .@addpart = 10905; break;
+		}
+	}
+	getitem3 @itemid,1,1,.@refine[@itemid],.@attribute[@itemid],.@card1[@itemid],.@card2[@itemid],.@card3[@itemid],.@addpart,getd(".@OptID"+@itemid+""),getd(".@OptVal"+@itemid+""),getd(".@OptParam"+@itemid+"");
+	sleep2 1000;
+	refresh;
+	specialeffect2 1607;
+	end;
+OnFailed:
+	sleep2 2000;
+	refresh;
+	end;
+OnInit:
+	//=======================================================
+	//= Config
+	//=======================================================
+	//= Enchantment System
+	setarray .Soul_lv1[0],100,30,0,0,0; // (uncommon)
+	setarray .Soul_lv2[0],100,60,25,10,0; // (rare)
+	setarray .Soul_lv3[0],100,75,50,15,5; // (pure)
+	//= Enchantment + Brilliant Soul
+	setarray .Soul_lv1_up[0],100,60,0,0,0; // (uncommon)
+	setarray .Soul_lv2_up[0],100,100,50,20,5; // (rare)
+	setarray .Soul_lv3_up[0],100,100,100,30,10; // (pure)
+	end;
+}
+
+//============================================================
+// = Gives the detail of a random opt (quality system)
+//============================================================
+function	script	Random_Opt_Name	{
+	switch(getarg(0)) {
+		case 1000: setarray @rand$[0],"Resistance against Small size monster","%"; break;
+		case 1001: setarray @rand$[0],"Resistance against Medium size monster","%"; break;
+		case 1002: setarray @rand$[0],"Resistance against Large size monster","%"; break;
+		case 1003: setarray @rand$[0],"Near damage resistance","%"; break;
+		case 1004: setarray @rand$[0],"Long distance damage resistance","%"; break;
+		case 1005: setarray @rand$[0],"Magic damage resistance","%"; break;
+		case 1006: setarray @rand$[0],"Blocking rate","%"; break;
+		case 1007: setarray @rand$[0],"Resistance against MvP","%"; break;
+		case 1008: setarray @rand$[0],"Resistance against normal class monsters","%"; break;
+		case 1009: setarray @rand$[0],"Reflection of physical damage","%"; break;
+		case 1010: setarray @rand$[0],"Front damage resistance","%"; break;
+		case 1011: setarray @rand$[0],"Special (Misc) damage resistance","%"; break;
+
+		case 1051: setarray @rand$[0],"MaxHP","%"; break;
+		case 1052: setarray @rand$[0],"MaxSP","%"; break;
+		case 1053: setarray @rand$[0],"MaxLP","%"; break;
+		case 1054: setarray @rand$[0],"Walking speed","%"; break;
+		case 1055: setarray @rand$[0],"After Hit Recovery","%"; break;
+		case 1056: setarray @rand$[0],"Pushback effects reduction","%"; break;
+		case 1057: setarray @rand$[0],"Chances to avoid cast cancel","%"; break;
+		case 1058: setarray @rand$[0],"Weight capacity","%"; break;
+		case 1059: setarray @rand$[0],"Duration reduction of abnormal status","%"; break;
+		case 1060: setarray @rand$[0],"Increase resistance to receive an abnormal status","%"; break;
+
+		case 1101: setarray @rand$[0],"Resistance to Neutral element","%"; break;
+		case 1102: setarray @rand$[0],"Resistance to Water element","%"; break;
+		case 1103: setarray @rand$[0],"Resistance to Earth element","%"; break;
+		case 1104: setarray @rand$[0],"Resistance to Fire element","%"; break;
+		case 1105: setarray @rand$[0],"Resistance to Wind element","%"; break;
+		case 1106: setarray @rand$[0],"Resistance to Poison element","%"; break;
+		case 1107: setarray @rand$[0],"Resistance to Holy element","%"; break;
+		case 1108: setarray @rand$[0],"Resistance to Dark element","%"; break;
+		case 1109: setarray @rand$[0],"Resistance to Ghost element","%"; break;
+		case 1110: setarray @rand$[0],"Resistance to Undead element","%"; break;
+		case 1111: setarray @rand$[0],"Physical Flee","%"; break;
+		case 1112: setarray @rand$[0],"Magical Flee","%"; break;
+		case 1113: setarray @rand$[0],"Special Flee","%"; break;
+		case 1114: setarray @rand$[0],"Flee",""; break;
+		case 1115: setarray @rand$[0],"Perfect Flee",""; break;
+		case 1116: setarray @rand$[0],"Chances of reflecting physical damage","%"; break;
+		case 1117: setarray @rand$[0],"Chances of reflecting long distance damage","%"; break;
+		case 1118: setarray @rand$[0],"Chances of reflecting magical damage","%"; break;
+		case 1119: setarray @rand$[0],"Chances of reflecting Stone status","%"; break;
+		case 1120: setarray @rand$[0],"Chances of reflecting Freeze status","%"; break;
+		case 1121: setarray @rand$[0],"Chances of reflecting Stun status","%"; break;
+		case 1122: setarray @rand$[0],"Chances of reflecting Poison status","%"; break;
+		case 1123: setarray @rand$[0],"Chances of reflecting Bleeding status","%"; break;
+		case 1124: setarray @rand$[0],"Chances of reflecting Burning status","%"; break;
+		case 1125: setarray @rand$[0],"Chances of reflecting Dpoison status","%"; break;
+		case 1126: setarray @rand$[0],"Chances of reflecting Sleep status","%"; break;
+		case 1127: setarray @rand$[0],"Chances of reflecting Cruse status","%"; break;
+		case 1128: setarray @rand$[0],"Chances of reflecting Silence status","%"; break;
+		case 1129: setarray @rand$[0],"Chances of reflecting Confusion status","%"; break;
+		case 1130: setarray @rand$[0],"Chances of reflecting Blind status","%"; break;
+
+		case 1150: setarray @rand$[0],"ASPD","%"; break;
+		case 1151: setarray @rand$[0],"Reduction of Delay","%"; break;
+		case 1152: setarray @rand$[0],"Reduction of Cast Time","%"; break;
+		case 1153: setarray @rand$[0],"Reduction of Cooldown","%"; break;
+		case 1154: setarray @rand$[0],"Heal/potions effects received","%"; break;
+		case 1155: setarray @rand$[0],"Reduction of DOT damage","%"; break;
+		case 1156: setarray @rand$[0],"Chances of avoiding cast cancel","%"; break;
+		case 1157: setarray @rand$[0],"Critical Resistance","%"; break;
+		case 1158: setarray @rand$[0],"DEF",""; break;
+		case 1159: setarray @rand$[0],"MDEF",""; break;
+		case 1160: setarray @rand$[0],"DEF2",""; break;
+		case 1161: setarray @rand$[0],"MDEF2",""; break;
+
+		case 1200: setarray @rand$[0],"HP recovery","%"; break;
+		case 1201: setarray @rand$[0],"SP recovery","%"; break;
+		case 1202: setarray @rand$[0],"LP recovery","%"; break;
+		case 1203: setarray @rand$[0],"Reduction of duration of abnormal status","%"; break;
+		case 1204: setarray @rand$[0],"Increases duration of abnormal status on target","%"; break;
+		case 1205: setarray @rand$[0],"Chances of causing Stone Status","%",1; break;
+		case 1206: setarray @rand$[0],"Chances of causing Freeze Status","%",1; break;
+		case 1207: setarray @rand$[0],"Chances of causing Stun Status","%",1; break;
+		case 1208: setarray @rand$[0],"Chances of causing Poison Status","%",1; break;
+		case 1209: setarray @rand$[0],"Chances of causing Bleeding Status","%",1; break;
+		case 1210: setarray @rand$[0],"Chances of causing Burning Status","%",1; break;
+		case 1211: setarray @rand$[0],"Chances of causing Dpoison Status","%",1; break;
+		case 1212: setarray @rand$[0],"Chances of causing Sleep Status","%",1; break;
+		case 1213: setarray @rand$[0],"Chances of causing Curse Status","%",1; break;
+		case 1214: setarray @rand$[0],"Chances of causing Silence Status","%",1; break;
+		case 1215: setarray @rand$[0],"Chances of causing Confusion Status","%",1; break;
+		case 1216: setarray @rand$[0],"Chances of causing Blind Status","%",1; break;
+		case 1217: setarray @rand$[0],"Resistance to Stone Status","%"; break;
+		case 1218: setarray @rand$[0],"Resistance to Freeze Status","%"; break;
+		case 1219: setarray @rand$[0],"Resistance to Stun Status","%"; break;
+		case 1220: setarray @rand$[0],"Resistance to Poison Status","%"; break;
+		case 1221: setarray @rand$[0],"Resistance to Bleeding Status","%"; break;
+		case 1222: setarray @rand$[0],"Resistance to Burning Status","%"; break;
+		case 1223: setarray @rand$[0],"Resistance to Dpoison Status","%"; break;
+		case 1224: setarray @rand$[0],"Resistance to Sleep Status","%"; break;
+		case 1225: setarray @rand$[0],"Resistance to Curse Status","%"; break;
+		case 1226: setarray @rand$[0],"Resistance to Silence Status","%"; break;
+		case 1227: setarray @rand$[0],"Resistance to Confusion Status","%"; break;
+		case 1228: setarray @rand$[0],"Resistance to Blind Status","%"; break;
+		case 1229: setarray @rand$[0],"Resistance to break/strip","%"; break;
+		case 1230: setarray @rand$[0],"Weight capacity","%"; break;
+		case 1231: setarray @rand$[0],"Ignore target's immunity to break/strip","%"; break;
+		case 1232: setarray @rand$[0],"MaxHP + BaseLevel x",""; break;
+		case 1233: setarray @rand$[0],"MaxSP + BaseLevel /",""; break;
+
+		case 1250: setarray @rand$[0],"Increases success of abnormal status on target","%"; break;
+		case 1251: setarray @rand$[0],"Parrying rate","%"; break;
+		case 1252: setarray @rand$[0],"HIT","%"; break;
+		case 1253: setarray @rand$[0],"Critical","%"; break;
+		case 1254: setarray @rand$[0],"Critical",""; break;
+		case 1255: setarray @rand$[0],"ATK","%"; break;
+		case 1256: setarray @rand$[0],"MATK","%"; break;
+		case 1257: setarray @rand$[0],"ATK",""; break;
+		case 1258: setarray @rand$[0],"MATK",""; break;
+		case 1259: setarray @rand$[0],"Heal Power","%"; break;
+		case 1260: setarray @rand$[0],"Increases damage from DoT","%"; break;
+		case 1261: setarray @rand$[0],"Damage with Neutral property","%"; break;
+		case 1262: setarray @rand$[0],"Damage with Water property","%"; break;
+		case 1263: setarray @rand$[0],"Damage with Earth property","%"; break;
+		case 1264: setarray @rand$[0],"Damage with Fire property","%"; break;
+		case 1265: setarray @rand$[0],"Damage with Wind property","%"; break;
+		case 1266: setarray @rand$[0],"Damage with Poison property","%"; break;
+		case 1267: setarray @rand$[0],"Damage with Holy property","%"; break;
+		case 1268: setarray @rand$[0],"Damage with Dark property","%"; break;
+		case 1269: setarray @rand$[0],"Damage with Ghost property","%"; break;
+		case 1270: setarray @rand$[0],"Damage with Undead property","%"; break;
+		case 1271: setarray @rand$[0],"Leech damage to HP","%",1; break;
+		case 1272: setarray @rand$[0],"Recovers HP every hit (1/sec)","%",1; break;
+		case 1273: setarray @rand$[0],"Chance to perform double attack","%"; break;
+		case 1274: setarray @rand$[0],"Weapon ATK","%"; break;
+		case 1275: setarray @rand$[0],"Ignore target's DEF","%"; break;
+		case 1276: setarray @rand$[0],"Ignore target's MDEF","%"; break;
+		case 1277: setarray @rand$[0],"Critical Damage","%"; break;
+
+		case 1300: setarray @rand$[0],"Damage on Formless monsters","%"; break;
+		case 1301: setarray @rand$[0],"Damage on Undead monsters","%"; break;
+		case 1302: setarray @rand$[0],"Damage on Plant monsters","%"; break;
+		case 1303: setarray @rand$[0],"Damage on Insect monsters","%"; break;
+		case 1304: setarray @rand$[0],"Damage on Demon monsters","%"; break;
+		case 1305: setarray @rand$[0],"Damage on Demi-Human monsters","%"; break;
+		case 1306: setarray @rand$[0],"Damage on Angel monsters","%"; break;
+		case 1307: setarray @rand$[0],"Damage on Dragon monsters","%"; break;
+		case 1308: setarray @rand$[0],"Resistance to Formless monsters","%"; break;
+		case 1309: setarray @rand$[0],"Resistance to Undead monsters","%"; break;
+		case 1310: setarray @rand$[0],"Resistance to Plant monsters","%"; break;
+		case 1311: setarray @rand$[0],"Resistance to Insect monsters","%"; break;
+		case 1312: setarray @rand$[0],"Resistance to Demon monsters","%"; break;
+		case 1313: setarray @rand$[0],"Resistance to Demi-Human monsters","%"; break;
+		case 1314: setarray @rand$[0],"Resistance to Angel monsters","%"; break;
+		case 1315: setarray @rand$[0],"Resistance to Dragon monsters","%"; break;
+		case 1316: setarray @rand$[0],"Damage against Neutral property","%"; break;
+		case 1317: setarray @rand$[0],"Damage against Water property","%"; break;
+		case 1318: setarray @rand$[0],"Damage against Earth property","%"; break;
+		case 1319: setarray @rand$[0],"Damage against Fire property","%"; break;
+		case 1320: setarray @rand$[0],"Damage against Wind property","%"; break;
+		case 1321: setarray @rand$[0],"Damage against Poison property","%"; break;
+		case 1322: setarray @rand$[0],"Damage against Holy property","%"; break;
+		case 1323: setarray @rand$[0],"Damage against Dark property","%"; break;
+		case 1324: setarray @rand$[0],"Damage against Ghost property","%"; break;
+		case 1325: setarray @rand$[0],"Damage against Undead property","%"; break;
+		case 1326: setarray @rand$[0],"Resistance to Neutral element","%"; break;
+		case 1327: setarray @rand$[0],"Resistance to Water element","%"; break;
+		case 1328: setarray @rand$[0],"Resistance to Earth element","%"; break;
+		case 1329: setarray @rand$[0],"Resistance to Fire element","%"; break;
+		case 1330: setarray @rand$[0],"Resistance to Wind element","%"; break;
+		case 1331: setarray @rand$[0],"Resistance to Poison element","%"; break;
+		case 1332: setarray @rand$[0],"Resistance to Holy element","%"; break;
+		case 1333: setarray @rand$[0],"Resistance to Dark element","%"; break;
+		case 1334: setarray @rand$[0],"Resistance to Ghost element","%"; break;
+		case 1335: setarray @rand$[0],"Resistance to Undead element","%"; break;
+
+		case 1500: setarray @rand$[0],"[STR] Physical damage","%"; break;
+		case 1501: setarray @rand$[0],"[STR] Maximum Weight","%"; break;
+		case 1502: setarray @rand$[0],"[STR] ATK",""; break;
+		case 1503: setarray @rand$[0],"[STR] ATK2",""; break;
+		case 1504: setarray @rand$[0],"[STR] Short range critical",""; break;
+		case 1505: setarray @rand$[0],"[STR] Chance to break armor when attacking","%"; break;
+		case 1506: setarray @rand$[0],"[STR] Chance of ignoring pushback","%"; break;
+		case 1507: setarray @rand$[0],"[STR] Front physical damage","%"; break;
+		case 1508: setarray @rand$[0],"[STR] ATK damage when HP Low","%"; break;
+		case 1509: setarray @rand$[0],"[STR] Damage facing multiple enemies","%"; break;
+
+		case 1520: setarray @rand$[0],"[VIT] Physical damage resistance","%"; break;
+		case 1521: setarray @rand$[0],"[VIT] MaxHP","%"; break;
+		case 1522: setarray @rand$[0],"[VIT] HP Regeneration","%"; break;
+		case 1523: setarray @rand$[0],"[VIT] After Hit Delay Reduction","%"; break;
+		case 1524: setarray @rand$[0],"[VIT] DEF",""; break;
+		case 1525: setarray @rand$[0],"[VIT] MaxHP",""; break;
+		case 1526: setarray @rand$[0],"[VIT] DEF2",""; break;
+		case 1527: setarray @rand$[0],"[VIT]  Increases Healing items","%"; break;
+		case 1528: setarray @rand$[0],"[VIT] Increases Healing received","%"; break;
+		case 1529: setarray @rand$[0],"[VIT] Cast Cancel resistance","%"; break;
+		case 1530: setarray @rand$[0],"[VIT] Chance of resistance against break/strip","%"; break;
+
+		case 1540: setarray @rand$[0],"[INT] Damage received while casting reduced","%"; break;
+		case 1541: setarray @rand$[0],"[INT] Increases Healing skills","%"; break;
+		case 1542: setarray @rand$[0],"[INT] MDEF2","%"; break;
+		case 1543: setarray @rand$[0],"[INT] Increases Magical damage","%"; break;
+		case 1544: setarray @rand$[0],"[INT] MaxSP","%"; break;
+		case 1545: setarray @rand$[0],"[INT] SP Regeneration","%"; break;
+		case 1546: setarray @rand$[0],"[INT] MATKmax",""; break;
+		case 1547: setarray @rand$[0],"[INT] MDEF",""; break;
+		case 1548: setarray @rand$[0],"[INT] EXP gained","%"; break;
+		case 1549: setarray @rand$[0],"[INT] MaxSP",""; break;
+		case 1550: setarray @rand$[0],"[INT] Increases attributes bonuses from skills","%"; break;
+		case 1551: setarray @rand$[0],"[INT] Chance to do not consume a scroll","%"; break;
+		case 1552: setarray @rand$[0],"[INT] MATK damage when SP Low","%"; break;
+
+		case 1560: setarray @rand$[0],"[AGI] Damage from the back","%"; break;
+		case 1561: setarray @rand$[0],"[AGI] Flee",""; break;
+		case 1562: setarray @rand$[0],"[AGI] Walking speed","%"; break;
+		case 1563: setarray @rand$[0],"[AGI] ASPD","%"; break;
+		case 1564: setarray @rand$[0],"[AGI] After Skill Delay","%"; break;
+		case 1565: setarray @rand$[0],"[AGI] Physical Perfect Flee","%"; break;
+		case 1566: setarray @rand$[0],"[AGI] Magical Perfect Flee","%"; break;
+		case 1567: setarray @rand$[0],"[AGI] All Perfect Flee","%"; break;
+		case 1568: setarray @rand$[0],"[AGI] Reduces walking speed penalties","%"; break;
+		case 1569: setarray @rand$[0],"[AGI] ASPDmax","%"; break;
+
+		case 1580: setarray @rand$[0],"[DEX] Chance of ignoring a break/strip immunity","%"; break;
+		case 1581: setarray @rand$[0],"[DEX] Double Attack chance","%"; break;
+		case 1582: setarray @rand$[0],"[DEX] HIT",""; break;
+		case 1583: setarray @rand$[0],"[DEX] Critical damage","%"; break;
+		case 1584: setarray @rand$[0],"[DEX] Perfect Hit","%"; break;
+		case 1585: setarray @rand$[0],"[DEX] Cast Time reduction","%"; break;
+		case 1586: setarray @rand$[0],"[DEX] Special (misc) damage","%"; break;
+		case 1587: setarray @rand$[0],"[DEX] Ignore physical and magical defense","%"; break;
+		case 1588: setarray @rand$[0],"[DEX] Critical long range",""; break;
+
+		case 1600: setarray @rand$[0],"[LUK] Critical",""; break;
+		case 1601: setarray @rand$[0],"[LUK] Critical resistance","%"; break;
+		case 1602: setarray @rand$[0],"[LUK] Increases resistance to all status","%"; break;
+		case 1603: setarray @rand$[0],"[LUK] Increases chance of inflicting status by","%"; break;
+		case 1604: setarray @rand$[0],"[LUK] Drop rate","%"; break;
+		case 1605: setarray @rand$[0],"[LUK] Zeny gained from monsters","%"; break;
+		case 1606: setarray @rand$[0],"[LUK] Perfect Flee",""; break;
+		case 1607: setarray @rand$[0],"[LUK] Chance of ignoring ammo/spirit/gemstone cost","%"; break;
+		case 1608: setarray @rand$[0],"[LUK] Increases damage from DoT","%"; break;
+		case 1609: setarray @rand$[0],"[LUK] High Critical rate","%"; break;
+
+		case 1620: setarray @rand$[0],"[Water] Chance of auto-casting Cold Bolt Lv 3 when attacking","%"; break;
+		case 1621: setarray @rand$[0],"[Water] Chance of auto-casting Cold Bolt Lv 3 when being attacked","%"; break;
+		case 1622: setarray @rand$[0],"[Water] Increases Water damage","%"; break;
+		case 1623: setarray @rand$[0],"[Water] Resistance against Water Element","%"; break;
+		case 1624: setarray @rand$[0],"[Water] Chance of inflicting Freeze when attacking","%"; break;
+		case 1625: setarray @rand$[0],"[Water] Chance of auto-casting Storm Gust Lv 2 when attacking","%"; break;
+		case 1626: setarray @rand$[0],"[Water] Damage with Water element","%"; break;
+		case 1627: setarray @rand$[0],"[Water] Resistance against Water monsters","%"; break;
+
+		case 1630: setarray @rand$[0],"[Earth] Chance of auto-casting Earth Spike Lv 3 when attacking","%"; break;
+		case 1631: setarray @rand$[0],"[Earth] Chance of auto-casting Earth Spike Lv 3 when being attacked","%"; break;
+		case 1632: setarray @rand$[0],"[Earth] Increases Earth damage","%"; break;
+		case 1633: setarray @rand$[0],"[Earth] Resistance against Earth Element","%"; break;
+		case 1634: setarray @rand$[0],"[Earth] Chance of inflicting Stone when attacking","%"; break;
+		case 1635: setarray @rand$[0],"[Earth] Chance of auto-casting Heaven's Drive Lv 2 when attacking","%"; break;
+		case 1636: setarray @rand$[0],"[Earth] Damage with Earth element","%"; break;
+		case 1637: setarray @rand$[0],"[Earth] Resistance against Earth monsters","%"; break;
+
+		case 1640: setarray @rand$[0],"[Fire] Chance of auto-casting Fire Bolt Lv 3 when attacking","%"; break;
+		case 1641: setarray @rand$[0],"[Fire] Chance of auto-casting Fire Bolt Lv 3 when being attacked","%"; break;
+		case 1642: setarray @rand$[0],"[Fire] Increases Fire damage","%"; break;
+		case 1643: setarray @rand$[0],"[Fire] Resistance against Fire Element","%"; break;
+		case 1644: setarray @rand$[0],"[Fire] Chance of inflicting Burning when attacking","%"; break;
+		case 1645: setarray @rand$[0],"[Fire] Chance of auto-casting Lord of Vermilion Lv 2 when attacking","%"; break;
+		case 1646: setarray @rand$[0],"[Fire] Damage with Fire element","%"; break;
+		case 1647: setarray @rand$[0],"[Fire] Resistance against Fire monsters","%"; break;
+
+		case 1650: setarray @rand$[0],"[Wind] Chance of auto-casting Lightning Bolt Lv 3 when attacking","%"; break;
+		case 1651: setarray @rand$[0],"[Wind] Chance of auto-casting Lightning Bolt Lv 3 when being attacked","%"; break;
+		case 1652: setarray @rand$[0],"[Wind] Increases Wind damage","%"; break;
+		case 1653: setarray @rand$[0],"[Wind] Resistance against Wind Element","%"; break;
+		case 1654: setarray @rand$[0],"[Wind] Chance of inflicting Silence when attacking","%"; break;
+		case 1655: setarray @rand$[0],"[Wind] Chance of auto-casting Thunderstorm Lv 2 when attacking","%"; break;
+		case 1656: setarray @rand$[0],"[Wind] Damage with Wind element","%"; break;
+		case 1657: setarray @rand$[0],"[Wind] Resistance against Wind monsters","%"; break;
+
+		case 1670: setarray @rand$[0],"[Holy] Chance of auto-casting Holy Light Lv 3 when attacking","%"; break;
+		case 1671: setarray @rand$[0],"[Holy] Chance of auto-casting Holy Light Lv 3 when being attacked","%"; break;
+		case 1672: setarray @rand$[0],"[Holy] Increases Holy damage","%"; break;
+		case 1673: setarray @rand$[0],"[Holy] Resistance against Holy Element","%"; break;
+		case 1674: setarray @rand$[0],"[Holy] Chance of inflicting Blind when attacking","%"; break;
+		case 1675: setarray @rand$[0],"[Holy] Chance of auto-casting Grand Cross Lv 2 when attacking","%"; break;
+		case 1676: setarray @rand$[0],"[Holy] Damage with Holy element","%"; break;
+		case 1677: setarray @rand$[0],"[Holy] Resistance against Holy monsters","%"; break;
+
+		case 1680: setarray @rand$[0],"[Dark] Chance of auto-casting Dark Strike Lv 3 when attacking","%"; break;
+		case 1681: setarray @rand$[0],"[Dark] Chance of auto-casting Dark Strike Lv 3 when being attacked","%"; break;
+		case 1682: setarray @rand$[0],"[Dark] Increases Dark damage","%"; break;
+		case 1683: setarray @rand$[0],"[Dark] Resistance against Dark Element","%"; break;
+		case 1684: setarray @rand$[0],"[Dark] Chance of inflicting Curse when attacking","%"; break;
+		case 1685: setarray @rand$[0],"[Dark] Chance of auto-casting Grand Cross of Darkness Lv 2 when attacking","%"; break;
+		case 1686: setarray @rand$[0],"[Dark] Damage with Dark element","%"; break;
+		case 1687: setarray @rand$[0],"[Dark] Resistance against Dark monsters","%"; break;
+
+		case 1690: setarray @rand$[0],"[Ghost] Chance of auto-casting Soul Strike Lv 3 when attacking","%"; break;
+		case 1691: setarray @rand$[0],"[Ghost] Chance of auto-casting Soul Strike Lv 3 when being attacked","%"; break;
+		case 1692: setarray @rand$[0],"[Ghost] Increases Ghost damage","%"; break;
+		case 1693: setarray @rand$[0],"[Ghost] Resistance against Ghost Element","%"; break;
+		case 1694: setarray @rand$[0],"[Ghost] Chance of inflicting Sleep when attacking","%"; break;
+		case 1695: setarray @rand$[0],"[Ghost] Chance of auto-casting Napalm Beat Lv 2 when attacking","%"; break;
+		case 1696: setarray @rand$[0],"[Ghost] Damage with Ghost element","%"; break;
+		case 1697: setarray @rand$[0],"[Ghost] Resistance against Ghost monsters","%"; break;
+
+		case 1700: setarray @rand$[0],"[Undead] Chance of auto-casting Undead Attack Lv 3 when attacking","%"; break;
+		case 1701: setarray @rand$[0],"[Undead] Chance of auto-casting Undead Attack Lv 3 when being attacked","%"; break;
+		case 1702: setarray @rand$[0],"[Undead] Increases Undead damage","%"; break;
+		case 1703: setarray @rand$[0],"[Undead] Resistance against Undead Element","%"; break;
+		case 1704: setarray @rand$[0],"[Undead] Chance of inflicting Confusion when attacking","%"; break;
+		case 1705: setarray @rand$[0],"[Undead] Chance of auto-casting Quagmire Lv 2 when being attacked","%"; break;
+		case 1706: setarray @rand$[0],"[Undead] Damage with Undead element","%"; break;
+		case 1707: setarray @rand$[0],"[Undead] Resistance against Undead monsters","%"; break;
+
+		case 1710: setarray @rand$[0],"[Neutral] Chance of auto-casting Bash Lv 3 when attacking","%"; break;
+		case 1711: setarray @rand$[0],"[Neutral] Chance of auto-casting Bash Lv 3 when being attacked","%"; break;
+		case 1712: setarray @rand$[0],"[Neutral] Increases Neutral damage by","%"; break;
+		case 1713: setarray @rand$[0],"[Neutral] Resistance against Neutral Element","%"; break;
+		case 1714: setarray @rand$[0],"[Neutral] Chance of inflicting Stun when attacking","%"; break;
+		case 1715: setarray @rand$[0],"[Neutral] Chance of auto-casting Bowling Bash Lv 2 when attacking","%"; break;
+		case 1716: setarray @rand$[0],"[Neutral] Damage with Neutral element","%"; break;
+		case 1717: setarray @rand$[0],"[Neutral] Resistance against Neutral monsters","%"; break;
+
+		case 1720: setarray @rand$[0],"[STR] STR",""; break;
+		case 1721: setarray @rand$[0],"[AGI] AGI",""; break;
+		case 1722: setarray @rand$[0],"[VIT] VIT",""; break;
+		case 1723: setarray @rand$[0],"[INT] INT",""; break;
+		case 1724: setarray @rand$[0],"[DEX] DEX",""; break;
+		case 1725: setarray @rand$[0],"[LUK] LUK",""; break;
+
+		default: setarray @rand$[0],"[ Empty ]","1"; break;
+	}
+	return;
+}
+
+//============================================================
+// = Function that process random options
+//============================================================
+function	script	Quality_System	{
+	//= Quality System
+	.@name$ = "["+getarg(1)+"]";
+	setarray .@quality_0[0],85,100000,8182,3,0,0; // (1st quality: 85% chance, 100k, Drop Midgard South)
+	setarray .@quality_1[0],85,200000,8183,3,0,0; // (2st quality: 85% chance, 200k, Drop Endgame Midgard South)
+	setarray .@quality_2[0],85,300000,8184,3,0,0; // (3st quality: 85% chance, 300k, Drop Endgame Midgard North)
+	deletearray @inventorylist_id[0],(getarraysize(@inventorylist_id));
+	getinventorylist;
+	copyarray @inventorylist_id[0],@inventorylist_id[0],@inventorylist_count;
+	for( .@i = 0; .@i<= @inventorylist_count; .@i++) {
+			if (getiteminfo(@inventorylist_id[.@i],5) & getarg(0)) && ((getiteminfo(@inventorylist_id[.@i],2) == 4) || (getiteminfo(@inventorylist_id[.@i],2) == 5)) {
+				if(getiteminfo(@inventorylist_id[.@i],5) & 2) && (getequipweaponlv(getarg(0)) == 4)
+					continue;
+				.@ID3 = @inventorylist_id[.@i];
+				.@ID[.@ID2] = .@ID3;
+				.@refine[.@ID3] = @inventorylist_refine[.@i];
+				.@attribute[.@ID3] = @inventorylist_attribute[.@i];
+				.@card1[.@ID3] = @inventorylist_card1[.@i];
+				.@card2[.@ID3] = @inventorylist_card2[.@i];
+				.@card3[.@ID3] = @inventorylist_card3[.@i];
+				.@card4[.@ID3] = @inventorylist_card4[.@i];
+				setarray getd(".@OptID"+.@ID3+"[0]"),@inventorylist_option_id1[.@i],@inventorylist_option_id2[.@i],@inventorylist_option_id3[.@i];
+				setarray getd(".@OptVal"+.@ID3+"[0]"),@inventorylist_option_value1[.@i],@inventorylist_option_value2[.@i],@inventorylist_option_value3[.@i];
+				setarray getd(".@OptParam"+.@ID3+"[0]"),@inventorylist_option_parameter1[.@i],@inventorylist_option_parameter2[.@i],@inventorylist_option_parameter3[.@i];
+				.@ID2++;
+			}
+		}
+		if(!.@ID[0]) {
+			mes .@name$;
+			mes "Mmmm... You don't have any equipment on you that qualifies.";
+			close;
+		}
+		set .@menu$,"";
+		for( .@i = 0; .@i<getarraysize(.@ID); .@i++ ) {
+			if(.@card1[.@ID[.@i]])||(.@card4[.@ID[.@i]])||(.@card3[.@ID[.@i]]) {
+				if(.@refine[.@ID[.@i]])
+					.@menu$ = .@menu$+"^8fbc8f["+getitemname(.@ID[.@i])+" +"+.@refine[.@ID[.@i]]+"]^000000:";
+				else
+					.@menu$ = .@menu$+"^8fbc8f["+getitemname(.@ID[.@i])+"]^000000:";
+			} else {
+			if(.@refine[.@ID[.@i]])
+				.@menu$ = .@menu$+"["+getitemname(.@ID[.@i])+" +"+.@refine[.@ID[.@i]]+"]:";
+			else
+				.@menu$ = .@menu$+"["+getitemname(.@ID[.@i])+"]:";
+			}
+		}
+		.@itemid = .@ID[select(.@menu$)-1];
+		mes .@name$;
+		if (countitem(.@itemid) == 1) {
+			while(true) {
+			
+			if(.@refine[.@itemid]) mes "^5555ff"+getitemname(.@itemid)+" +"+.@refine[.@itemid]+"^000000 :"; else mes "^5555ff"+getitemname(.@itemid)+"^000000 :";
+			@rand$[2] = ""; callfunc "Random_Opt_Name",getd(".@OptID"+.@itemid+"[0]");
+			if(@rand$[1]=="1") mes "- 1st Quality : ^8fbc8f"+@rand$[0]+"^000000"; else mes "- 1st Quality : ^8fbc8f"+@rand$[0]+" +"+((@rand$[2])?(getd(".@OptVal"+.@itemid+"[0]")/10)+"."+(getd(".@OptVal"+.@itemid+"[0]")%10):getd(".@OptVal"+.@itemid+"[0]"))+""+@rand$[1]+"^000000";
+			@rand$[2] = ""; callfunc "Random_Opt_Name",getd(".@OptID"+.@itemid+"[1]");
+			if(@rand$[1]=="1") mes "- 2nd Quality : ^8fbc8f"+@rand$[0]+"^000000"; else mes "- 2nd Quality : ^8fbc8f"+@rand$[0]+" +"+((@rand$[2])?(getd(".@OptVal"+.@itemid+"[1]")/10)+"."+(getd(".@OptVal"+.@itemid+"[1]")%10):getd(".@OptVal"+.@itemid+"[1]"))+""+@rand$[1]+"^000000";
+			@rand$[2] = ""; callfunc "Random_Opt_Name",getd(".@OptID"+.@itemid+"[2]");
+			if(@rand$[1]=="1") mes "- 3rd Quality : ^8fbc8f"+@rand$[0]+"^000000"; else mes "- 3rd Quality : ^8fbc8f"+@rand$[0]+" +"+((@rand$[2])?(getd(".@OptVal"+.@itemid+"[2]")/10)+"."+(getd(".@OptVal"+.@itemid+"[2]")%10):getd(".@OptVal"+.@itemid+"[2]"))+""+@rand$[1]+"^000000";
+			switch(select("- Add new Quality:- Remove Quality:- Leave")) {
+			case 1:
+				next;
+				.@randomopt = ((getd(".@OptVal"+.@itemid+"[0]")?1:0)+(getd(".@OptVal"+.@itemid+"[0]")?1:0)+(getd(".@OptVal"+.@itemid+"[0]")?1:0));
+				mes .@name$;
+				mes "Which Quality spot on your "+getitemname(.@itemid)+" +"+.@refine[.@itemid]+" ?";
+				@rand$[2] = ""; callfunc "Random_Opt_Name",getd(".@OptID"+.@itemid+"[0]"); if(@rand$[1]=="1") .@rand1$ = ""+@rand$[0]+""; else .@rand1$ = ""+@rand$[0]+" +"+((@rand$[2])?(getd(".@OptVal"+.@itemid+"[0]")/10)+"."+(getd(".@OptVal"+.@itemid+"[0]")%10):getd(".@OptVal"+.@itemid+"[0]"))+""+@rand$[1]+"";
+				@rand$[2] = ""; callfunc "Random_Opt_Name",getd(".@OptID"+.@itemid+"[1]"); if(@rand$[1]=="1") .@rand2$ = ""+@rand$[0]+""; else .@rand2$ = ""+@rand$[0]+" +"+((@rand$[2])?(getd(".@OptVal"+.@itemid+"[1]")/10)+"."+(getd(".@OptVal"+.@itemid+"[1]")%10):getd(".@OptVal"+.@itemid+"[1]"))+""+@rand$[1]+"";
+				@rand$[2] = ""; callfunc "Random_Opt_Name",getd(".@OptID"+.@itemid+"[2]"); if(@rand$[1]=="1") .@rand3$ = ""+@rand$[0]+""; else .@rand3$ = ""+@rand$[0]+" +"+((@rand$[2])?(getd(".@OptVal"+.@itemid+"[2]")/10)+"."+(getd(".@OptVal"+.@itemid+"[2]")%10):getd(".@OptVal"+.@itemid+"[2]"))+""+@rand$[1]+"";
+				switch(select(.@rand1$,.@rand2$,.@rand3$)) {
+					case 1: .@Rand_Opt = 0; break;
+					case 2: if(!getd(".@OptID"+.@itemid+"[0]")) .@Rand_Opt = 0; else .@Rand_Opt = 1; break;
+					case 3: if(!getd(".@OptID"+.@itemid+"[0]")) .@Rand_Opt = 0; else if(!getd(".@OptID"+.@itemid+"[1]")) .@Rand_Opt = 1; else .@Rand_Opt = 2; break;
+				}
+
+				mes "Alright ! Let's try to add one quality, shall we ?";
+				close2;
+				progressbar "#00FF00",1;
+				specialeffect2 EF_MAPPILLAR;
+				if (Zeny < getd(".@quality_"+.@Rand_Opt+"[1]")) {
+					npctalk ""+getarg(1)+": It failed ! You don't have "+getd(".@quality_"+.@Rand_Opt+"[1]")+" zeny.",getarg(1)+"#mystic",bc_self;
+					end;
+				}
+
+				if(.@num = callfunc("countone",getd(".@quality_"+.@Rand_Opt+"[2]")) < getd(".@quality_"+.@Rand_Opt+"[3]")) {
+					npctalk ""+getarg(1)+": It failed ! You don't have "+getd(".@quality_"+.@Rand_Opt+"[3]")+" "+itemlink(getd(".@quality_"+.@Rand_Opt+"[2]"))+" !",""+getarg(1)+"#mystic",bc_self;
+					end;
+				}
+				set Zeny, Zeny - getd(".@quality_"+.@Rand_Opt+"[1]");
+				callfunc "delone",getd(".@quality_"+.@Rand_Opt+"[2]"),getd(".@quality_"+.@Rand_Opt+"[3]");
+
+				if(rand(0,100) >= getd(".@quality_"+.@Rand_Opt+"[0]")) {
+					specialeffect2 1609;
+					npctalk ""+getarg(1)+": Oh no !! The quality process has failed. (<_<')",""+getarg(1)+"#mystic",bc_self;
+					break;
+				}
+				switch (getarg(0)) {
+					case 2: case 34:	//Weapon
+						setarray .@rand_ID[0],1250,1251,1252,1253,1254,1255,1256,1257,1258,1259,1260,1261,1262,1263,1264,1265,1266,1267,1268,1269,1271,1272,1273,1274,1275,1276,1277;
+						setarray .@rand_val[0],rand(5,30),rand(2,5),rand(2,5),rand(3,10),rand(2,5),rand(2,4),rand(2,4),rand(5,20),rand(5,20),rand(2,5),rand(2,7),rand(2,7),rand(2,7),rand(2,7),rand(2,7),rand(2,7),rand(2,7),rand(2,7),rand(2,7),rand(2,7),rand(5,30),rand(3,15),rand(2,6),rand(3,15),rand(2,7),rand(2,7),rand(2,5);
+						setarray .@divided[0],0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1;
+						break;
+					case 16:	//Armor
+						setarray .@rand_ID[0],1150,1151,1152,1153,1154,1155,1156,1157,1158,1159,1232;
+						setarray .@rand_val[0],rand(2,5),rand(2,5),rand(2,5),rand(2,10),rand(2,5),rand(3,10),rand(5,15),rand(2,5),rand(1,3),rand(1,3),rand(3,7);
+						break;
+					case 4:	//Garment
+						setarray .@rand_ID[0],1101,1102,1103,1104,1105,1106,1107,1108,1109,1110,1111,1112,1113,1114,1115,1116,1117,1118,1119,1120,1121;
+						setarray .@rand_val[0],rand(1,4),rand(2,7),rand(2,7),rand(2,7),rand(2,7),rand(2,7),rand(2,7),rand(2,7),rand(2,7),rand(2,7),rand(2,5),rand(2,5),rand(2,5),rand(3,7),rand(2,5),rand(2,5),rand(2,5),rand(2,5),rand(2,10),rand(2,10),rand(2,10);
+						break;
+					case 64:	//Shoes
+						setarray .@rand_ID[0],1051,1052,1053,1054,1055,1056,1057,1058,1059,1060,1233;
+						setarray .@rand_val[0],rand(2,6),rand(2,6),rand(2,6),rand(3,7),rand(3,10),rand(3,15),rand(3,10),rand(4,16),rand(3,10),rand(3,10),rand(2,5);
+						break;
+					case 32:	//Shield
+						setarray .@rand_ID[0],1000,1001,1002,1003,1004,1005,1006,1007,1008,1009,1010,1011,1158,1159,1160,1161,1115,1118,1232,1233;
+						setarray .@rand_val[0],rand(1,5),rand(1,5),rand(1,5),rand(1,5),rand(1,5),rand(1,5),rand(1,5),rand(1,5),rand(1,5),rand(1,5),rand(2,7),rand(1,5),rand(1,3),rand(1,3),rand(10,25),rand(10,25),rand(2,5),rand(2,5),rand(3,10),rand(2,6);
+						break;
+					case 136:	//Accessory
+						setarray .@rand_ID[0],1200,1201,1202,1203,1204,1205,1206,1207,1208,1209,1210,1211,1212,1213,1214,1215,1216,1217,1218,1219,1220,1221,1222,1223,1224,1225,1226,1227,1228,1229,1230,1231,1232,1233;
+						setarray .@rand_val[0],rand(3,30),rand(1,10),rand(1,10),rand(1,7),rand(1,7),rand(10,40),rand(10,40),rand(10,40),rand(10,40),rand(10,40),rand(10,40),rand(10,40),rand(10,40),rand(10,40),rand(10,40),rand(10,40),rand(10,40),rand(1,7),rand(1,7),rand(1,7),rand(1,7),rand(1,7),rand(1,7),rand(1,7),rand(1,7),rand(1,7),rand(1,7),rand(1,7),rand(1,7),rand(1,7),rand(1,8),rand(1,7),rand(1,8),rand(2,5),rand(2,5);
+						setarray .@divided[0],0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,1;
+						break;
+				}
+
+				// We make sure it doesn't have already this bonus !
+				setarray .@bonusID,getd(".@OptID"+.@itemid+"[0]"),getd(".@OptID"+.@itemid+"[1]"),getd(".@OptID"+.@itemid+"[2]");
+				do { .@rand = rand(0,(getarraysize(.@rand_ID)-1)); } while ( (.@bonusID[0] != 0 && .@bonusID[0] == .@rand_ID[.@rand] && .@Rand_Opt != 0 ) || (.@bonusID[1] != 0 && .@bonusID[1] == .@rand_ID[.@rand] && .@Rand_Opt != 1 ) || (.@bonusID[2] != 0 && .@bonusID[2] == .@rand_ID[.@rand] && .@Rand_Opt != 2 ) );
+
+				// Special attention for status reflect on garment
+				if(.@rand_ID[.@rand] >= 1119 && .@rand_ID[.@rand] <= 1121)
+					.@rand_ID[.@rand] = rand(1119,1130);
+
+				// [03-17-2022] Ask if you want the one rand option or keep the old one
+				if(getd(".@OptID"+.@itemid+"["+.@Rand_Opt+"]")) {
+					mes .@name$;
+					@rand$[2] = ""; callfunc "Random_Opt_Name",.@rand_ID[.@rand];
+					if(@rand$[1]=="1") mes "You've got ^8fbc8f"+@rand$[0]+"^000000"; else mes "You've got ^8fbc8f"+@rand$[0]+" +"+((@rand$[2]) ? (.@rand_val[.@rand] / 10)+"."+(.@rand_val[.@rand]%10):.@rand_val[.@rand])+""+@rand$[1]+"^000000";
+					@rand$[2] = ""; callfunc "Random_Opt_Name",getd(".@OptID"+.@itemid+"["+.@Rand_Opt+"]");
+					if(@rand$[1]=="1") mes "Do you want to replace your ^8fbc8f"+@rand$[0]+"^000000 ?"; else mes "Do you want to replace your ^8fbc8f"+@rand$[0]+" +"+((@rand$[2]) ? (getd(".@OptVal"+.@itemid+"["+.@Rand_Opt+"]") / 10)+"."+(getd(".@OptVal"+.@itemid+"["+.@Rand_Opt+"]") % 10):getd(".@OptVal"+.@itemid+"["+.@Rand_Opt+"]"))+""+@rand$[1]+"^000000 ?";
+					next;
+					if(select("- Yes, replace by the new one.:- No, keep the old bonus.") == 2)
+						break;
+				}
+
+				// We have to put a switch because the array is not being counted if it's a variable with setd
+				switch (.@Rand_Opt) {
+				case 0:
+					setd(".@OptID"+.@itemid+"[0]"),.@rand_ID[.@rand];
+					setd(".@OptVal"+.@itemid+"[0]"),.@rand_val[.@rand];
+					setd(".@OptParam"+.@itemid+"[0]"),0;
+					break;
+				case 1:
+					setd(".@OptID"+.@itemid+"[1]"),.@rand_ID[.@rand];
+					setd(".@OptVal"+.@itemid+"[1]"),.@rand_val[.@rand];
+					setd(".@OptParam"+.@itemid+"[1]"),1;
+					break;
+				case 2:
+					setd(".@OptID"+.@itemid+"[2]"),.@rand_ID[.@rand];
+					setd(".@OptVal"+.@itemid+"[2]"),.@rand_val[.@rand];
+					setd(".@OptParam"+.@itemid+"[2]"),2;
+					break;
+				}
+				specialeffect2 1608;
+				delitem .@itemid,1;
+				getitem3 .@itemid,1,1,.@refine[.@itemid],.@attribute[.@itemid],.@card1[.@itemid],.@card2[.@itemid],.@card3[.@itemid],.@card4[.@itemid],getd(".@OptID"+.@itemid+""),getd(".@OptVal"+.@itemid+""),getd(".@OptParam"+.@itemid+"");
+				break;
+			case 2:
+				next;
+				if(!getd(".@OptVal"+.@itemid+"[0]"))&&(!getd(".@OptVal"+.@itemid+"[1]"))&&(!getd(".@OptVal"+.@itemid+"[2]")) {
+					mes .@name$;
+					mes "You don't have any quality on your "+getitemname(.@itemid)+" +"+.@refine[.@itemid]+" !";
+					close;
+				}
+				mes .@name$;
+				mes "Which Quality do you want me to remove on your "+getitemname(.@itemid)+" +"+.@refine[.@itemid]+" ?";
+				if(getd(".@OptVal"+.@itemid+"[0]")) { @rand$[2] = ""; callfunc "Random_Opt_Name",getd(".@OptID"+.@itemid+"[0]"); .@rand1$ = ""+@rand$[0]+" +"+((@rand$[2])?(getd(".@OptVal"+.@itemid+"[0]")/10)+"."+(getd(".@OptVal"+.@itemid+"[0]")%10):getd(".@OptVal"+.@itemid+"[0]"))+""+@rand$[1]+""; }
+				if(getd(".@OptVal"+.@itemid+"[1]")) { @rand$[2] = ""; callfunc "Random_Opt_Name",getd(".@OptID"+.@itemid+"[1]"); .@rand2$ = ""+@rand$[0]+" +"+((@rand$[2])?(getd(".@OptVal"+.@itemid+"[1]")/10)+"."+(getd(".@OptVal"+.@itemid+"[1]")%10):getd(".@OptVal"+.@itemid+"[1]"))+""+@rand$[1]+""; }
+				if(getd(".@OptVal"+.@itemid+"[2]")) { @rand$[2] = ""; callfunc "Random_Opt_Name",getd(".@OptID"+.@itemid+"[2]"); .@rand3$ = ""+@rand$[0]+" +"+((@rand$[2])?(getd(".@OptVal"+.@itemid+"[2]")/10)+"."+(getd(".@OptVal"+.@itemid+"[2]")%10):getd(".@OptVal"+.@itemid+"[2]"))+""+@rand$[1]+""; }
+				switch(select(.@rand1$,.@rand2$,.@rand3$)) {
+					case 1: .@Rand_Opt = 0; break;
+					case 2: .@Rand_Opt = 1; break;
+					case 3: .@Rand_Opt = 2; break;
+				}
+				mes .@name$;
+				if(!getd(".@OptVal"+.@itemid+"[.@Rand_Opt]")) {
+					mes "There is nothing there !";
+					close;
+				}
+				mes "Alright ! Let's remove it.";
+				close2;
+				progressbar "#00FF00",1;
+				specialeffect2 EF_MAPPILLAR;
+				switch (.@Rand_Opt) {
+				case 0:
+					setd(".@OptID"+.@itemid+"[0]"),0;
+					setd(".@OptVal"+.@itemid+"[0]"),0;
+					setd(".@OptParam"+.@itemid+"[0]"),0;
+					if(getd(".@OptID"+.@itemid+"[1]")) {
+						setd(".@OptID"+.@itemid+"[0]"),getd(".@OptID"+.@itemid+"[1]");
+						setd(".@OptVal"+.@itemid+"[0]"),getd(".@OptVal"+.@itemid+"[1]");
+						setd(".@OptParam"+.@itemid+"[0]"),0;
+						setd(".@OptID"+.@itemid+"[1]"),0;
+						setd(".@OptVal"+.@itemid+"[1]"),0;
+						setd(".@OptParam"+.@itemid+"[1]"),0;
+					}
+					if(getd(".@OptID"+.@itemid+"[2]")) {
+						setd(".@OptID"+.@itemid+"[1]"),getd(".@OptID"+.@itemid+"[2]");
+						setd(".@OptVal"+.@itemid+"[1]"),getd(".@OptVal"+.@itemid+"[2]");
+						setd(".@OptParam"+.@itemid+"[1]"),1;
+						setd(".@OptID"+.@itemid+"[2]"),0;
+						setd(".@OptVal"+.@itemid+"[2]"),0;
+						setd(".@OptParam"+.@itemid+"[2]"),0;
+					}
+					break;
+				case 1:
+					setd(".@OptID"+.@itemid+"[1]"),0;
+					setd(".@OptVal"+.@itemid+"[1]"),0;
+					setd(".@OptParam"+.@itemid+"[1]"),0;
+					if(getd(".@OptID"+.@itemid+"[2]")) {
+						setd(".@OptID"+.@itemid+"[1]"),getd(".@OptID"+.@itemid+"[2]");
+						setd(".@OptVal"+.@itemid+"[1]"),getd(".@OptVal"+.@itemid+"[2]");
+						setd(".@OptParam"+.@itemid+"[1]"),1;
+						setd(".@OptID"+.@itemid+"[2]"),0;
+						setd(".@OptVal"+.@itemid+"[2]"),0;
+						setd(".@OptParam"+.@itemid+"[2]"),0;
+					}
+					break;
+				case 2:
+					setd(".@OptID"+.@itemid+"[2]"),0;
+					setd(".@OptVal"+.@itemid+"[2]"),0;
+					setd(".@OptParam"+.@itemid+"[2]"),0;
+					break;
+				}
+				if(delitem(.@itemid,1))
+					getitem3 .@itemid,1,1,.@refine[.@itemid],.@attribute[.@itemid],.@card1[.@itemid],.@card2[.@itemid],.@card3[.@itemid],.@card4[.@itemid],getd(".@OptID"+.@itemid+""),getd(".@OptVal"+.@itemid+""),getd(".@OptParam"+.@itemid+"");
+				//end;
+				break;
+			case 3:
+				mes .@name$;
+				mes "Alright ! Come back another time.";
+				close;
+			}
+			}
+		} else {
+			mes "Hmm? There's nothing to be qualitative!";
+			mes "Please come back with just ONE equipment of the same name.";
+			close;
+		}
+		end;
+}
+
+function	script	Merge_System	{
+	progressbar "#00FF00",2;
+	setarray getd(".@OptID"+getarg(0)+"[0]"),getequiprandomoption(EQI_HAND_R,0,ROA_ID),getequiprandomoption(EQI_HAND_R,1,ROA_ID),getequiprandomoption(EQI_HAND_R,2,ROA_ID);
+	setarray getd(".@OptVal"+getarg(0)+"[0]"),getequiprandomoption(EQI_HAND_R,0,ROA_VALUE),getequiprandomoption(EQI_HAND_R,1,ROA_VALUE),getequiprandomoption(EQI_HAND_R,2,ROA_VALUE);
+	setarray getd(".@OptParam"+getarg(0)+"[0]"),getequiprandomoption(EQI_HAND_R,0,ROA_PARAM),getequiprandomoption(EQI_HAND_R,1,ROA_PARAM),getequiprandomoption(EQI_HAND_R,2,ROA_PARAM);
+
+	if(!getd(".@OptVal"+getarg(0)+"[2]")) .@Rand_Opt = 2;
+	if(!getd(".@OptVal"+getarg(0)+"[1]")) .@Rand_Opt = 1;
+	if(!getd(".@OptVal"+getarg(0)+"[0]")) .@Rand_Opt = 0;
+
+	specialeffect2 EF_MAPPILLAR;
+
+	setarray .@rand_ID[0],1250,1251,1252,1253,1254,1255,1256,1257,1258,1259,1260,1261,1262,1263,1264,1265,1266,1267,1268,1269,1270,1271,1272,1273,1274,1275,1276,1277;
+	setarray .@rand_val[0],rand(5,35),rand(2,7),rand(2,7),rand(3,15),rand(2,7),rand(2,5),rand(2,5),rand(5,25),rand(5,25),rand(2,7),rand(2,9),rand(2,9),rand(2,9),rand(2,9),rand(2,9),rand(2,9),rand(2,9),rand(2,9),rand(2,9),rand(2,9),rand(2,9),rand(5,40),rand(3,20),rand(2,8),rand(3,20),rand(2,9),rand(2,9),rand(2,7);
+
+	// We make sure it doesn't have already this bonus !
+	setarray .@bonusID,getd(".@OptID"+getarg(0)+"[0]"),getd(".@OptID"+getarg(0)+"[1]");
+	do {
+		.@rand = rand(0,(getarraysize(.@rand_ID)-1));
+	} while ( (.@bonusID[0] != 0 && .@bonusID[0] == .@rand_ID[.@rand] ) || (.@bonusID[1] != 0 && .@bonusID[1] == .@rand_ID[.@rand] ) );
+	// We have to put a switch because the array is not being counted if it's a variable with setd
+	switch (.@Rand_Opt) {
+		case 0:
+			setd(".@OptID"+getarg(0)+"[0]"),.@rand_ID[.@rand];
+			setd(".@OptVal"+getarg(0)+"[0]"),.@rand_val[.@rand];
+			setd(".@OptParam"+getarg(0)+"[0]"),0;
+			break;
+		case 1:
+			setd(".@OptID"+getarg(0)+"[1]"),.@rand_ID[.@rand];
+			setd(".@OptVal"+getarg(0)+"[1]"),.@rand_val[.@rand];
+			setd(".@OptParam"+getarg(0)+"[1]"),1;
+			break;
+		case 2:
+			setd(".@OptID"+getarg(0)+"[2]"),.@rand_ID[.@rand];
+			setd(".@OptVal"+getarg(0)+"[2]"),.@rand_val[.@rand];
+			setd(".@OptParam"+getarg(0)+"[2]"),2;
+			break;
+	}
+	setarray .@card,getequipcardid(EQI_HAND_R,0),getequipcardid(EQI_HAND_R,1),getequipcardid(EQI_HAND_R,2),getequipcardid(EQI_HAND_R,3);
+	.@refine = getequiprefinerycnt(EQI_HAND_R);
+	delitem getarg(0),2;
+	getitem3 getarg(0),1,1,.@refine,0,.@card[0],.@card[1],.@card[2],.@card[3],getd(".@OptID"+getarg(0)+""),getd(".@OptVal"+getarg(0)+""),getd(".@OptParam"+getarg(0)+"");
+	end;
+}

@@ -1,0 +1,4160 @@
+//===== Mystic Project Script ================================
+//= Introduction Mystic Project 5 - Divine Ascension
+//===== By: ==================================================
+//= Grenat
+//===== Current Version: =====================================
+//= 1.0
+//===== Description: ========================================= 
+//= Intro scripts
+//===== Additional Comments: =================================
+//= 1.0 Initial script released.
+//============================================================
+//= Mapflags
+//============================================================
+intro02	mapflag	hidemobhpbar
+intro09	mapflag	hidemobhpbar
+
+intro01	mapflag	noskill
+intro02	mapflag	noskill
+intro03	mapflag	noskill
+intro04	mapflag	noskill
+intro05	mapflag	noskill
+intro06	mapflag	noskill
+intro07	mapflag	noskill
+intro08	mapflag	noskill
+intro09	mapflag	noskill
+
+//============================================================
+//= Scripts
+//============================================================
+intro01,34,30,1	script	Intro#m01	139,15,15,{
+	setoption Option_Invisible,1;
+	addtimer 1000,"Intro#m01::OnStart";
+	end;
+OnStart:
+	setnight;
+	if(!(#setting & OPT_1))
+		#setting += OPT_1;
+	mes "[Language Option]:";
+	mes "Please select the language that suits you best.";
+	next;
+	dispbottom "Please select the language that suits you best.";
+	switch(prompt("- English:- French")) {
+		default:
+		case 1: #langtype = 0; break;
+		case 2: #langtype = 7; break;
+		case 255: doevent "Intro#m01::OnStart"; end;
+	}
+	close2;
+	atcommand "@speed 400";
+	callfunc "blockpj",1;
+	unitwalk getcharid(3),34,40;
+	if(#langtype == 0) announce "[Mystic Project Team] : Welcome to Divine Ascension RO,",bc_self,"0x5555ff",FW_BOLD,22;
+	if(#langtype == 7) announce "[Mystic Project Team] : Bienvenue sur Divine Ascension RO,",bc_self,"0x5555ff",FW_BOLD,22;
+	sleep2 2000;
+	if(#langtype == 0) announce "[Mystic Project Team] : A mix between the best customs of the Mystic Project, and the best of Renewal,",bc_self,"0x5555ff",FW_BOLD,22;
+	if(#langtype == 7) announce "[Mystic Project Team] : Un mélange entre les meilleurs customs du projet Mystic, et le meilleur de Renewal,",bc_self,"0x5555ff",FW_BOLD,22;
+	sleep2 3000;
+	if(#langtype == 0) announce "[Mystic Project Team] : United in the old system, Pre-Renewal.",bc_self,"0x5555ff",FW_BOLD,22;
+	if(#langtype == 7) announce "[Mystic Project Team] : Unis dans l'ancien système, Pre-Renewal.",bc_self,"0x5555ff",FW_BOLD,22;
+	sleep2 3000;
+	if(#langtype == 0) announce "[Mystic Project Team] : If you meet any issues during your playtime, please contact any Guards.",bc_self,"0x5555ff",FW_BOLD,22;
+	if(#langtype == 7) announce "[Mystic Project Team] : Si vous rencontrez des problèmes pendant votre temps de jeu, veuillez contacter les guards.",bc_self,"0x5555ff",FW_BOLD,22;
+	sleep2 3000;
+	if(#langtype == 0) announce "[Mystic Project Team] : Enjoy.",bc_self,"0x5555ff",FW_BOLD,22;
+	if(#langtype == 7) announce "[Mystic Project Team] : Bon amusement.",bc_self,"0x5555ff",FW_BOLD,22;
+	sleep2 3000;
+	if(#langtype == 0) dispbottom "Please, select an option. Viewing the introduction grants you a free Stats/Skills Reset Coupon. (Inexchangeable)";
+	if(#langtype == 7) dispbottom "Veuillez sélectionner une option. Voir l'introduction vous offre un coupon de réinitialisation des statistiques/compétences gratuit. (Inéchangeable)";
+	Lmenu:
+	if(#langtype == 0) .@menu$ = "- Start Cinematic Introduction:- Skip Cinematic Introduction:- Training Room";
+	if(#langtype == 7) { .@menu$ = "- Commencer l'Introduction Cinématique:- Passer l'Introduction Cinématique:- Training Room"; }
+	switch(prompt(.@menu$)) {
+		case 1:
+			getmapxy .@map$,.@x,.@y;
+			for(.@i=0; .@i<10; .@i++) {
+				unitmove getcharid(3),.@x,95+.@i;
+				sleep2 50;
+			}
+			if(getcharid(1)==0) {
+				if(party_create("Intro"+rand(10,100000)+"") < 0) {
+					dispbottom "Something went wrong.";
+					callfunc "blockpj",0;
+					warp "intro01",34,30;
+					end;
+				}
+			}
+			setpcblock PCBLOCK_NPCCLICK,false;
+			sleep2 100;
+			instance_create("Introduction");
+			sleep2 100;
+			instance_enter("Introduction");
+			end;
+		case 2:
+			intronew = 2;
+			savepoint "kar_fild04",145,72;
+			setoption Option_Invisible,0;
+			atcommand "@speed 150";
+			callfunc "blockpj",0;
+			warp "kar_fild04",145,72;
+			donpcevent "Entrance Point::OnStart";
+			donpcevent "Terrina#intro::OnStart";
+			sleep2 500;
+			camerainfo 80000,0,-5000;
+			end;
+		case 3:
+			mes "Are you sure you want to go to the Training Room ?";
+			mes "^ff0000*Your character will be locked forever in that room*^000000";
+			mes "^ff0000*You will be level 99 - stats up to 160, basic stuff, dummies, kugan/zodiac reset available*^000000";
+			next;
+			if(prompt("- Back.:- Go to the training room.") == 1)
+				goto Lmenu;
+			close2;
+			announce "Welcome to the Training Room.",bc_self;
+			announce "There is no zeny and items requirements while using skills on this map.",bc_self;
+			announce "You can do @duel and then @invite to fight against other players or Double Account.",bc_self;
+			TrainingRoom = 1;
+			savepoint "arena",50,49;
+			settraining;
+			BaseLevel = 99;
+			KuganPoints = 100;
+			KuganLevel = 99;
+			Zeny += 500000;
+			setoption Option_Invisible,0;
+			atcommand "@speed 150";
+			callfunc "blockpj",0;
+			warp "arena",50,49;
+			end;
+		case 255:
+			if(#langtype == 0) dispbottom "You can't close this conversation.";
+			if(#langtype == 7) dispbottom "Vous ne pouvez pas fermer la conversation.";
+			goto Lmenu;
+	}
+}
+
+//============================================================
+// = Scene 1 - Nebu,Melu,Yuna,Alek fight
+//============================================================
+intro09,87,47,0	script	Intro02#m02	139,1,1,{
+killmonsterall instance_mapname("intro09");
+	setpcblock PCBLOCK_NPCCLICK,true;
+	monster strnpcinfo(4),75,62,"Cult member",3983,1; 'Cult1 = $@mobid[0]; unitlookdir 'Cult1,rand(1,8); unitskilluseid 'Cult1,"NV_TRICKDEAD",1;
+	monster strnpcinfo(4),83,68,"Cult member",3983,1; 'Cult2 = $@mobid[0]; unitlookdir 'Cult2,rand(1,8); unitskilluseid 'Cult2,"NV_TRICKDEAD",1;
+	monster strnpcinfo(4),94,70,"Cult member",3983,1; 'Cult3 = $@mobid[0]; unitlookdir 'Cult3,rand(1,8); unitskilluseid 'Cult3,"NV_TRICKDEAD",1;
+	monster strnpcinfo(4),90,53,"Cult member",3983,1; 'Cult4 = $@mobid[0]; unitlookdir 'Cult4,rand(1,8); unitskilluseid 'Cult4,"NV_TRICKDEAD",1;
+	monster strnpcinfo(4),104,65,"Cult member",3983,1; 'Cult5 = $@mobid[0]; unitlookdir 'Cult5,DIR_NORTH; unitskilluseid 'Cult5,"NV_TRICKDEAD",1;
+	monster strnpcinfo(4),82,87,"Cult member",3983,1; 'Cult6 = $@mobid[0]; unitlookdir 'Cult6,rand(1,8); unitskilluseid 'Cult6,"NV_TRICKDEAD",1;
+	monster strnpcinfo(4),73,75,"Cult member",3983,1; 'Cult7 = $@mobid[0]; unitlookdir 'Cult7,rand(1,8); unitskilluseid 'Cult7,"NV_TRICKDEAD",1;
+	monster strnpcinfo(4),84,70,"Cult member",3983,1; 'Cult8 = $@mobid[0]; unitlookdir 'Cult8,rand(1,8); unitskilluseid 'Cult8,"NV_TRICKDEAD",1;
+	refresh;
+	monster strnpcinfo(4),84,78,"Cult member",3999,1; 'Cult9 = $@mobid[0]; monster strnpcinfo(4),85,78,"Royal Guard",3998,1,"",0,AI_FLORA; unitattack $@mobid[0],'Cult9,1;
+	monster strnpcinfo(4),89,80,"Cult member",3999,1; 'Cult10 = $@mobid[0]; monster strnpcinfo(4),90,80,"Protector",3998,1,"",0,AI_FLORA; unitattack $@mobid[0],'Cult10,1;
+	monster strnpcinfo(4),90,68,"Cult member",3999,1; 'Cult11 = $@mobid[0]; monster strnpcinfo(4),90,68,"Royal Guard",3966,1,"",0,AI_FLORA; unitattack $@mobid[0],'Cult11,1;
+	monster strnpcinfo(4),82,71,"Cult member",3999,1; 'Cult12 = $@mobid[0]; monster strnpcinfo(4),83,71,"Sniper",3965,1,"",0,AI_FLORA; unitattack $@mobid[0],'Cult12,1;
+	monster strnpcinfo(4),81,57,"Cult member",3999,1; 'Cult13 = $@mobid[0]; monster strnpcinfo(4),82,57,"Royal Guard",3966,1,"",0,AI_FLORA; unitattack $@mobid[0],'Cult13,1;
+	monster strnpcinfo(4),94,58,"Cult member",3999,1; 'Cult14 = $@mobid[0]; monster strnpcinfo(4),95,58,"Wizard",3967,1,"",0,AI_FLORA; unitattack $@mobid[0],'Cult14,1;
+	monster strnpcinfo(4),87,59,"Cult member",3999,1; 'Cult15 = $@mobid[0]; monster strnpcinfo(4),88,59,"Royal Guard",3998,1,"",0,AI_FLORA; unitattack $@mobid[0],'Cult15,1;
+	donpcevent instance_npcname("Intro00#m02")+"::OnStart";
+	donpcevent instance_npcname("Nekraa#m02")+"::OnStart";
+	camerainfo 30000,600,-3000;
+	unitwalk getcharid(3),87,56;
+	sleep2 3000;
+	camerainfo 30000,600,-3000;
+	unitwalk getcharid(3),87,63;
+	sleep2 1000;
+	unitwalk getcharid(3),87,66;
+	sleep2 3000;
+	unitwalk getcharid(3),87,72;
+	sleep2 2000;
+	if(#langtype == 0) donpcevent instance_npcname("Zheir#m02")+"::OnStart";
+	if(#langtype == 7) donpcevent instance_npcname("Zheir#m02")+"::OnStart2";
+	unitwalk getcharid(3),98,72;
+	sleep2 2000;
+	unitwalk getcharid(3),104,76;
+	sleep2 105500;
+	setpcblock PCBLOCK_NPCCLICK,false;
+	end;
+}
+intro09,106,84,0	script	Zheir#m02	139,{
+//nebu 103,82
+//alek 106,82
+//yuna 108,80
+//melu 105,80
+	end;
+OnStart:
+	disablenpc instance_npcname("Zheir#m03");
+	monster strnpcinfo(4),103,82,"Nebuchadnezzar",27340,1,"",0,AI_FLORA; 'nebu = $@mobid[0];
+	monster strnpcinfo(4),106,82,"Aleksander",27341,1,"",0,AI_FLORA; 'alek = $@mobid[0];
+	monster strnpcinfo(4),107,77,"Yunalesca",3963,1,"",0,AI_FLORA; 'yuna = $@mobid[0];
+	monster strnpcinfo(4),105,80,"Melusine",27339,1,"",0,AI_FLORA; 'melu = $@mobid[0];
+	monster strnpcinfo(4),106,84,"Zheir",1647,1,"",0,0; 'zheir = $@mobid[0];
+	unitfollow 'yuna,'alek;
+	sleep 10000;
+	unittalk 'nebu,"Nebu: Now ! Use the seals !";
+	sleep 2000;
+	specialeffect3 'nebu,99;
+	sleep 500;
+	specialeffect3 'alek,99;
+	sleep 600;
+	specialeffect3 'melu,99;
+	sleep 700;
+	unittalk 'nebu,"Nebu: Hurry, this won't last !";
+	sleep 2000;
+	specialeffect3 'yuna,99;
+	sleep 2000;
+	unittalk 'alek,"Aleksander: Isn't there a way to get out of this?!";
+	sleep 3000;
+	unittalk 'nebu,"Nebu: It's now or never !!! He is not as you've known him and y'all know it !";
+	sleep 3000;
+	specialeffect3 'zheir,722;
+	unitpush 'zheir,DIR_SOUTH,5;
+	sleep 1000;
+	unitkill 'zheir;
+	enablenpc instance_npcname("Zheir#m03");
+	donpcevent instance_npcname("Zheir#m03")+"::OnStart";
+	end;
+OnStart2:
+	disablenpc instance_npcname("Zheir#m03");
+	monster strnpcinfo(4),103,82,"Nebuchadnezzar",27340,1,"",0,AI_FLORA; 'nebu = $@mobid[0];
+	monster strnpcinfo(4),106,82,"Aleksander",27341,1,"",0,AI_FLORA; 'alek = $@mobid[0];
+	monster strnpcinfo(4),107,77,"Yunalesca",3963,1,"",0,AI_FLORA; 'yuna = $@mobid[0];
+	monster strnpcinfo(4),105,80,"Melusine",27339,1,"",0,AI_FLORA; 'melu = $@mobid[0];
+	monster strnpcinfo(4),106,84,"Zheir",1647,1,"",0,0; 'zheir = $@mobid[0];
+	unitfollow 'yuna,'alek;
+	sleep 10000;
+	unittalk 'nebu,"Nebu: Maintenant ! Utilisez les sceaux !";
+	sleep 2000;
+	specialeffect3 'nebu,99;
+	sleep 500;
+	specialeffect3 'alek,99;
+	sleep 600;
+	specialeffect3 'melu,99;
+	sleep 700;
+	unittalk 'nebu,"Nebu: Dépêchez-vous, cela ne durera pas !";
+	sleep 2000;
+	specialeffect3 'yuna,99;
+	sleep 2000;
+	unittalk 'alek,"Aleksander: N'y a-t-il pas un moyen de s'en sortir?!";
+	sleep 3000;
+	unittalk 'nebu,"Nebu: C'est maintenant ou jamais !!! Il n'est pas comme vous l'avez connu et vous le savez tous !";
+	sleep 3000;
+	specialeffect3 'zheir,722;
+	unitpush 'zheir,DIR_SOUTH,5;
+	sleep 1000;
+	unitkill 'zheir;
+	enablenpc instance_npcname("Zheir#m03");
+	donpcevent instance_npcname("Zheir#m03")+"::OnStart2";
+	end;
+}
+intro09,87,47,0	script	Intro00#m02	139,{
+	end;
+OnStart:
+	for(.@i = 0; .@i < 50; .@i++) {
+		monster strnpcinfo(4),83,69,"",3114,1; .@flame1 = $@mobid[0];
+		monster strnpcinfo(4),84,50,"",3114,1; .@flame2 = $@mobid[0];
+		monster strnpcinfo(4),96,62,"",3114,1; .@flame3 = $@mobid[0];
+		monster strnpcinfo(4),102,54,"",3114,1; .@flame4 = $@mobid[0];
+		monster strnpcinfo(4),110,68,"",3114,1; .@flame5 = $@mobid[0];
+		monster strnpcinfo(4),94,69,"",3114,1; .@flame6 = $@mobid[0];
+		monster strnpcinfo(4),94,78,"",3114,1; .@flame7 = $@mobid[0];
+		monster strnpcinfo(4),99,81,"",3114,1; .@flame8 = $@mobid[0];
+		monster strnpcinfo(4),104,87,"",3114,1; .@flame9 = $@mobid[0];
+		monster strnpcinfo(4),81,92,"",3114,1; .@flame10 = $@mobid[0];
+		monster strnpcinfo(4),67,90,"",3114,1; .@flame11 = $@mobid[0];
+		monster strnpcinfo(4),76,83,"",3114,1; .@flame12 = $@mobid[0];
+		monster strnpcinfo(4),78,67,"",3114,1; .@flame13 = $@mobid[0];
+		monster strnpcinfo(4),79,62,"",3114,1; .@flame14 = $@mobid[0];
+		monster strnpcinfo(4),69,57,"",3114,1; .@flame15 = $@mobid[0];
+		monster strnpcinfo(4),93,79,"",3114,1; .@flame16 = $@mobid[0];
+		for(.@i = 0; .@i < 50; .@i++) {
+			for(.@i2 = 1; .@i2 < 17; .@i2++)
+				specialeffect3 getd(".@flame"+.@i2+""),25;
+			sleep 480;
+		}
+		for(.@i2 = 1; .@i2 < 17; .@i2++)
+			unitremove getd(".@flame"+.@i2+"");
+	}
+	end;
+}
+
+intro09,90,74,0	script	Dakkon	3976,{
+	end;
+OnHit:
+//	npctalk "Haah !";
+	misceffect 442;
+	misceffect 457;
+	end;
+OnHit2:
+	misceffect 442;
+	misceffect 3;
+	misceffect 457;
+	end;
+OnBrute2:
+	npcwalkto 88,74;
+	end;
+OnDamage:
+	misceffect 1;
+	end;
+OnBrute4:
+//	npctalk "Hfff...";
+	npcwalkto 85,76;
+	end;
+OnProtect:
+	misceffect 675;
+	end;
+OnMove:
+	npcwalkto 91,76;
+	end;
+OnMove2:
+//	npctalk "Yaaaah !";
+	npcwalkto 90,76;
+	end;
+OnMove3:
+	npcwalkto 90,74;
+	end;
+OnDie:
+	misceffect 590;
+	misceffect 550;
+	misceffect 1;
+	misceffect 3;
+	end;
+}
+
+intro09,85,74,0	script	Nekraa#m02	3957,{
+//	end;
+OnStart:
+	initnpctimer;
+	end;
+OnTimer6000:
+emotion 0;
+misceffect 457;
+donpcevent instance_npcname("Dakkon")+"::OnHit";
+misceffect 442;
+end;
+OnTimer7000:
+//npctalk "Uryaaaah!!";
+npcwalkto 88,74;
+donpcevent instance_npcname("Dakkon")+"::OnBrute2";
+end;
+OnTimer7500:
+misceffect 1;
+misceffect 457;
+donpcevent instance_npcname("Dakkon")+"::OnHit";
+end;
+OnTimer8000:
+npcwalkto 85,77;
+donpcevent instance_npcname("Dakkon")+"::OnBrute4";
+end;
+OnTimer8500:
+misceffect 4;
+misceffect 457;
+donpcevent instance_npcname("Dakkon")+"::OnHit";
+end;
+OnTimer9000:
+npcwalkto 85,76;
+end;
+OnTimer9300:
+npcwalkto 86,76;
+end;
+OnTimer10000:
+//npctalk "Take this !";
+misceffect 457;
+donpcevent instance_npcname("Dakkon")+"::OnProtect";
+end;
+OnTimer10500:
+misceffect 218;
+donpcevent instance_npcname("Dakkon")+"::OnMove";
+end;
+OnTimer12000:
+misceffect 463;
+donpcevent instance_npcname("Dakkon")+"::OnMove2";
+end;
+OnTimer13000:
+misceffect 457;
+misceffect 417;
+misceffect 246;
+donpcevent instance_npcname("Dakkon")+"::OnHit";
+end;
+OnTimer13500:
+npcwalkto 90,76;
+end;
+OnTimer14500:
+donpcevent instance_npcname("Dakkon")+"::OnHit2";
+end;
+OnTimer15000:
+//npctalk "Wooh !";
+donpcevent instance_npcname("Dakkon")+"::OnHit";
+misceffect 466;
+npcwalkto 85,74;
+end;
+OnTimer15500:
+donpcevent instance_npcname("Dakkon")+"::OnMove3";
+end;
+OnTimer16000:
+npcwalkto 88,74;
+donpcevent instance_npcname("Dakkon")+"::OnBrute2";
+end;
+OnTimer16500:
+misceffect 1;
+misceffect 630;
+donpcevent instance_npcname("Dakkon")+"::OnHit";
+end;
+OnTimer17000:
+npcwalkto 85,77;
+donpcevent instance_npcname("Dakkon")+"::OnBrute4";
+end;
+OnTimer17500:
+misceffect 4;
+misceffect 632;
+donpcevent instance_npcname("Dakkon")+"::OnHit";
+end;
+OnTimer19000:
+//npctalk "Hop !";
+npcwalkto 85,76;
+end;
+OnTimer19300:
+npcwalkto 86,76;
+end;
+OnTimer20000:
+misceffect 618;
+donpcevent instance_npcname("Dakkon")+"::OnProtect";
+end;
+OnTimer20500:
+misceffect 603;
+misceffect 602;
+donpcevent instance_npcname("Dakkon")+"::OnMove";
+end;
+OnTimer21000:
+misceffect 366;
+donpcevent instance_npcname("Dakkon")+"::OnMove2";
+end;
+OnTimer22000:
+npctalk "Ngh!!";
+misceffect 457;
+misceffect 566;
+misceffect 567;
+donpcevent instance_npcname("Dakkon")+"::OnHit";
+end;
+OnTimer22500:
+npcwalkto 90,76;
+end;
+OnTimer23500:
+donpcevent instance_npcname("Dakkon")+"::OnHit2";
+end;
+OnTimer24000:
+donpcevent instance_npcname("Dakkon")+"::OnHit";
+misceffect 415;
+npcwalkto 85,74;
+end;
+OnTimer24500:
+donpcevent instance_npcname("Dakkon")+"::OnMove3";
+end;
+OnTimer26000:
+npcwalkto 88,74;
+donpcevent instance_npcname("Dakkon")+"::OnBrute2";
+end;
+OnTimer26500:
+misceffect 1;
+misceffect 457;
+misceffect 399;
+donpcevent instance_npcname("Dakkon")+"::OnHit";
+end;
+OnTimer27000:
+//npctalk "Not yet !";
+npcwalkto 87,77;
+donpcevent instance_npcname("Dakkon")+"::OnBrute4";
+end;
+OnTimer27500:
+misceffect 4;
+misceffect 400;
+misceffect 457;
+donpcevent instance_npcname("Dakkon")+"::OnHit";
+end;
+OnTimer28000:
+npcwalkto 82,76;
+end;
+OnTimer28300:
+npcwalkto 83,76;
+end;
+OnTimer29000:
+misceffect 457;
+misceffect 329;
+donpcevent instance_npcname("Dakkon")+"::OnProtect";
+end;
+OnTimer29500:
+misceffect 273;
+npctalk "Hehe..!";
+donpcevent instance_npcname("Dakkon")+"::OnMove";
+end;
+OnTimer31000:
+misceffect 455;
+misceffect 266;
+donpcevent instance_npcname("Dakkon")+"::OnMove2";
+end;
+OnTimer32000:
+misceffect 457;
+misceffect 226;
+misceffect 1;
+donpcevent instance_npcname("Dakkon")+"::OnHit";
+end;
+OnTimer32500:
+npcwalkto 87,76;
+end;
+OnTimer33500:
+donpcevent instance_npcname("Dakkon")+"::OnHit2";
+end;
+OnTimer34000:
+donpcevent instance_npcname("Dakkon")+"::OnHit";
+misceffect 220;
+npcwalkto 82,74;
+end;
+OnTimer34500:
+donpcevent instance_npcname("Dakkon")+"::OnMove3";
+end;
+OnTimer35500:
+//npctalk "Yaaaah ! !";
+npcwalkto 85,74;
+donpcevent instance_npcname("Dakkon")+"::OnBrute2";
+end;
+OnTimer36000:
+misceffect 457;
+misceffect 668;
+donpcevent instance_npcname("Dakkon")+"::OnDie";
+end;
+}
+intro09,106,81,0	script	Zheir#m03	697,{
+	end;
+OnStart:
+	setunitdata 'nebu,UMOB_MODE,1|8|32;
+	setunitdata 'melu,UMOB_MODE,1|8|32;
+	setunitdata 'alek,UMOB_MODE,1|8|32;
+	setunitdata 'yuna,UMOB_MODE,1|8|32;
+	setnpcdisplay( strnpcinfo(0), strnpcinfo(0), 697, 0 );
+	unittalk getnpcid(0),"Zheir: Free... finally...";
+	sleep 2500;
+	sleep 3000;
+	//hideonnpc instance_npcname("Zheir#m03");
+	sleep 2000;
+	specialeffect 99;
+	unitwalk 'nebu,106,82;
+	unitwalk 'melu,104,80;
+	unitwalk 'alek,106,78;
+	unitwalk 'yuna,108,80;
+	sleep 1500;
+	unitlookdir 'nebu,DIR_SOUTH;
+	unitlookdir 'melu,DIR_EAST;
+	unitlookdir 'alek,DIR_NORTH;
+	unitlookdir 'yuna,DIR_WEST;
+	sleep 2000;
+	unittalk 'yuna,"Yunalesca: It's terrible, we couldn't do anything else than ending his life...";
+	sleep 3000;
+	unittalk 'nebu,"Nebu: Well... He almost got us. The seals were an excellent idea though. My idea, of course. Ah ah. I always have good ideas !";
+	sleep 5500;
+	unittalk 'alek,"Aleksander: Stop laughing in front of an old compagnon fallen...";
+	sleep 3000;
+	unittalk 'yuna,"Yunalesca: Where could this force which stimulated him comes from? It seemed ... endless, or almost. We knew it and yet I couldn't help but be surprised!";
+	sleep 6000;
+	unittalk 'melu,"Melusine: Tsss, whatever, he is dead, it's all that matters right? This is what we were sent to do that I know of, so let's go!";
+	sleep 5000;
+	unittalk 'alek,"Aleksander: Wait a second, what is this ?";
+	sleep 2500;
+	unitwalk 'alek,106,79;
+	sleep 600;
+	unitskilleffect 'alek,'alek,1013,1,0;
+	showscript "?!",'alek;
+	unittalk 'nebu,"Nebu: Don't touch anything, let me see, I feel magic from this artifact, a lot of magic...";
+	sleep 2000;
+	unitpush 'nebu,DIR_NORTH,3;
+	specialeffect3 'nebu,1;
+	sleep 100;
+	unitskilluseid 'nebu,"NV_TRICKDEAD",1;
+	sleep 50;
+	showscript "Errghh !!",'nebu;
+	//unitwarp 'nebu,strnpcinfo(4),106,82;
+	specialeffect3 'nebu,828;
+	specialeffect3 'nebu,825;
+	sleep 1500;
+	unitskilluseid 'nebu,"NV_TRICKDEAD",1;
+	unittalk 'nebu,"Nebu: Errrrh, so much power... An essence, so strong ... is it ... divine?";
+	unitwalk 'nebu,106,82;
+	sleep 2000;
+	unitskilluseid 'yuna,28,11,'nebu;
+	sleep 1000;
+	mapannounce strnpcinfo(4),"The artifact breaks into 4 pieces...",bc_yellow;
+	sleep 2000;
+	unittalk 'alek,"Aleksander: Everything is good?";
+	sleep 2000;
+	unittalk 'nebu,"Nebu: Humpf, I cannot tell you with certainty, I was taken aback but I'm fine now...";
+	sleep 3500;
+	unittalk 'yuna,"Yunalesca: The object has divided itself, it seems, as if a form of cohesion had just been removed...";
+	sleep 4500;
+	unittalk 'nebu,"Nebu: Yes, interesting, fascinating even !";
+	sleep 3000;
+	unittalk 'melu,"Melusine: Interesting you say? it especially looks dangerous to me! Zheir was in his possession? Is it some kind of artifact? Should we destroy it?";
+	sleep 6000;
+	unittalk 'nebu,"Nebu: I would like to say yes but it seems too powerful to me, this was not shaped by conventional magic I'm afraid. But I think we have, here, beneath our eyes, the origin of the madness of our former comrade in arms, as you say...";
+	sleep 6000;
+	specialeffect 563;
+	unittalk 'melu,"Melusine: This damn place is not going to last very long!";
+	sleep 1500;
+	specialeffect 563;
+	sleep 1500;
+	specialeffect 563;
+	unittalk 'nebu,"Nebu: Aaaah, but of course this ... artifact, shall we say, could well have had something to do with it ... I see, I see ...";
+	sleep 1500;
+	specialeffect 563;
+	sleep 1500;
+	specialeffect 563;
+	sleep 2000;
+	specialeffect 563;
+	unittalk 'melu,"Melusine: So stop your ranting, this is not the time to make assumptions, we must go!";
+	sleep 2000;
+	specialeffect 563;
+	sleep 2000;
+	specialeffect 563;
+	unittalk 'nebu,"Nebu: Certainly, certainly...";
+	sleep 1500;
+	specialeffect 563;
+	sleep 1500;
+	specialeffect 563;
+	unittalk 'alek,"Aleksander: Let's go, we must help our most wounded companions!";
+	unitwalk 'alek,104,66;
+	sleep 1500;
+	specialeffect 563;
+	sleep 2000;
+	specialeffect 563;
+	unittalk 'melu,"Melusine: As if we cared ...";
+	sleep 1500;
+	specialeffect 563;
+	sleep 1500;
+	specialeffect 563;
+	unittalk 'alek,"Aleksander: I would pretend I hadn't heard anything! Now let's go!";
+	unitwalk 'nebu,105,62;
+	sleep 300;
+	unitwalk 'melu,105,62;
+	sleep 800;
+	unitwalk 'yuna,105,62;
+	sleep 1200;
+	mapwarp instance_mapname("intro09"),instance_mapname("rivendel"),203,147;
+//Changement de scene, fin scene 1
+	end;
+OnStart2:
+	setunitdata 'nebu,UMOB_MODE,1|8|32;
+	setunitdata 'melu,UMOB_MODE,1|8|32;
+	setunitdata 'alek,UMOB_MODE,1|8|32;
+	setunitdata 'yuna,UMOB_MODE,1|8|32;
+	setnpcdisplay( strnpcinfo(0), strnpcinfo(0), 697, 0 );
+	unittalk getnpcid(0),"Zheir: Libre... Finalement...";
+	sleep 2500;
+	sleep 3000;
+	//hideonnpc instance_npcname("Zheir#m03");
+	sleep 2000;
+	specialeffect 99;
+	unitwalk 'nebu,106,82;
+	unitwalk 'melu,104,80;
+	unitwalk 'alek,106,78;
+	unitwalk 'yuna,108,80;
+	sleep 1500;
+	unitlookdir 'nebu,DIR_SOUTH;
+	unitlookdir 'melu,DIR_EAST;
+	unitlookdir 'alek,DIR_NORTH;
+	unitlookdir 'yuna,DIR_WEST;
+	sleep 2000;
+	unittalk 'yuna,"Yunalesca: C'est terrible, on ne pouvait rien faire d'autre que mettre fin à ses jours...";
+	sleep 3000;
+	unittalk 'nebu,"Nebu: Eh bien... Il nous a presque eu. Les sceaux étaient une excellente idée cependant. Mon idée, bien sûr. Ah ah. j'ai toujours de bonnes idées !";
+	sleep 5500;
+	unittalk 'alek,"Aleksander: Arrête de rire devant un vieux compagnon tombé...";
+	sleep 3000;
+	unittalk 'yuna,"Yunalesca: D'où pourrait venir cette force qui le stimulait ? Cela semblait... interminable, ou presque. Nous le savions et pourtant je n'ai pas pu m'empêcher d'être surpris!";
+	sleep 6000;
+	unittalk 'melu,"Melusine: Tsss, peu importe, il est mort, c'est tout ce qui compte, non ? C'est ce que nous avons été envoyés faire à ma connaissance, alors allons-y !";
+	sleep 5000;
+	unittalk 'alek,"Aleksander: Attends une seconde, qu'est-ce que c'est ?";
+	sleep 2500;
+	unitwalk 'alek,106,79;
+	sleep 600;
+	unitskilleffect 'alek,'alek,1013,1,0;
+	showscript "?!",'alek;
+	unittalk 'nebu,"Nebu: Ne touche à rien, laisse-moi voir, je ressens la magie de cet artefact, beaucoup de magie...";
+	sleep 2000;
+	unitpush 'nebu,DIR_NORTH,3;
+	specialeffect3 'nebu,1;
+	sleep 100;
+	unitskilluseid 'nebu,"NV_TRICKDEAD",1;
+	sleep 50;
+	showscript "Errghh !!",'nebu;
+	specialeffect3 'nebu,828;
+	specialeffect3 'nebu,825;
+	sleep 1500;
+	unittalk 'nebu,"Nebu: Errrrh, tant de pouvoir... Une essence, si forte... est-ce... divin?";
+	unitskilluseid 'nebu,"NV_TRICKDEAD",1;
+	unitwalk 'nebu,106,82;
+	sleep 2000;
+	unitskilluseid 'yuna,28,11,'nebu;
+	sleep 1000;
+	mapannounce strnpcinfo(4),"L'artefact se brise en 4 morceaux...",bc_yellow;
+	sleep 2000;
+	unittalk 'alek,"Aleksander: Tout va bien?";
+	sleep 2000;
+	unittalk 'nebu,"Nebu: Humpf, Je ne peux pas te dire avec certitude, j'ai été pris de court mais je vais bien maintenant...";
+	sleep 3500;
+	unittalk 'yuna,"Yunalesca: L'objet s'est divisé, semble-t-il, comme si une forme de cohésion venait d'être supprimée...";
+	sleep 4500;
+	unittalk 'nebu,"Nebu: Oui, intéressant, fascinant même !";
+	sleep 3000;
+	unittalk 'melu,"Melusine: Intéressant me direz-vous ? ça m'a l'air particulièrement dangereux ! Zheir était en sa possession ? Est-ce une sorte d'artefact ? Doit-on le détruire?";
+	sleep 6000;
+	unittalk 'nebu,"Nebu: J'aimerais bien dire oui mais cela me semble trop puissant, cela n'a pas été façonné par la magie conventionnelle j'en ai peur. Mais je pense qu'on a, là, sous nos yeux, l'origine de la folie de notre ancien compagnon d'armes...";
+	sleep 6000;
+	specialeffect 563;
+	unittalk 'melu,"Melusine: Ce foutu endroit ne va pas durer très longtemps!";
+	sleep 1500;
+	specialeffect 563;
+	sleep 1500;
+	specialeffect 563;
+	unittalk 'nebu,"Nebu: Aaaah, mais bien sûr cet... artefact, dirons-nous, pourrait bien avoir quelque chose à voir avec ça... je vois, je vois ...";
+	sleep 1500;
+	specialeffect 563;
+	sleep 1500;
+	specialeffect 563;
+	sleep 2000;
+	specialeffect 563;
+	unittalk 'melu,"Melusine: Alors arrêtez vos divagations, ce n'est pas le moment de faire des suppositions, il faut y aller!";
+	sleep 2000;
+	specialeffect 563;
+	sleep 2000;
+	specialeffect 563;
+	unittalk 'nebu,"Nebu: Certainement, certainement...";
+	sleep 1500;
+	specialeffect 563;
+	sleep 1500;
+	specialeffect 563;
+	unittalk 'alek,"Aleksander: Allons-y, il faut aider nos compagnons les plus blessés!";
+	unitwalk 'alek,104,66;
+	sleep 1500;
+	specialeffect 563;
+	sleep 2000;
+	specialeffect 563;
+	unittalk 'melu,"Melusine: Comme si on s'en souciait ...";
+	sleep 1500;
+	specialeffect 563;
+	sleep 1500;
+	specialeffect 563;
+	unittalk 'alek,"Aleksander: Je ferais comme si je n'avais rien entendu ! Maintenant allons-y!";
+	unitwalk 'nebu,105,62;
+	sleep 300;
+	unitwalk 'melu,105,62;
+	sleep 800;
+	unitwalk 'yuna,105,62;
+	sleep 1200;
+	mapwarp instance_mapname("intro09"),instance_mapname("rivendel"),203,147;
+//Changement de scene, fin scene 1
+	end;
+	
+}
+
+//============================================================
+// = Scene 2 - Rivendel
+//============================================================
+rivendel,203,147,0	script	intro#m03	139,1,1,{
+	if(!instance_id()) end;
+	setmapflag instance_mapname("rivendel"), MF_NOSKILL;
+	setpcblock PCBLOCK_NPCCLICK,true;
+	camerainfo 20000,400,-1000;
+	unitwalk getcharid(3),203,134;
+	sleep2 4000;
+	if(#langtype == 0) unittalk getnpcid(0,instance_npcname("Whisper#m01")),"Murmurs: What remains of the ancestral dragon... at the end of the world... waiting only for death ...";
+	if(#langtype == 7) unittalk getnpcid(0,instance_npcname("Whisper#m01")),"Murmures: Ce qu'il reste du dragon ancestral... au bout du monde... n'attendant plus que la mort...";
+	unitwalk getcharid(3),212,134;
+	sleep2 4000;
+	if(#langtype == 0) unittalk getnpcid(0,instance_npcname("Whisper#m02")),"Murmurs: The one who is enthroned in darkness... at the origin of the most terrible of wars";
+	if(#langtype == 7) unittalk getnpcid(0,instance_npcname("Whisper#m02")),"Murmures: Celle qui trône aux ténèbres... à l'origine de la plus terrible des guerres...";
+	unitwalk getcharid(3),224,134;
+	sleep2 4000;
+	if(#langtype == 0) unittalk getnpcid(0,instance_npcname("Whisper#m03")),"Murmurs: The one who prowls in the intangible... his perception of the world forever distorted ...";
+	if(#langtype == 7) unittalk getnpcid(0,instance_npcname("Whisper#m03")),"Murmures: Celui qui rôde dans l'immatériel... sa perception du monde à jamais distordue...";
+	unitwalk getcharid(3),236,134;
+	sleep2 4000;
+	if(#langtype == 0) unittalk getnpcid(0,instance_npcname("Whisper#m04")),"Murmurs: The man who raised armies ... his forever tormented sword...";
+	if(#langtype == 7) unittalk getnpcid(0,instance_npcname("Whisper#m04")),"Murmures: L'homme qui leva des armées... son épée à jamais tourmentée...";
+	unitwalk getcharid(3),244,141;
+	sleep2 4000;
+	if(#langtype == 0) unittalk getnpcid(0,instance_npcname("Whisper#m05")),"Murmurs: Finally the darkest shadow in the Abyssal Depths... the guardian of the divinity... is just waiting for you...";
+	if(#langtype == 7) unittalk getnpcid(0,instance_npcname("Whisper#m05")),"Murmures: Enfin l'ombre la plus sombre dans les abysses... le gardien de la divinité... n'attendant plus que vous...";
+	unitwalk getcharid(3),244,153;
+	sleep2 3000;
+	specialeffect2 484;
+	sleep2 4000;
+//Fin scene 2
+	removemapflag instance_mapname("rivendel"), MF_NOSKILL;
+	setpcblock PCBLOCK_NPCCLICK,false;
+	mapwarp instance_mapname("rivendel"),instance_mapname("asg_fild10"),160,287;
+	end;
+}
+rivendel,207,141,0	script	Whisper#m01	111,{end;}
+rivendel,214,135,0	script	Whisper#m02	111,{end;}
+rivendel,225,131,0	script	Whisper#m03	111,{end;}
+rivendel,238,134,0	script	Whisper#m04	111,{end;}
+rivendel,246,147,0	script	Whisper#m05	111,{end;}
+
+//============================================================
+// = Scene 3 - Abyssal Depths doors
+//============================================================
+
+asg_fild10,160,287,0	script	intro#m04	139,1,1,{
+	if(!instance_id()) end;
+	setmapflag instance_mapname("asg_fild10"), MF_NOSKILL;
+	camerainfo 50000,0,-1500;
+	setoption Option_Invisible,0;
+	atcommand "@disguise 1647";
+	atcommand "@speed 250";
+	atcommand "@fakename Zheir";
+	fixeffect2 getnpcid(0,instance_npcname("Abyssal#warp1")),1025,1;
+	disguise 1647;
+	sleep2 200;
+	if(#langtype == 0) mapannounce strnpcinfo(4),"[Instance 5] : Abyssal Depths - Final World Dungeon...",bc_map,"0xFFFF00",FW_BOLD,22;
+	if(#langtype == 7) mapannounce strnpcinfo(4),"[Instance 5] : Abyssal Depths - Ultime World Dungeon...",bc_map,"0xFFFF00",FW_BOLD,22;
+	setpcblock PCBLOCK_NPCCLICK,true;
+	unitwalk getcharid(3),160,300;
+	unittalk getcharid(3),"Zheir: ...";
+	if(#langtype == 0) unittalk getnpcid(0,instance_npcname("Whisper#m06")),"Dead: Come to us Zheir.";
+	if(#langtype == 7) unittalk getnpcid(0,instance_npcname("Whisper#m06")),"Dead: Viens à nous Zheir.";
+	sleep2 3000;
+	unitwalk getcharid(3),160,315;
+	if(#langtype == 0) unittalk getnpcid(0,instance_npcname("Whisper#m07")),"Dead: Jormungandr is waiting for you.";
+	if(#langtype == 7) unittalk getnpcid(0,instance_npcname("Whisper#m07")),"Dead: Jormungandr t'attends.";
+	sleep2 3000;
+	unitwalk getcharid(3),160,330;
+	if(#langtype == 0) unittalk getnpcid(0,instance_npcname("Whisper#m08")),"Dead: Justice will be served!";
+	if(#langtype == 7) unittalk getnpcid(0,instance_npcname("Whisper#m08")),"Dead: Justice sera rendue!";
+	sleep2 6000;
+	specialeffect2 484;
+	sleep2 4000;
+//Fin scene 3
+	atcommand "@fakename "+strcharinfo(0)+"";
+	undisguise;
+	setpcblock PCBLOCK_NPCCLICK,false;
+	removemapflag instance_mapname("asg_fild10"), MF_NOSKILL;
+	mapwarp instance_mapname("asg_fild10"),instance_mapname("intro02"),155,67;
+	end;
+}
+asg_fild10,153,295,0	script	Whisper#m06	111,{end;}
+asg_fild10,168,305,0	script	Whisper#m07	111,{end;}
+asg_fild10,154,320,0	script	Whisper#m08	111,{end;}
+
+//============================================================
+// = Scene 3 - Big fight
+//============================================================
+intro02,155,67,8	script	Intro02#new	139,1,1,{
+killmonsterall instance_mapname("intro02");
+OnStart:
+'langtype = #langtype;
+camerainfo 50000,0,-4000;
+setpcblock PCBLOCK_NPCCLICK,true;
+setoption Option_Invisible,0;
+atcommand "@speed 120";
+unitwalk getcharid(3),151,70;
+set .@x1,157;	set .@y1,64;
+set .@x2,153;	set .@y2,62;
+set .@x3,150;	set .@y3,66;
+set .@x4,152;	set .@y4,69;
+set .@x5,156;	set .@y5,71;
+set .@x6,154;	set .@y6,76;
+set .@x7,153;	set .@y7,61;
+set .@x8,159;	set .@y8,62;
+set .@x9,155;	set .@y9,65;
+set .@x10,158;	set .@y10,66;
+for(set .@i,1;.@i<=10;set .@i,.@i+1) {
+if((.@i>0)&&(.@i<4))||((.@i>7)&&(.@i<10)) { monster instance_mapname("intro02"),getd(".@x"+.@i+""),getd(".@y"+.@i+""),"Child",3984+.@i,1; setarray getd("'novice"+.@i+""),$@mobid[0]; }
+if((.@i>3)&&(.@i<8))||(.@i==10) { monster instance_mapname("intro02"),getd(".@x"+.@i+""),getd(".@y"+.@i+""),"Child",3984+.@i,1; setarray getd("'novice"+.@i+""),$@mobid[0]; }
+setunitdata getd("'novice"+.@i+""),UMOB_MODE,1|32|128;
+unitwalk getd("'novice"+.@i+""),getd(".@x"+.@i+""),getd(".@y"+.@i+"")+12;	setd(".@y"+.@i+"",getd(".@y"+.@i+"")+12);
+}
+unitwalk getcharid(3),151,70+12;
+//pcfollow getcharid(3),'novice1;
+//unitassist getcharid(3),'novice1;
+if(#langtype == 0) unittalk 'novice1,"Child: Hurry up !";
+if(#langtype == 7) unittalk 'novice1,"Child: Dépêchez-Vous !";
+sleep2 130*12;
+for(set .@i,1;.@i<=10;set .@i,.@i+1) {
+unitwalk getd("'novice"+.@i+""),getd(".@x"+.@i+""),getd(".@y"+.@i+"")+12;	setd(".@y"+.@i+"",getd(".@y"+.@i+"")+12);
+}
+unitwalk getcharid(3),151,82+12;
+sleep2 130*12;
+for(set .@i,1;.@i<=10;set .@i,.@i+1) {
+unitwalk getd("'novice"+.@i+""),getd(".@x"+.@i+""),getd(".@y"+.@i+"")+12;	setd(".@y"+.@i+"",getd(".@y"+.@i+"")+12);
+}
+unitwalk getcharid(3),151,94+12;
+sleep2 130*6;
+unittalk 'novice2,"Child: ?!!";
+unittalk 'novice3,"Child: ?!!";
+unittalk 'novice5,"Child: ?!!";
+unittalk 'novice7,"Child: ?!!";
+unittalk 'novice9,"Child: ?!!";
+soundeffect "se_prtmarket_02.wav", 0;
+soundeffect "se_prtmarket_02.wav", 0;
+soundeffect "se_prtmarket_02.wav", 0;
+sleep2 130*6;
+for(set .@i,1;.@i<=10;set .@i,.@i+1) {
+unitwalk getd("'novice"+.@i+""),getd(".@x"+.@i+""),117;	setd(".@y"+.@i+"",117);
+}
+unitwalk getcharid(3),151,117;
+
+for(set .@i,1;.@i<=36;set .@i,.@i+1) {
+monster instance_mapname("intro02"),(139-.@i),122,"Imperial Guard",3938,1;
+setd("'garde1_"+.@i+""),$@mobid[0];
+monster instance_mapname("intro02"),(139-.@i),123,"Imperial Guard",3938,1;
+setd("'garde2_"+.@i+""),$@mobid[0];
+//setarray getd("'garde2_"+.@i+""),$@mobid[0];
+monster instance_mapname("intro02"),(170+.@i),122,"Imperial Guard",3938,1;
+setd("'garde3_"+.@i+""),$@mobid[0];
+//setarray getd("'garde3_"+.@i+""),$@mobid[0];
+monster instance_mapname("intro02"),(170+.@i),123,"Imperial Guard",3938,1;
+setd("'garde4_"+.@i+""),$@mobid[0];
+//setarray getd("'garde4_"+.@i+""),$@mobid[0];
+setunitdata getd("'garde1_"+.@i+""),UMOB_MODE,1|8|32|128;
+setunitdata getd("'garde2_"+.@i+""),UMOB_MODE,1|8|32|128;
+setunitdata getd("'garde3_"+.@i+""),UMOB_MODE,1|8|32|128;
+setunitdata getd("'garde4_"+.@i+""),UMOB_MODE,1|8|32|128;
+unitwalk getd("'garde1_"+.@i+""),(139-.@i)+16,122;
+unitwalk getd("'garde2_"+.@i+""),(139-.@i)+16,123;
+unitwalk getd("'garde3_"+.@i+""),(169+.@i)-16,122;
+unitwalk getd("'garde4_"+.@i+""),(169+.@i)-16,123;
+}
+for(set .@i,1;.@i<=16;set .@i,.@i+1) {
+soundeffect "byorgue_move.wav", 0;
+sleep2 120;
+}
+
+//unitwalk getcharid(3),161,128;
+//unitstopwalk getcharid(3),USW_NONE;
+soundeffect "se_prtmarket_02.wav", 0;
+//Ils avancent de 16cases en avant
+
+for(set .@i,1;.@i<=36;set .@i,.@i+1) {
+if(.@i<7){
+unitwalk getd("'garde1_"+.@i+""),((139-.@i)+16),122+10;
+unitwalk getd("'garde2_"+.@i+""),((139-.@i)+16),123+10;
+unitwalk getd("'garde3_"+.@i+""),((169+.@i)-16),122+10;
+unitwalk getd("'garde4_"+.@i+""),((169+.@i)-16),123+10;
+}
+if(.@i>6)&&(.@i<13){
+unitwalk getd("'garde1_"+.@i+""),((139-.@i)+16)+6,122;
+unitwalk getd("'garde2_"+.@i+""),((139-.@i)+16)+6,123;
+unitwalk getd("'garde3_"+.@i+""),((169+.@i)-16)-6,122;
+unitwalk getd("'garde4_"+.@i+""),((169+.@i)-16)-6,123;
+}
+if(.@i>12)&&(.@i<19){
+unitwalk getd("'garde1_"+.@i+""),((139-.@i)+16)+12,122;
+unitwalk getd("'garde2_"+.@i+""),((139-.@i)+16)+12,123;
+unitwalk getd("'garde3_"+.@i+""),((169+.@i)-16)-12,122;
+unitwalk getd("'garde4_"+.@i+""),((169+.@i)-16)-12,123;
+}
+if(.@i>18)&&(.@i<25){
+unitwalk getd("'garde1_"+.@i+""),((139-.@i)+16)+18,122;
+unitwalk getd("'garde2_"+.@i+""),((139-.@i)+16)+18,123;
+unitwalk getd("'garde3_"+.@i+""),((169+.@i)-16)-18,122;
+unitwalk getd("'garde4_"+.@i+""),((169+.@i)-16)-18,123;
+}
+if(.@i>24)&&(.@i<31){
+unitwalk getd("'garde1_"+.@i+""),((139-.@i)+16)+24,122;
+unitwalk getd("'garde2_"+.@i+""),((139-.@i)+16)+24,123;
+unitwalk getd("'garde3_"+.@i+""),((169+.@i)-16)-24,122;
+unitwalk getd("'garde4_"+.@i+""),((169+.@i)-16)-24,123;
+}
+if(.@i>30)&&(.@i<37){
+unitwalk getd("'garde1_"+.@i+""),((139-.@i)+16)+30,122;
+unitwalk getd("'garde2_"+.@i+""),((139-.@i)+16)+30,123;
+unitwalk getd("'garde3_"+.@i+""),((169+.@i)-16)-30,122;
+unitwalk getd("'garde4_"+.@i+""),((169+.@i)-16)-30,123;
+}
+}
+for(set .@i,1;.@i<=6;set .@i,.@i+1) {
+soundeffect "byorgue_move.wav", 0;
+sleep2 120;
+}
+soundeffect "se_prtmarket_02.wav", 0;
+soundeffect "se_prtmarket_02.wav", 0;
+soundeffect "se_prtmarket_02.wav", 0;
+
+for(set .@i,1;.@i<=36;set .@i,.@i+1) {
+if(.@i<13){
+getunitdata getd("'garde1_"+.@i+""),.@array;
+getunitdata getd("'garde2_"+.@i+""),.@array2;
+getunitdata getd("'garde3_"+.@i+""),.@array3;
+getunitdata getd("'garde4_"+.@i+""),.@array4;
+unitwalk getd("'garde1_"+.@i+""),.@array[6],.@array[7]+6;
+unitwalk getd("'garde2_"+.@i+""),.@array2[6],.@array2[7]+6;
+unitwalk getd("'garde3_"+.@i+""),.@array3[6],.@array3[7]+6;
+unitwalk getd("'garde4_"+.@i+""),.@array4[6],.@array4[7]+6;
+}
+}
+for(set .@i,1;.@i<=6;set .@i,.@i+1) {
+soundeffect "byorgue_move.wav", 0;
+sleep2 120;
+}
+for(set .@i,1;.@i<=36;set .@i,.@i+1) {
+if(.@i<19){
+getunitdata getd("'garde1_"+.@i+""),.@array;
+getunitdata getd("'garde2_"+.@i+""),.@array2;
+getunitdata getd("'garde3_"+.@i+""),.@array3;
+getunitdata getd("'garde4_"+.@i+""),.@array4;
+unitwalk getd("'garde1_"+.@i+""),.@array[6],.@array[7]+6;
+unitwalk getd("'garde2_"+.@i+""),.@array2[6],.@array2[7]+6;
+unitwalk getd("'garde3_"+.@i+""),.@array3[6],.@array3[7]+6;
+unitwalk getd("'garde4_"+.@i+""),.@array4[6],.@array4[7]+6;
+}
+}
+for(set .@i,1;.@i<=6;set .@i,.@i+1) {
+soundeffect "byorgue_move.wav", 0;
+sleep2 120;
+}
+if(#langtype == 0) unittalk 'garde1_21,"Guard: Get out of the way child !";
+if(#langtype == 7) unittalk 'garde1_21,"Guard: Poussez-vous de là les gosses !";
+for(set .@i,1;.@i<=40;set .@i,.@i+1) {
+if(.@i<25){
+getunitdata getd("'garde1_"+.@i+""),.@array;
+getunitdata getd("'garde2_"+.@i+""),.@array2;
+getunitdata getd("'garde3_"+.@i+""),.@array3;
+getunitdata getd("'garde4_"+.@i+""),.@array4;
+unitwalk getd("'garde1_"+.@i+""),.@array[6],.@array[7]+6;
+unitwalk getd("'garde2_"+.@i+""),.@array2[6],.@array2[7]+6;
+unitwalk getd("'garde3_"+.@i+""),.@array3[6],.@array3[7]+6;
+unitwalk getd("'garde4_"+.@i+""),.@array4[6],.@array4[7]+6;
+}
+}
+for(set .@i,1;.@i<=6;set .@i,.@i+1) {
+soundeffect "byorgue_move.wav", 0;
+sleep2 120;
+}
+for(set .@i,1;.@i<=36;set .@i,.@i+1) {
+if(.@i<31){
+getunitdata getd("'garde1_"+.@i+""),.@array;
+getunitdata getd("'garde2_"+.@i+""),.@array2;
+getunitdata getd("'garde3_"+.@i+""),.@array3;
+getunitdata getd("'garde4_"+.@i+""),.@array4;
+unitwalk getd("'garde1_"+.@i+""),.@array[6],.@array[7]+6;
+unitwalk getd("'garde2_"+.@i+""),.@array2[6],.@array2[7]+6;
+unitwalk getd("'garde3_"+.@i+""),.@array3[6],.@array3[7]+6;
+unitwalk getd("'garde4_"+.@i+""),.@array4[6],.@array4[7]+6;
+}
+}
+soundeffect "se_prtmarket_02.wav", 0;
+soundeffect "se_prtmarket_02.wav", 0;
+soundeffect "se_prtmarket_02.wav", 0;
+for(set .@i,1;.@i<=6;set .@i,.@i+1) {
+soundeffect "byorgue_move.wav", 0;
+sleep2 120;
+}
+for(set .@i,1;.@i<=40;set .@i,.@i+1) {
+if(.@i<37){
+getunitdata getd("'garde1_"+.@i+""),.@array;
+getunitdata getd("'garde2_"+.@i+""),.@array2;
+getunitdata getd("'garde3_"+.@i+""),.@array3;
+getunitdata getd("'garde4_"+.@i+""),.@array4;
+unitwalk getd("'garde1_"+.@i+""),.@array[6],.@array[7]+6;
+unitwalk getd("'garde2_"+.@i+""),.@array2[6],.@array2[7]+6;
+unitwalk getd("'garde3_"+.@i+""),.@array3[6],.@array3[7]+6;
+unitwalk getd("'garde4_"+.@i+""),.@array4[6],.@array4[7]+6;
+}
+}
+
+if(#langtype == 0) unittalk 'novice1,"Child: What the hell is going on here ?!";
+if(#langtype == 7) unittalk 'novice1,"Child: Qu'est ce qui se passe ici ?!";
+
+for(set .@i,1;.@i<=6;set .@i,.@i+1) {
+soundeffect "byorgue_move.wav", 0;
+sleep2 120;
+}
+for(set .@i,1;.@i<=36;set .@i,.@i+1) {
+if(.@i<37){
+getunitdata getd("'garde1_"+.@i+""),.@array;
+getunitdata getd("'garde2_"+.@i+""),.@array2;
+getunitdata getd("'garde3_"+.@i+""),.@array3;
+getunitdata getd("'garde4_"+.@i+""),.@array4;
+unitwalk getd("'garde1_"+.@i+""),.@array[6],.@array[7]+6;
+unitwalk getd("'garde2_"+.@i+""),.@array2[6],.@array2[7]+6;
+unitwalk getd("'garde3_"+.@i+""),.@array3[6],.@array3[7]+6;
+unitwalk getd("'garde4_"+.@i+""),.@array4[6],.@array4[7]+6;
+}
+}
+for(set .@i,1;.@i<=6;set .@i,.@i+1) {
+soundeffect "byorgue_move.wav", 0;
+sleep2 120;
+}
+for(set .@i,1;.@i<=36;set .@i,.@i+1) {
+if(.@i<37){
+getunitdata getd("'garde1_"+.@i+""),.@array;
+getunitdata getd("'garde2_"+.@i+""),.@array2;
+getunitdata getd("'garde3_"+.@i+""),.@array3;
+getunitdata getd("'garde4_"+.@i+""),.@array4;
+unitwalk getd("'garde1_"+.@i+""),.@array[6],.@array[7]+6;
+unitwalk getd("'garde2_"+.@i+""),.@array2[6],.@array2[7]+6;
+unitwalk getd("'garde3_"+.@i+""),.@array3[6],.@array3[7]+6;
+unitwalk getd("'garde4_"+.@i+""),.@array4[6],.@array4[7]+6;
+}
+}
+
+soundeffect "se_prtmarket_02.wav", 0;
+soundeffect "se_prtmarket_02.wav", 0;
+soundeffect "se_prtmarket_02.wav", 0;
+
+for(set .@i,1;.@i<=6;set .@i,.@i+1) {
+soundeffect "byorgue_move.wav", 0;
+sleep2 120;
+}
+for(set .@i,1;.@i<=36;set .@i,.@i+1) {
+if(.@i<37){
+getunitdata getd("'garde1_"+.@i+""),.@array;
+getunitdata getd("'garde2_"+.@i+""),.@array2;
+getunitdata getd("'garde3_"+.@i+""),.@array3;
+getunitdata getd("'garde4_"+.@i+""),.@array4;
+unitwalk getd("'garde1_"+.@i+""),.@array[6],.@array[7]+12;
+unitwalk getd("'garde2_"+.@i+""),.@array2[6],.@array2[7]+12;
+unitwalk getd("'garde3_"+.@i+""),.@array3[6],.@array3[7]+12;
+unitwalk getd("'garde4_"+.@i+""),.@array4[6],.@array4[7]+12;
+}
+}
+for(set .@i,1;.@i<=12;set .@i,.@i+1) {
+soundeffect "byorgue_move.wav", 0;
+sleep2 120;
+}
+
+if(#langtype == 0) unittalk 'novice3,"Child: Let's go !";
+if(#langtype == 7) unittalk 'novice3,"Child: Allons-y !";
+
+for(set .@i,1;.@i<=10;set .@i,.@i+1) {
+getunitdata getd("'novice"+.@i+""),.@array;
+unitwalk getd("'novice"+.@i+""),.@array[6],.@array[7]+22;
+}
+getmapxy .@map$,.@x,.@y;
+unitwalk getcharid(3),.@x,.@y+22;
+sleep2 22*120;
+if(#langtype == 0) unittalk 'novice9,"Child: This way !";
+if(#langtype == 7) unittalk 'novice9,"Child: Par ici !";
+sleep2 500;
+for(set .@i,1;.@i<=10;set .@i,.@i+1) {
+unitwalk getd("'novice"+.@i+""),162,150;
+}
+unitwalk getcharid(3),162,150;
+sleep2 120*10;
+for(set .@i,1;.@i<=10;set .@i,.@i+1) {
+unitwalk getd("'novice"+.@i+""),164,171;
+}
+unitwalk getcharid(3),164,171;
+sleep2 120*21;
+for(set .@i,1;.@i<=10;set .@i,.@i+1) {
+if(.@i<9) unitwalk getd("'novice"+.@i+""),164,186+.@i;
+if(.@i>=9) unitwalk getd("'novice"+.@i+""),164,186;
+}
+unitwalk getcharid(3),164,186;
+monster instance_mapname("intro02"),155,189,"Loki's Spirit",3996,1;
+setarray 'divinite1,$@mobid[0];
+setunitdata 'divinite1,UMOB_MODE,1|32|128;
+unitwalk 'divinite1,155,188;
+sleep2 120;
+//unitskillusepos 'divinite1,90,10,155,184;
+//unitskillusepos 'divinite1,1702,1,155,184;
+
+sleep2 120*7;
+if(#langtype == 0) unittalk 'novice4,"Child: Who is this ?!";
+if(#langtype == 7) unittalk 'novice4,"Child: Qui est-ce ?!";
+//unitskillusepos 'divinite1,89,10,155,184;
+sleep2 120*12;
+
+//Les gardes doivent se faire kill ici
+if(#langtype == 0) unittalk 'divinite1,"Loki's Spirit: Ultima !!";
+if(#langtype == 7) unittalk 'divinite1,"Esprit de Loki: Ultima !!";
+specialeffect3 'divinite1,457;
+specialeffect3 'divinite1,223;
+specialeffect3 'divinite1,225;
+specialeffect3 'divinite1,650;
+specialeffect3 'divinite1,650;
+specialeffect3 'divinite1,651;
+
+for(set .@i,1;.@i<=6;set .@i,.@i+1) {
+specialeffect3 getd("'garde1_"+.@i+""),49;
+specialeffect3 getd("'garde1_"+.@i+""),94;
+specialeffect3 getd("'garde1_"+.@i+""),585;
+specialeffect3 getd("'garde2_"+.@i+""),49;
+specialeffect3 getd("'garde2_"+.@i+""),94;
+specialeffect3 getd("'garde2_"+.@i+""),585;
+specialeffect3 getd("'garde3_"+.@i+""),49;
+specialeffect3 getd("'garde3_"+.@i+""),94;
+specialeffect3 getd("'garde3_"+.@i+""),585;
+specialeffect3 getd("'garde4_"+.@i+""),49;
+specialeffect3 getd("'garde4_"+.@i+""),94;
+specialeffect3 getd("'garde4_"+.@i+""),585;
+}
+'charid = getcharid(3);
+donpcevent instance_npcname("Intro02#new")+"::OnUltima1";
+donpcevent instance_npcname("Intro02#new")+"::OnUltima2";
+donpcevent instance_npcname("Intro02#new")+"::OnUltima3";
+donpcevent instance_npcname("Intro02#new")+"::OnNoviceRun";
+
+	if(#langtype == 0) unittalk 'novice10,"Child: Come sister, let's go !";
+	if(#langtype == 7) unittalk 'novice10,"Child: Viens soeurette, allons-y !";
+	unitwalk 'novice9,171,194;
+	unitwalk 'novice10,171,194;
+	monster instance_mapname("intro02"),179,201,"Thor",3995,1;
+	setarray 'divinite2,$@mobid[0];
+	setunitdata 'divinite1,UMOB_AI,1;
+	setunitdata 'divinite2,UMOB_AI,1;
+	setunitdata 'divinite2,UMOB_MODE,1|32|128;
+	unitwalk 'divinite2,173,195;
+	sleep2 120*10;
+	//mapannounce ""+instance_mapname("intro02")+"","Thor: No one will escape the Ragnarök !",0;
+	sleep2 500;
+	unittalk 'divinite2,"Thor: Zantetsuken !!";
+	specialeffect3 'divinite2,650;
+	specialeffect3 'divinite2,650;
+	specialeffect3 'divinite2,651;
+	specialeffect3 'divinite2,457;
+	specialeffect3 'divinite2,223;
+	specialeffect3 'divinite2,225;
+	Lrefaire:
+	if(.@refaire<21){
+		specialeffect3 'novice9,457;
+		specialeffect3 'novice9,1;
+		specialeffect3 'novice9,630;
+		specialeffect3 'novice10,457;
+		specialeffect3 'novice10,1;
+		specialeffect3 'novice10,630;
+		set .@refaire,.@refaire+1;
+		sleep2 150;
+		goto Lrefaire;
+	}
+	specialeffect3 'novice9,372; specialeffect3 'novice9,52; specialeffect3 'novice9,450; specialeffect3 'novice9,17;
+	specialeffect3 'novice10,372; specialeffect3 'novice10,52; specialeffect3 'novice10,450; specialeffect3 'novice10,17;
+	unitkill 'novice10; unitkill 'novice9;
+	if(#langtype == 0) unittalk 'divinite2,"Thor: No one will escape the Ragnarök !";
+	if(#langtype == 7) unittalk 'divinite2,"Thor: Personne n'échappera au Ragnarök !";
+	for(set .@i2,1;.@i2<=36;set .@i2,.@i2+1) {
+		if(.@i2>6)&&(.@i2<13){
+			unitwalk getd("'garde1_"+.@i2+""),155,186;
+			unitwalk getd("'garde2_"+.@i2+""),155,186;
+			unitwalk getd("'garde3_"+.@i2+""),155,186;
+			unitwalk getd("'garde4_"+.@i2+""),155,186;
+			unittalk getd("'garde1_"+.@i2+""),"Guard: Yaaaaa !!!";
+			unittalk getd("'garde2_"+.@i2+""),"Guard: Yaaaaa !!!";
+			unittalk getd("'garde3_"+.@i2+""),"Guard: Yaaaaa !!!";
+			unittalk getd("'garde4_"+.@i2+""),"Guard: Yaaaaa !!!";
+			sleep2 120;
+		}
+	}
+
+	sleep2 120;
+	monster instance_mapname("intro02"),173,207,"Grenat",3957,1; setarray 'joueur1,$@mobid[0];
+	monster instance_mapname("intro02"),173,207,"Eri Eckland",3971,1; setarray 'joueur2,$@mobid[0];
+	monster instance_mapname("intro02"),173,207,"TiNange",3967,1; setarray 'joueur3,$@mobid[0];
+	monster instance_mapname("intro02"),173,207,"Hyde",3968,1; setarray 'joueur4,$@mobid[0];
+	monster instance_mapname("intro02"),173,207,"Kitty",3978,1; setarray 'joueur5,$@mobid[0];
+	monster instance_mapname("intro02"),173,207,"Makkie",3961,1; setarray 'joueur6,$@mobid[0];
+	monster instance_mapname("intro02"),173,207,"Hubu",3956,1; setarray 'joueur7,$@mobid[0];
+	monster instance_mapname("intro02"),173,207,"Green",3974,1; setarray 'joueur8,$@mobid[0];
+	monster instance_mapname("intro02"),154,173,"Harikado",3998,1; setarray 'joueur9,$@mobid[0];
+	setunitdata 'joueur1,UMOB_MODE,1|8|32|128;
+	setunitdata 'joueur2,UMOB_MODE,1|8|32|128;
+	setunitdata 'joueur3,UMOB_MODE,1|8|32|128;
+	setunitdata 'joueur4,UMOB_MODE,1|8|32|128;
+	setunitdata 'joueur5,UMOB_MODE,1|8|32|128;
+	setunitdata 'joueur6,UMOB_MODE,1|8|32|128;
+	setunitdata 'joueur7,UMOB_MODE,1|8|32|128;
+	setunitdata 'joueur8,UMOB_MODE,1|8|32|128;
+	setunitdata 'joueur9,UMOB_MODE,1|8|32|128;
+	unitwalk 'joueur1,171,197;
+	unitwalk 'joueur2,170,195;
+	unitwalk 'joueur3,170,192;
+	unitwalk 'joueur4,172,192;
+	unitwalk 'joueur5,174,192;
+	unitwalk 'joueur6,163,191;
+	unitwalk 'joueur7,165,185;
+	unitwalk 'joueur8,160,188;
+	unitwalk 'joueur9,155,183;
+
+	if(#langtype == 0) unittalk 'divinite1,"Loki's Spirit: Useless !";
+	if(#langtype == 7) unittalk 'divinite1,"Esprit de Loki: Inutile !";
+
+	for(set .@i2,1;.@i2<=36;set .@i2,.@i2+1) {
+		if(.@i2>6)&&(.@i2<13){
+			specialeffect3 'divinite1,457;
+			specialeffect3 'divinite1,223;
+			specialeffect3 'divinite1,225;
+			specialeffect3 getd("'garde1_"+.@i2+""),20;
+			specialeffect3 getd("'garde1_"+.@i2+""),25;
+			specialeffect3 getd("'garde2_"+.@i2+""),20;
+			specialeffect3 getd("'garde2_"+.@i2+""),25;
+			specialeffect3 getd("'garde3_"+.@i2+""),20;
+			specialeffect3 getd("'garde3_"+.@i2+""),25;
+			specialeffect3 getd("'garde4_"+.@i2+""),20;
+			specialeffect3 getd("'garde4_"+.@i2+""),25;
+			sleep2 120;
+			unitkill getd("'garde1_"+.@i2+"");
+			unitkill getd("'garde2_"+.@i2+"");
+			unitkill getd("'garde3_"+.@i2+"");
+			unitkill getd("'garde4_"+.@i2+"");
+		}
+	}
+
+for(set .@i,1;.@i<=36;set .@i,.@i+1) {
+if(.@i>12){
+getunitdata getd("'garde1_"+.@i+""),.@array;
+getunitdata getd("'garde2_"+.@i+""),.@array2;
+getunitdata getd("'garde3_"+.@i+""),.@array3;
+getunitdata getd("'garde4_"+.@i+""),.@array4;
+unitwalk getd("'garde1_"+.@i+""),.@array[6],.@array[7]+6;
+unitwalk getd("'garde2_"+.@i+""),.@array2[6],.@array2[7]+6;
+unitwalk getd("'garde3_"+.@i+""),.@array3[6],.@array3[7]+6;
+unitwalk getd("'garde4_"+.@i+""),.@array4[6],.@array4[7]+6;
+}
+}
+
+
+for(set .@i2,1;.@i2<=36;set .@i2,.@i2+1) {
+if(.@i2>12)&&(.@i2<19){
+unitwalk getd("'garde1_"+.@i2+""),155,186;
+unitwalk getd("'garde2_"+.@i2+""),155,186;
+unitwalk getd("'garde3_"+.@i2+""),155,186;
+unitwalk getd("'garde4_"+.@i2+""),155,186;
+unittalk getd("'garde1_"+.@i2+""),"Guard: Yaaaaa !!!";
+unittalk getd("'garde2_"+.@i2+""),"Guard: Yaaaaa !!!";
+unittalk getd("'garde3_"+.@i2+""),"Guard: Yaaaaa !!!";
+unittalk getd("'garde4_"+.@i2+""),"Guard: Yaaaaa !!!";
+sleep2 120;
+}
+}
+sleep2 120;
+
+for(set .@i2,1;.@i2<=36;set .@i2,.@i2+1) {
+if(.@i2>12)&&(.@i2<19){
+specialeffect3 'divinite1,457;
+specialeffect3 'divinite1,223;
+specialeffect3 'divinite1,225;
+specialeffect3 getd("'garde1_"+.@i2+""),20;
+specialeffect3 getd("'garde1_"+.@i2+""),25;
+specialeffect3 getd("'garde2_"+.@i2+""),20;
+specialeffect3 getd("'garde2_"+.@i2+""),25;
+specialeffect3 getd("'garde3_"+.@i2+""),20;
+specialeffect3 getd("'garde3_"+.@i2+""),25;
+specialeffect3 getd("'garde4_"+.@i2+""),20;
+specialeffect3 getd("'garde4_"+.@i2+""),25;
+sleep2 120;
+unitkill getd("'garde1_"+.@i2+"");
+unitkill getd("'garde2_"+.@i2+"");
+unitkill getd("'garde3_"+.@i2+"");
+unitkill getd("'garde4_"+.@i2+"");
+}
+}
+
+for(set .@i,1;.@i<=36;set .@i,.@i+1) {
+if(.@i>18){
+getunitdata getd("'garde1_"+.@i+""),.@array;
+getunitdata getd("'garde2_"+.@i+""),.@array2;
+getunitdata getd("'garde3_"+.@i+""),.@array3;
+getunitdata getd("'garde4_"+.@i+""),.@array4;
+unitwalk getd("'garde1_"+.@i+""),.@array[6],.@array[7]+6;
+unitwalk getd("'garde2_"+.@i+""),.@array2[6],.@array2[7]+6;
+unitwalk getd("'garde3_"+.@i+""),.@array3[6],.@array3[7]+6;
+unitwalk getd("'garde4_"+.@i+""),.@array4[6],.@array4[7]+6;
+}
+}
+
+unitattack 'joueur1,'divinite2,1;
+unitattack 'joueur2,'divinite2,1;
+unitattack 'joueur3,'divinite2,1;
+unitattack 'joueur4,'divinite2,1;
+unitattack 'joueur5,'divinite2,1;
+
+if(#langtype == 0) unittalk 'joueur7,"Hubu: Go up and go to the castle !";
+if(#langtype == 7) unittalk 'joueur7,"Hubu: Montez et allez au château !";
+unitwalk 'joueur7,164,185;
+setunitdata 'joueur7,UMOB_TARGETID,'divinite2;
+unitattack 'joueur7,'divinite2,1;
+
+specialeffect3 'joueur3,60;
+specialeffect3 'joueur3,55;
+specialeffect3 'joueur2,33;
+specialeffect3 'joueur1,493;
+specialeffect3 'joueur1,493;
+
+specialeffect3 'joueur8,60;
+specialeffect3 'joueur8,72;
+specialeffect3 'joueur6,9;
+unitwalk 'joueur8,158,189;
+unitwalk 'joueur6,157,188;
+unitattack 'joueur9,'divinite1,1;
+sleep2 300;
+specialeffect3 'joueur8,10;
+specialeffect3 'joueur6,55;
+sleep2 300;
+specialeffect3 'divinite1,666;
+specialeffect3 'divinite1,666;
+specialeffect3 'divinite1,666;
+specialeffect3 'divinite1,500;
+specialeffect3 'divinite2,830;
+specialeffect3 'divinite2,831;
+sleep2 200;
+specialeffect3 'divinite1,666;
+specialeffect3 'divinite1,666;
+specialeffect3 'divinite1,666;
+specialeffect3 'joueur1,493;
+unitskilluseid 'joueur7,19,10,'divinite2;
+sleep2 200;
+specialeffect3 'divinite1,666;
+specialeffect3 'divinite1,666;
+specialeffect3 'divinite1,666;
+unitskilluseid 'joueur7,19,10,'divinite2;
+sleep2 200;
+unitattack 'joueur8,'divinite1,1;
+unitattack 'joueur6,'divinite1,1;
+specialeffect3 'divinite1,666;
+specialeffect3 'divinite1,666;
+specialeffect3 'divinite1,666;
+specialeffect3 'divinite2,835;
+unitskilluseid 'joueur7,19,10,'divinite2;
+sleep2 200;
+specialeffect3 'divinite2,457;
+specialeffect3 'divinite2,223;
+specialeffect3 'divinite2,225;
+unitskilluseid 'joueur7,19,10,'divinite2;
+sleep2 500;
+donpcevent instance_npcname("Intro02#new")+"::OnOuroboros1";
+unitskilluseid 'joueur7,19,10,'divinite2;
+sleep2 500;
+if(#langtype == 0) unittalk 'divinite1,"Loki's Spirit: Children of the Realm !";
+if(#langtype == 7) unittalk 'divinite1,"Esprit de Loki : les enfants de Realm !";
+unitskilluseid 'joueur7,19,10,'divinite2;
+sleep2 1000;
+unitskilluseid 'joueur7,19,10,'divinite2;
+sleep2 1000;
+/*
+	for(set .@i,1;.@i<=36;set .@i,.@i+1) {
+		if(.@i>18){
+			unitattack getd("'garde1_"+.@i+""),'divinite1;
+			unitattack getd("'garde2_"+.@i+""),'divinite1;
+			unitattack getd("'garde3_"+.@i+""),'divinite1;
+			unitattack getd("'garde4_"+.@i+""),'divinite1;
+		}
+	}
+*/
+unitskilluseid 'joueur7,19,10,'divinite2;
+if(#langtype == 0) unittalk 'divinite1,"Loki's Spirit: You knew that day would come.";
+if(#langtype == 7) unittalk 'divinite1,"Esprit de Loki : vous saviez que ce jour viendrait.";
+sleep2 1000;
+unitskilluseid 'joueur7,19,10,'divinite2;
+sleep2 1000;
+unitskilluseid 'joueur7,19,10,'divinite2;
+sleep2 1000;
+unitskilluseid 'joueur7,19,10,'divinite2;
+unittalk 'joueur6,"Makkie: ...";
+sleep2 2000;
+unitskilluseid 'joueur7,19,10,'divinite2;
+if(#langtype == 0) unittalk 'divinite1,"Loki's Spirit: The Gods came on Earth to create a renewal!";
+if(#langtype == 7) unittalk 'divinite1,"Esprit de Loki: Les Dieux sont venus sur Terre pour créer un renouveau!";
+specialeffect3 'divinite1,28;
+specialeffect3 'divinite1,27;
+specialeffect3 'divinite1,457;
+specialeffect3 'divinite1,223;
+specialeffect3 'divinite1,225;
+
+specialeffect3 'divinite1,27;
+
+specialeffect3 'joueur6,636;
+specialeffect3 'joueur8,636;
+
+donpcevent instance_npcname("Intro02#new")+"::OnTrans1";
+donpcevent instance_npcname("Intro02#new")+"::OnTrans2";
+sleep2 2000;
+unitskilluseid 'joueur7,19,10,'divinite2;
+if(#langtype == 0) unittalk 'novice1,"Child: I don't want to stay here !!";
+if(#langtype == 7) unittalk 'novice1,"Child: je ne veux pas rester ici !!";
+sleep2 2000;
+unitskilluseid 'joueur7,19,10,'divinite2;
+for(set .@i,1;.@i<=8;set .@i,.@i+1) {
+unitwalk getd("'novice"+.@i+""),167,202;
+}
+unitwalk getcharid(3),167,202;
+
+sleep2 500;
+unitskilluseid 'joueur7,19,10,'divinite2;
+if(#langtype == 0) unittalk 'divinite2,"Thor: No need to run away, everyone will die !";
+if(#langtype == 7) unittalk 'divinite2,"Thor: Pas besoin de s'enfuir, tout le monde mourra !";
+
+unitattack 'divinite2,'joueur7,1;
+unitskilluseid 'joueur7,19,10,'divinite2;
+
+sleep2 1500;
+for(set .@i,1;.@i<=8;set .@i,.@i+1) {
+unitwalk getd("'novice"+.@i+""),166+.@i,212;
+}
+unitwalk getcharid(3),166,212;
+if(#langtype == 0) unittalk 'joueur7,"Hubu: If I die, it will be in honor !";
+if(#langtype == 7) unittalk 'joueur7,"Hubu: Si je meurs, ce sera dans l'honneur !";
+
+monster instance_mapname("intro02"),167,218,"Gileyn Fu Arma",3939,1,"",2; setarray 'ascalon,$@mobid[0];
+setunitdata 'ascalon,UMOB_AI,1;
+setunitdata 'ascalon,UMOB_MODE,1|32|128;
+monster instance_mapname("intro02"),163,219,"Intoxx",3964,1; setarray 'joueur10,$@mobid[0];
+monster instance_mapname("intro02"),162,222,"Hishigi",3969,1; setarray 'joueur11,$@mobid[0];
+monster instance_mapname("intro02"),164,216,"Bodhiryu",3970,1; setarray 'joueur12,$@mobid[0];
+monster instance_mapname("intro02"),162,217,"Arkenciel",3999,1; setarray 'joueur13,$@mobid[0];
+setunitdata 'ascalon,UMOB_TARGETID,'joueur12;
+setunitdata 'joueur10,UMOB_MODE,1|8|32|128;
+setunitdata 'joueur11,UMOB_MODE,1|8|32|128;
+setunitdata 'joueur12,UMOB_MODE,1|8|32|128;
+setunitdata 'joueur13,UMOB_MODE,1|8|32|128;
+
+unitattack 'joueur10,'ascalon;
+unitattack 'joueur12,'ascalon;
+unitattack 'joueur13,'ascalon;
+unitattack 'ascalon,'joueur10;
+unitskilluseid 'joueur11,28,10,'joueur10;
+unitskilluseid 'joueur13,14,10,'ascalon;
+sleep2 1000;
+unitskilluseid 'joueur11,28,10,'joueur10;
+sleep2 1000;
+unitskilluseid 'joueur11,28,10,'joueur10;
+unitskilluseid 'joueur13,14,10,'ascalon;
+sleep2 1000;
+unitskilluseid 'joueur11,28,10,'joueur10;
+sleep2 1000;
+unitskilluseid 'joueur11,28,10,'joueur10;
+unitskilluseid 'joueur13,14,10,'ascalon;
+if(#langtype == 0) unittalk 'ascalon,"Gileyn Fu Arma: Humans !";
+if(#langtype == 7) unittalk 'ascalon,"Gileyn Fu Arma: Humains !";
+sleep2 1000;
+unitskilluseid 'joueur11,28,10,'joueur10;
+sleep2 1000;
+unitskilluseid 'joueur11,28,10,'joueur10;
+unitskilluseid 'joueur13,14,10,'ascalon;
+sleep2 1000;
+unitskilluseid 'joueur11,28,10,'joueur10;
+if(#langtype == 0) unittalk 'joueur10,"Intoxx: If you are not able to fight, take cover !";
+if(#langtype == 7) unittalk 'joueur10,"Intoxx: Si vous n'êtes pas en mesure de vous battre, mettez-vous à l'abri !";
+sleep2 1000;
+unitskilluseid 'joueur13,14,10,'ascalon;
+sleep2 1000;
+unitskilluseid 'joueur11,28,10,'joueur10;
+if(#langtype == 0) unittalk 'novice1,"Child: Ye... Yes sir !";
+if(#langtype == 0) unittalk 'novice7,"Child: Thanks !";
+if(#langtype == 7) unittalk 'novice1,"Child: O... Oui m'sieur !";
+if(#langtype == 7) unittalk 'novice7,"Child: Merci !";
+for(set .@i,1;.@i<=8;set .@i,.@i+1) {
+unitwalk getd("'novice"+.@i+""),159,218;
+unitemote getd("'novice"+.@i+""),ET_KEK;
+}
+unitwalk getcharid(3),159,218;
+sleep2 1000;
+unitskilluseid 'joueur11,28,10,'joueur10;
+unitskilluseid 'joueur13,14,10,'ascalon;
+for(set .@i,1;.@i<=8;set .@i,.@i+1) {
+unitwalk getd("'novice"+.@i+""),155,238;
+unitemote getd("'novice"+.@i+""),ET_KEK;
+}
+unitwalk getcharid(3),155,238;
+unitskilluseid 'joueur11,28,10,'joueur10;
+if(#langtype == 0) unittalk 'joueur11,"Hishigi: (Farewell...)";
+if(#langtype == 7) unittalk 'joueur11,"Hishigi: (Adieu...)";
+sleep2 1000;
+for(set .@i,1;.@i<=8;set .@i,.@i+1) {
+unitwalk getd("'novice"+.@i+""),157,250;
+unitemote getd("'novice"+.@i+""),ET_KEK;
+}
+unitwalk getcharid(3),157,250;
+sleep2 1000;
+monster instance_mapname("intro02"),151,248,"Evangeline Mac Dowell",3959,1; setarray 'joueur14,$@mobid[0];
+monster instance_mapname("intro02"),152,248,"Hideki",3960,1; setarray 'joueur15,$@mobid[0];
+monster instance_mapname("intro02"),153,248,"Payle Itaki",3958,1; setarray 'joueur16,$@mobid[0];
+monster instance_mapname("intro02"),154,248,"Rins",3968,1; setarray 'joueur17,$@mobid[0];
+monster instance_mapname("intro02"),155,248,"Mikuru",3963,1; setarray 'joueur18,$@mobid[0];
+monster instance_mapname("intro02"),156,248,"Docthib",3965,1; setarray 'joueur19,$@mobid[0];
+monster instance_mapname("intro02"),157,248,"Duran",3966,1; setarray 'joueur20,$@mobid[0];
+monster instance_mapname("intro02"),151,249,"Veda",3972,1; setarray 'joueur21,$@mobid[0];
+monster instance_mapname("intro02"),152,249,"Meuh",3973,1; setarray 'joueur22,$@mobid[0];
+monster instance_mapname("intro02"),153,249,"Malebolgia",3975,1; setarray 'joueur23,$@mobid[0];
+monster instance_mapname("intro02"),154,249,"Kwaii",3976,1; setarray 'joueur24,$@mobid[0];
+monster instance_mapname("intro02"),155,249,"Yang Xia",3977,1; setarray 'joueur25,$@mobid[0];
+monster instance_mapname("intro02"),156,249,"Kenshin",3979,1; setarray 'joueur26,$@mobid[0];
+monster instance_mapname("intro02"),157,249,"Amelia",3980,1; setarray 'joueur27,$@mobid[0];
+monster instance_mapname("intro02"),157,250,"Tutuxinton",3981,1; setarray 'joueur28,$@mobid[0];
+monster instance_mapname("intro02"),156,250,"Nerine",3982,1; setarray 'joueur29,$@mobid[0];
+monster instance_mapname("intro02"),155,250,"Ren Aurora",3984,1; setarray 'joueur30,$@mobid[0];
+sleep2 1500;
+for(set .@i,14;.@i<=30;set .@i,.@i+1) {
+setunitdata getd("'joueur"+.@i+""),UMOB_MODE,1|8|32;
+unitwalk getd("'joueur"+.@i+""),160,228;
+if(#langtype == 0) {
+switch (rand(0,7)) {
+	case 0: unittalk getd("'joueur"+.@i+""),getunitname(getd("'joueur"+.@i+""))+": Let's go !"; break;
+	case 1: unittalk getd("'joueur"+.@i+""),getunitname(getd("'joueur"+.@i+""))+": For the Realm !"; break;
+	case 2: unittalk getd("'joueur"+.@i+""),getunitname(getd("'joueur"+.@i+""))+": For the Realm !"; break;
+	case 3: unittalk getd("'joueur"+.@i+""),getunitname(getd("'joueur"+.@i+""))+": Aaaahhhh !"; break;
+	case 4: unittalk getd("'joueur"+.@i+""),getunitname(getd("'joueur"+.@i+""))+": ..."; break;
+	case 5: unittalk getd("'joueur"+.@i+""),getunitname(getd("'joueur"+.@i+""))+": Together !"; break;
+	case 6: unittalk getd("'joueur"+.@i+""),getunitname(getd("'joueur"+.@i+""))+": United !"; break;
+	case 7: unittalk getd("'joueur"+.@i+""),getunitname(getd("'joueur"+.@i+""))+": !!!!"; break;
+}
+}
+if(#langtype == 7) {
+switch (rand(0,8)) {
+	case 0: unittalk getd("'joueur"+.@i+""),getunitname(getd("'joueur"+.@i+""))+": On y va !"; break;
+	case 1: unittalk getd("'joueur"+.@i+""),getunitname(getd("'joueur"+.@i+""))+": Pour Realm !"; break;
+	case 2: unittalk getd("'joueur"+.@i+""),getunitname(getd("'joueur"+.@i+""))+": Pour Realm !"; break;
+	case 3: unittalk getd("'joueur"+.@i+""),getunitname(getd("'joueur"+.@i+""))+": Aaaahhhh !"; break;
+	case 4: unittalk getd("'joueur"+.@i+""),getunitname(getd("'joueur"+.@i+""))+": ..."; break;
+	case 5: unittalk getd("'joueur"+.@i+""),getunitname(getd("'joueur"+.@i+""))+": Ensemble !"; break;
+	case 6: unittalk getd("'joueur"+.@i+""),getunitname(getd("'joueur"+.@i+""))+": Unis !"; break;
+	case 7: unittalk getd("'joueur"+.@i+""),getunitname(getd("'joueur"+.@i+""))+": !!!!"; break;
+	case 8: unittalk getd("'joueur"+.@i+""),getunitname(getd("'joueur"+.@i+""))+": Allons-y !"; break;
+}
+}
+}
+sleep2 1000;
+for(set .@i,14;.@i<=30;set .@i,.@i+1) {
+unitwalk getd("'joueur"+.@i+""),163,220;
+}
+specialeffect2 484;
+unitskilluseid 'joueur11,28,10,'joueur10;
+unitskilluseid 'joueur13,14,10,'ascalon;
+sleep2 1000;
+for(set .@i,1;.@i<=8;set .@i,.@i+1) {
+unitwalk getd("'novice"+.@i+""),157,265;
+unitemote getd("'novice"+.@i+""),ET_KEK;
+}
+unitwalk getcharid(3),157,265;
+unitskilluseid 'joueur11,28,10,'joueur10;
+sleep2 1000;
+unitskilluseid 'joueur11,28,10,'joueur10;
+unitskilluseid 'joueur13,14,10,'ascalon;
+sleep2 1000;
+unitskilluseid 'joueur11,28,10,'joueur10;
+
+	for(.@i = 1; .@i <= 8; .@i++) {
+		setunitdata getd("'novice"+.@i+""),UMOB_SPEED,150;
+		unitwarp getd("'novice"+.@i+""),instance_mapname("intro07"),7,94;
+	}
+	setpcblock PCBLOCK_NPCCLICK,false;
+	warp instance_mapname("intro07"),7,94;
+	end;
+
+OnNoviceRun:
+	getmapxy .@map$,.@x,.@y,BL_PC,'charid;
+	for(.@i = 1; .@i <= 8; .@i++) {
+		getunitdata getd("'novice"+.@i+""),.@array;
+		setunitdata getd("'novice"+.@i+""),UMOB_SPEED,90;
+	}
+	for(.@i3 = 0; .@i3 < 30; .@i3++) {
+		for(.@i = 1; .@i <= 8; .@i++) {
+			if(.@i3==1)
+				unitwalk getd("'novice"+.@i+""),.@array[6]-2,.@array[7];
+			if(.@i3>1)
+				unitwalk getd("'novice"+.@i+""),.@array[6]-4,.@array[7];
+			unitemote getd("'novice"+.@i+""),ET_KEK;
+		}
+		unitwalk 'charid,.@x-4,.@y;
+		if(.@i3==1) sleep 160;
+		if(.@i3>1) sleep 320;
+		for(.@i = 1; .@i <= 8; .@i++)
+			unitwalk getd("'novice"+.@i+""),.@array[6],.@array[7];
+		unitwalk 'charid,.@x,.@y;
+		sleep 320;
+	}
+	for(.@i = 1; .@i <= 8; .@i++)
+		setunitdata getd("'novice"+.@i+""),UMOB_SPEED,120;
+	end;
+
+OnTrans2:
+	sleep 1000;
+	specialeffect3 'joueur6,51;
+	specialeffect3 'joueur8,51;
+	specialeffect3 'joueur6,51;
+	specialeffect3 'joueur8,51;
+	specialeffect3 'joueur6,51;
+	specialeffect3 'joueur8,51;
+	specialeffect3 'joueur6,51;
+	specialeffect3 'joueur8,51;
+	specialeffect3 'joueur6,51;
+	specialeffect3 'joueur8,51;
+	specialeffect3 'joueur6,636;
+	specialeffect3 'joueur8,636;
+	sleep 1000;
+	specialeffect3 'joueur6,74;
+	specialeffect3 'joueur8,74;
+	specialeffect3 'joueur6,74;
+	specialeffect3 'joueur8,74;
+	specialeffect3 'joueur6,74;
+	specialeffect3 'joueur8,74;
+	specialeffect3 'joueur6,74;
+	specialeffect3 'joueur8,74;
+	specialeffect3 'joueur6,74;
+	specialeffect3 'joueur8,74;
+	specialeffect3 'joueur6,636;
+	specialeffect3 'joueur8,636;
+	sleep 1000;
+	specialeffect3 'joueur6,636;
+	specialeffect3 'joueur8,636;
+	specialeffect3 'divinite1,89;
+	specialeffect3 'divinite1,89;
+	specialeffect3 'divinite1,89;
+	specialeffect3 'divinite1,27;
+	if('langtype == 0) unittalk 'joueur6,"Makkie: It's the end...";
+	if('langtype == 7) unittalk 'joueur6,"Makkie: C'est la fin...";
+	unittalk 'joueur8,"Green: Arghh !";
+	sleep 1000;
+	unitkill 'joueur6;
+	unitkill 'joueur8;
+	end;
+
+OnTrans1:
+	for(.@i = 0; .@i < 17; .@i++) {
+		sleep 200;
+		specialeffect3 'joueur6,28;
+		specialeffect3 'joueur8,28;
+	}
+	end;
+
+OnOuroboros1:
+	for(.@i = 0; .@i < 26; .@i++) {
+		if(.effet3>=20) { specialeffect3 'divinite2,537; specialeffect3 'divinite2,266; specialeffect3 'joueur1,90; specialeffect3 'joueur2,90; }
+		if(.effet3>=10) { specialeffect3 'joueur1,587; specialeffect3 'joueur2,587; specialeffect3 'joueur3,587; specialeffect3 'joueur4,587; specialeffect3 'joueur5,587; specialeffect3 'divinite2,266; specialeffect3 'divinite2,537; specialeffect3 'joueur1,409; specialeffect3 'joueur2,409; specialeffect3 'joueur3,409; specialeffect3 'joueur4,409; specialeffect3 'joueur5,409; }
+		specialeffect3 'joueur1,583;
+		specialeffect3 'joueur2,583;
+		specialeffect3 'joueur3,583;
+		specialeffect3 'joueur4,583;
+		specialeffect3 'joueur5,583;
+		specialeffect3 'divinite2,266;
+		specialeffect3 'divinite2,537;
+	}
+	unittalk 'joueur1,"Grenat: Arghh...";
+	if('langtype == 0) unittalk 'joueur2,"Eri Eckland: Too strong...";
+	if('langtype == 7) unittalk 'joueur2,"Eri Eckland: Trop puissant...";
+	if('langtype == 0) unittalk 'joueur3,"TiNange: I... I can't...";
+	if('langtype == 7) unittalk 'joueur3,"TiNange: Je... Je ne peux plus...";
+	unittalk 'joueur4,"Hyde: Arg...";
+	unittalk 'joueur5,"Kitty: Ahhh !!"; sleep 1000; unitkill 'joueur1; unitkill 'joueur2; unitkill 'joueur3; unitkill 'joueur4; unitkill 'joueur5;
+	end;
+
+OnUltima1:
+	for(.@i2 = 0; .@i2 < 26; .@i2++) {
+		sleep 150;
+		for(set .@i,1;.@i<=6;set .@i,.@i+1) {
+			specialeffect3 getd("'garde1_"+.@i+""),587;
+			specialeffect3 getd("'garde2_"+.@i+""),587;
+			specialeffect3 getd("'garde3_"+.@i+""),587;
+			specialeffect3 getd("'garde4_"+.@i+""),587;
+		}
+	}
+	end;
+OnUltima2:
+	for(.@i2 = 0; .@i2 < 13; .@i2++) {
+		sleep 300;
+		for(set .@i,1;.@i<=6;set .@i,.@i+1) {
+			specialeffect3 getd("'garde1_"+.@i+""),585;
+			specialeffect3 getd("'garde2_"+.@i+""),585;
+			specialeffect3 getd("'garde3_"+.@i+""),585;
+			specialeffect3 getd("'garde4_"+.@i+""),585;
+			specialeffect3 getd("'garde1_"+.@i+""),51;
+			specialeffect3 getd("'garde2_"+.@i+""),51;
+			specialeffect3 getd("'garde3_"+.@i+""),51;
+			specialeffect3 getd("'garde4_"+.@i+""),51;
+		}
+	}
+	end;
+OnUltima3:
+	for(.@i3 = 0; .@i3 < 3; .@i3++) {
+		sleep 1000;
+		for(.@i = 1; .@i <= 6; .@i++) {
+			for(.@i2 = 1; .@i2 <= 4; .@i2++) {
+				specialeffect3 getd("'garde"+.@i2+"_"+.@i+""),51;
+				specialeffect3 getd("'garde"+.@i2+"_"+.@i+""),585;
+				specialeffect3 getd("'garde"+.@i2+"_"+.@i+""),94;
+			}
+		}
+	}
+	sleep 500;
+	for(set .@i,1;.@i<=6;set .@i,.@i+1) {
+		unitkill getd("'garde1_"+.@i+"");
+		unitkill getd("'garde2_"+.@i+"");
+		unitkill getd("'garde3_"+.@i+"");
+		unitkill getd("'garde4_"+.@i+"");
+	}
+	end;
+}
+
+intro02,153,360,0	script	newro001	45,{
+	end;
+}
+
+intro07,7,94,0	script	Intro07#new01	139,1,1,{
+	setpcblock PCBLOCK_NPCCLICK,true;
+	for(set .@i,1;.@i<=8;set .@i,.@i+1) {
+		unitwalk getd("'novice"+.@i+""),23,93;
+		sleep2 150;
+	}
+	unitwalk getcharid(3),23,93;
+	sleep2 150*8;
+	for(set .@i,1;.@i<=8;set .@i,.@i+1) {
+		unitwalk getd("'novice"+.@i+""),23,78;
+		sleep2 150;
+	}
+	unitwalk getcharid(3),23,78;
+	sleep2 150*8;
+	for(set .@i,1;.@i<=8;set .@i,.@i+1) {
+		unitwalk getd("'novice"+.@i+""),8,78;
+		sleep2 150;
+	}
+	unitwalk getcharid(3),8,78;
+	sleep2 150*8;
+	for(set .@i,1;.@i<=8;set .@i,.@i+1) {
+		unitwalk getd("'novice"+.@i+""),8,62;
+		sleep2 150;
+	}
+	unitwalk getcharid(3),8,62;
+	sleep2 150*8;
+	for(set .@i,1;.@i<=8;set .@i,.@i+1) {
+		unitwalk getd("'novice"+.@i+""),17,62;
+		sleep2 150;
+	}
+	unitwalk getcharid(3),17,62;
+	sleep2 150;
+	for(set .@i,1;.@i<=8;set .@i,.@i+1) {
+		unitwalk getd("'novice"+.@i+""),17,50;
+		sleep2 150;
+	}
+	unitwalk getcharid(3),17,50;
+	sleep2 150*4;
+	sleep2 1000;
+	unitwarp 'novice1,instance_mapname("intro08"),82,98;
+	unitwarp 'novice2,instance_mapname("intro08"),82,98;
+	unitwarp 'novice3,instance_mapname("intro08"),82,98;
+	unitwarp 'novice4,instance_mapname("intro08"),82,98;
+	unitwarp 'novice5,instance_mapname("intro08"),82,98;
+	unitwarp 'novice6,instance_mapname("intro08"),82,98;
+	unitwarp 'novice7,instance_mapname("intro08"),82,98;
+	unitwarp 'novice8,instance_mapname("intro08"),82,98;
+	setpcblock PCBLOCK_NPCCLICK,false;
+	warp instance_mapname("intro08"),82,98;
+	end;
+}
+
+intro08,82,98,0	script	Intro08#new01	139,1,1,{
+	setpcblock PCBLOCK_NPCCLICK,true;
+	if(#langtype == 0) unittalk 'novice8,"Child: What happened to Prontera's Castle?!";
+	if(#langtype == 7) unittalk 'novice8,"Child: Qu'est-il arrivé au château de Prontera?!";
+	for(set .@i,1;.@i<=8;set .@i,.@i+1) {
+		if(.@i==6) { if(#langtype == 0) unittalk 'novice1,"Child: Where did we land?"; if(#langtype == 7) unittalk 'novice1,"Child: Où avons-nous atterri ?"; }
+		if(.@i==1)||(.@i==3)||(.@i==5)||(.@i==7) {set .@i2,.@i2+1; unitwalk getd("'novice"+.@i+""),83+.@i2,91;}
+		if(.@i==2)||(.@i==4)||(.@i==6)||(.@i==8) {set .@i3,.@i3+1; unitwalk getd("'novice"+.@i+""),83-.@i3,91;}
+		sleep2 150;
+	}
+	unitwalk getcharid(3),83,91;
+	sleep2 2000;
+	if(#langtype == 0) unittalk 'novice2,"Child: Let's move forwards?";
+	if(#langtype == 7) unittalk 'novice2,"Child: Avançons ?";
+	sleep2 2000;
+	if(#langtype == 0) unittalk 'novice8,"Child: Good idea";
+	if(#langtype == 7) unittalk 'novice8,"Child: Bonne idée";
+	sleep2 800;
+	unitwalk 'novice8,91,86;
+	unitwalk 'novice6,91,86;
+	unitwalk 'novice4,91,86;
+	unitwalk 'novice2,91,86;
+	sleep2 300;
+
+	///ATTENDRE
+	for(set .@i,1;.@i<=8;set .@i,.@i+1) {
+		unitwalk getd("'novice"+.@i+""),95,80;
+		sleep2 150;
+	}
+	unitwalk getcharid(3),95,80;
+	sleep2 150*3;
+	for(set .@i,1;.@i<=8;set .@i,.@i+1) {
+		unitwalk getd("'novice"+.@i+""),77,76;
+		sleep2 150;
+	}
+	unitwalk getcharid(3),77,76;
+	sleep2 150*10;
+	for(set .@i,1;.@i<=8;set .@i,.@i+1) {
+		unitwalk getd("'novice"+.@i+""),85,66;
+		sleep2 150;
+	}
+	unitwalk getcharid(3),85,66;
+	sleep2 150*8;
+	for(set .@i,1;.@i<=8;set .@i,.@i+1) {
+		unitwalk getd("'novice"+.@i+""),85,46;
+		sleep2 150;
+	}
+	unitwalk getcharid(3),85,46;
+	sleep2 150*12;
+	for(set .@i,1;.@i<=8;set .@i,.@i+1) {
+		if(.@i==4) unitwalk getd("'novice"+.@i+""),88,39;
+		if(.@i!=4) unitwalk getd("'novice"+.@i+""),88,(30+.@i);
+		sleep2 150;
+	}
+	unitwalk getcharid(3),88,34;
+	sleep2 150*8;
+	for(set .@i,1;.@i<=8;set .@i,.@i+1) {
+		getunitdata getd("'novice"+.@i+""),.@array;
+		unitwalk getd("'novice"+.@i+""),.@array[6]+1,.@array[7];
+		sleep2 150;
+	}
+	unitwalk getcharid(3),89,34;
+	'freyja = getnpcid(0,instance_npcname("Freyja#new"));
+	specialeffect3 'freyja,650;
+	specialeffect3 'freyja,651;
+	camerainfo 25000,6500,-3000;
+	if(#langtype == 0) unittalk 'freyja,"Freyja: Welcome all. We have no time to waste.";
+	if(#langtype == 7) unittalk 'freyja,"Freyja: Bienvenue à tous. Nous n'avons pas de temps à perdre.";
+	pcstopfollow getcharid(3);
+	sleep2 2000;
+	if(#langtype == 0) unittalk 'freyja,"Freyja: You were chosen to survive the ragnarok";
+	if(#langtype == 7) unittalk 'freyja,"Freyja: Vous avez été choisis pour survivre au Ragnarok";
+	sleep2 3500;
+	if(#langtype == 0) unittalk 'novice8,"Child: Where is my family?!";
+	if(#langtype == 7) unittalk 'novice8,"Child: Où est ma famille?!";
+	sleep2 3000;
+	if(#langtype == 0) unittalk 'freyja,"Freyja: I'm sorry, your families are... not part of this world anymore.";
+	if(#langtype == 7) unittalk 'freyja,"Freyja: Je suis désolée, vos familles ne font plus partie de ce monde.";
+	sleep2 3000;
+	unitemote 'novice1,ET_CRY;
+	unitemote 'novice2,ET_KEK;
+	unitemote 'novice3,ET_CRY;
+	unitemote 'novice4,ET_KEK;
+	unitemote 'novice5,ET_CRY;
+	unitemote 'novice6,ET_KEK;
+	unitemote 'novice7,ET_CRY;
+	unitemote 'novice8,ET_CRY;
+	sleep2 1000;
+	if(#langtype == 0) unittalk 'freyja,"Freyja: You shall not remember what you just seen.";
+	if(#langtype == 7) unittalk 'freyja,"Freyja: Vous ne vous souviendrez pas de ce que vous venez de voir.";
+	sleep2 2000;
+	if(#langtype == 0) unittalk 'freyja,"Freyja: May the Gods protect you, children of the Realm.";
+	if(#langtype == 7) unittalk 'freyja,"Freyja: Que les dieux vous protègent, enfants de Realm.";
+	sleep2 3000;
+	setpcblock PCBLOCK_NPCCLICK,false;
+	warp instance_mapname("intro03"),8,1;
+	end;
+}
+
+intro08,82,100,1	script	WarpIntro01#m01	45,{ end; }
+intro07,7,93,1	script	WarpIntro02#m01	45,{ end; }
+intro07,17,49,1	script	WarpIntro03#m01	45,{ end; }
+intro08,95,34,3	script	Freyja#new	624,{ end; }
+
+intro03,8,1,0	script	Intro002#new	139,1,1,{
+	setpcblock PCBLOCK_NPCCLICK,true;
+	setoption Option_Invisible,1;
+	sleep2 3000;
+	if(#langtype == 0) donpcevent instance_npcname("conversnew01")+"::OnTalk";
+	if(#langtype == 7) donpcevent instance_npcname("conversnew01")+"::OnTalk3";
+	sleep2 4000;
+	if(#langtype == 0) donpcevent instance_npcname("conversnew02")+"::OnTalk";
+	if(#langtype == 7) donpcevent instance_npcname("conversnew02")+"::OnTalk3";
+	sleep2 3000;
+	if(#langtype == 0) donpcevent instance_npcname("conversnew01")+"::OnTalk2";
+	if(#langtype == 7) donpcevent instance_npcname("conversnew01")+"::OnTalk4";
+	sleep2 4000;
+	if(#langtype == 0) donpcevent instance_npcname("conversnew02")+"::OnTalk2";
+	if(#langtype == 7) donpcevent instance_npcname("conversnew02")+"::OnTalk4";
+	sleep2 4500;
+	if(#langtype == 0) donpcevent instance_npcname("conversnew03")+"::OnTalk";
+	if(#langtype == 7) donpcevent instance_npcname("conversnew03")+"::OnTalk2";
+	sleep2 5000;
+	setoption Option_Invisible,0;
+	set intronew,1;
+	setpcblock PCBLOCK_NPCCLICK,false;
+	warp instance_mapname("kar_in01"),38,157;
+	sleep2 500;
+	sc_start SC_TRICKDEAD,28000,1;
+	if(Sex) sc_start SC_DRESSUP,28000,1; else sc_start SC_SUMMER,28000,1;
+	unitlookdir getcharid(3),DIR_SOUTH;
+	sleep2 5000;
+	doevent instance_npcname("Titania#int01")+"::OnStart";
+	end;
+}
+
+kar_in01,32,159,4	script	Titania#int01	624,{
+	if(intronew >= 3) {
+		mes "[Titania]";
+		if(#langtype == 0) mes "I don't know where you are coming from, but I do hope you will enjoy your life here.";
+		if(#langtype == 7) mes "Je ne sais pas d'où vous venez, mais j'espère que vous apprécierez votre vie ici.";
+		close;
+	}
+	if(intronew == 2) {
+		mes "[Titania]";
+		if(#langtype == 0) mes "Let's go, I'll show you something.";
+		if(#langtype == 7) mes "Allons-y, je vais vous montrer quelque chose.";
+		navigateto(strcharinfo(3),10,151,0,0,0,getcharid(0));
+		close;
+	}
+OnStart:
+	atcommand "@speed 150";
+	callfunc "blockpj",0;
+	sc_end SC_TRICKDEAD;
+	sc_end SC_DRESSUP;
+	sc_end SC_SUMMER;
+	unitwalk getcharid(3),37,158;
+	sleep2 1000;
+	removenight;
+	if(intronew == 1) {
+		if(#langtype == 0) {
+		mes "[^ff0000"+strcharinfo(0)+"^000000]";
+		mes "Where am I ?!";
+		next;
+		mes "[Titania]";
+		mes "Hi you";
+		next;
+		mes "[^ff0000"+strcharinfo(0)+"^000000]";
+		mes "You... I feel like I know you !";
+		next;
+		mes "[^ff0000"+strcharinfo(0)+"^000000]";
+		mes "You were in my dream !";
+		next;
+		mes "[Titania]";
+		mes "My name is Titania. This must have been quite a journey for you.";
+		next;
+		mes "[^ff0000"+strcharinfo(0)+"^000000]";
+		mes "I'm... confused. Where am I ?";
+		next;
+		mes "[Titania]";
+		mes "You are in Karakass, the antique city.";
+		next;
+		mes "[Titania]";
+		mes "I found you in the fields, you came straight from a strange light.";
+		next;
+		mes "[Titania]";
+		mes "I must have hurt myself... I don't know who I am.";
+		next;
+		mes "[Titania]";
+		mes "No worries, I'll take care of you.";
+L1:
+		next;
+		gemini = 0;
+		mes "[Titania]";
+		mes "According to the stars, you must be a...";
+		mes "(Choose your zodiacal skill)";
+		if(callfunc("Choose_Zodiac")) {
+			@signeastral$ = callfunc("get_Sign_Name",signeastral);
+			mes "[Titania]";
+			cutin ""+@signeastral$+"",1;
+			mes "a "+@signeastral$+", is that right ?";
+			menu "- No it's not.",L1,"- Yes that's right.",-;
+			cutin "",255;
+		}
+		next;
+		mes "[Titania]";
+		mes "Alright. Please take this as a present.";
+		next;
+		mes "^5555FFTitania gives you 5.000z and starting equipments.^000000";
+		intronew = 2;
+		if(Zeny < 5000) {
+			getitem 1243,1;
+			getitem 2112,1;
+			getitem 2393,1;
+			getitem 569,10;
+			getitem 29884,1;
+			set Zeny,Zeny+5000;
+			getitembound 8088,1,Bound_Char;
+		}
+		next;
+		mes "[Titania]";
+		mes "You have a Charm in your possession, it's mine. Charms are special equipment yes, you surely are not used to seeing them, welcome to our world, and you will surely discover more things along the way. You can equip it in the second equipment window.";
+		next;
+		mes "[Titania]";
+		mes "Let's go, I'll show you something. You will be able to leave this town once your reach job level 10.";
+		navigateto(strcharinfo(3),10,151,NAV_NONE,0,0);
+		close;
+		}
+		if(#langtype == 7) {
+		mes "[^ff0000"+strcharinfo(0)+"^000000]";
+		mes "Où suis-je ?!";
+		next;
+		mes "[Titania]";
+		mes "Bonjour toi";
+		next;
+		mes "[^ff0000"+strcharinfo(0)+"^000000]";
+		mes "Vous... j'ai l'impression de vous connaître !";
+		next;
+		mes "[^ff0000"+strcharinfo(0)+"^000000]";
+		mes "Vous étiez dans mon rêve !";
+		next;
+		mes "[Titania]";
+		mes "Je m'appelle Titania. Cela a dû être un sacré voyage pour vous.";
+		next;
+		mes "[^ff0000"+strcharinfo(0)+"^000000]";
+		mes "Je ne comprends pas. Où suis-je?";
+		next;
+		mes "[Titania]";
+		mes "Vous êtes à Karakass, la cité antique.";
+		next;
+		mes "[Titania]";
+		mes "Je vous ai trouvé dans les champs, vous êtes venu tout droit d'une étrange lumière.";
+		next;
+		mes "[Titania]";
+		mes "J'ai dû me blesser... je ne sais pas qui je suis.";
+		next;
+		mes "[Titania]";
+		mes "Pas de soucis, je vais m'occuper de toi.";
+L2:
+		next;
+		gemini = 0;
+		mes "[Titania]";
+		mes "D'après les étoiles, vous devez être un...";
+		mes "(Choisissez votre skill zodiaque)";
+		if(callfunc("Choose_Zodiac")) {
+			@signeastral$ = callfunc("get_Sign_Name",signeastral);
+			mes "[Titania]";
+			.@type$ = "";
+			if(signeastral == 6) {
+				mes "Quelle sorte de Gem ?";
+				gemini = select("- Mad Gemini:- Kind Gemini")-1;
+				if(gemini)
+					.@type$ = "Kind";
+				else
+					.@type$ = "Mad";
+			}
+			cutin ""+@signeastral$+"",1;
+			mes "Un "+.@type$+""+@signeastral$+", c'est bien cela ?";
+			menu "- Non.",L2,"- Oui c'est cela.",-;
+			cutin "",255;
+		}
+		next;
+		mes "[Titania]";
+		mes "Bien. S'il te plait prends ça.";
+		next;
+		mes "^5555FFTitania vous offre 5.000z et équipements de démarrage.^000000";
+		intronew = 2;
+		getitem 1243,1;
+		getitem 2112,1;
+		getitem 2393,1;
+		getitem 569,10;
+		getitem 29884,1;
+		set Zeny,Zeny+5000;
+		getitembound 8088,1,Bound_Char;
+		next;
+		mes "[Titania]";
+		mes "Vous avez un Charme en votre possession, c'est le mien. Les charmes sont des équipements spéciaux oui, vous n'êtes sûrement pas habitué à les voir, bienvenue dans notre monde, et vous découvrirez sûrement plus de choses en cours de route. Vous pouvez l'équiper dans la deuxième fenêtre d'équipement.";
+		next;
+		mes "[Titania]";
+		mes "Allons-y, je vais vous montrer quelque chose. Vous pourrez quitter cette ville une fois que vous aurez atteint le job level 10.";
+		navigateto(strcharinfo(3),10,151,NAV_NONE,0,0);
+		close;
+		}
+	}
+}
+kar_in01,23,154,4	script	Doctor#intro01	769,{
+	mes "[Doctor]";
+	if(#langtype == 0) mes "This have been quite a journey for you.";
+	if(#langtype == 7) mes "Cela a été tout un voyage pour vous.";
+	next;
+	mes "[Doctor]";
+	if(#langtype == 0) mes "Let me heal your wound.";
+	if(#langtype == 7) mes "Laissez-moi guérir vos blessures.";
+	next;
+	percentheal 80,80;
+	unitskilluseid getnpcid(0),28,10,getcharid(3);
+	mes "[Doctor]";
+	if(#langtype == 0) mes "There you go. You are safe here, no worries.";
+	if(#langtype == 7) mes "Voilà. Vous êtes en sécurité ici, ne vous inquiétez pas.";
+	close;
+}
+
+kar_in01,10,151,0	script	midint01	45,1,1,{
+	if(intronew == 2) {
+		warp "kar_fild04",145,72;
+		instance_destroy;
+		partyleave getcharid(0);
+		end;
+	}
+	warp "karak_01",106,50;
+	end;
+}
+kar_fild04,145,72,0	script	midint00	139,1,1,{
+	if(intronew >= 3) end;
+	if(intronew == 2) {
+		announce "Welcome to "+strcharinfo(0)+" who has just arrived on our lands !",0;
+		camerainfo 80000,0,-5000;
+		unitlookdir getcharid(3),DIR_NORTHEAST;
+		intronew = 3;
+		savepoint "kar_fild04",145,72;
+		callfunc "SET_QUEST", 49200;
+		if(#langtype == 0) {
+		mes "[Titania]";
+		mes "This is where I found you.";
+		next;
+		mes "[Titania]";
+		mes "You may not know where you're coming from, and we don't know either what happen...";
+		next;
+		mes "[Titania]";
+		mes "I think you will find more information in Midgard, the capitale of Rune-Midgarts North.";
+		next;
+		mes "[Titania]";
+		mes "You seem to have a great potential, I sense that from you.";
+		next;
+		mes "[Titania]";
+		mes "This is how you are going to do your training. You must reach job level 10 and then I'll give you the ability to leave Karakass.";
+		next;
+		mes "[Titania]";
+		mes "I have a gift for you. This is a mount. You will be able to walk faster.";
+		mes "^ff0000Tip: Riding a mount comes with 5 skills:";
+		mes "- Backsliding: Moves your mount quickly backwards.";
+		mes "- Jumping: Jump a few cells in front.";
+		mes "- Acceleration: Increases walking speed for a few seconds.";
+		mes "- Run: Walking speed drastically boosted. Cannot move while running.";
+		mes "- Riding: Allow to Mount/Dismount.";
+		mes "Your mount can learn a few abilities. Check more information in Midgard's Stable.";
+		mes "When the mount is in use, HP / SP become Mount's HP/SP.";
+		mes "<URL>Mount Guide<INFO>http://mysticprojectro.com/wiki/index.php/Mount_System</INFO></URL>";
+		getitem 8504,1;
+		getitem 8522,1;
+		getitem 8523,1;
+		getitem 8524,1;
+		getitem 8525,1;
+		getitem 8976,1;
+		specialeffect2 8;
+		specialeffect2 9;
+		soundeffect "complete.wav",0;
+		.@maxhp = (((BaseLevel+1)*25)+(((BaseLevel+1)*25)/2)+((((BaseLevel+1)*25)/2)*((MountSkill&OPT_1)?1:0)));
+		.@maxsp = ((BaseLevel+1)+(((BaseLevel+1)/2)*((MountSkill&OPT_2)?1:0))+((BaseLevel+1)/2));
+		hp_mount = .@maxhp;
+		sp_mount = .@maxsp+20;
+		setmountinfo MOUNT_HP,hp_mount;
+		setmountinfo MOUNT_MAXHP,hp_mount;
+		setmountinfo MOUNT_SP,sp_mount;
+		setmountinfo MOUNT_MAXSP,sp_mount;
+		announce "[Mount System]: Congratulations !! You've got a new mount ! Put 'Mount Riding' in your shortcut bar to mount/dismount.",bc_blue|bc_self;
+		next;
+		callfunc("setnavi",1);
+		mes "[Titania]";
+		mes "Also, let me introduce you to Nava, she will accompagny and guide you through your adventure.";
+		mes "Nava is a fairy from Rivendel, the antique city, where I'm from.";
+		mes "I'm communicating with her through telepathy and therefore, I'll always be there.";
+		mes "You can consult her by using the command @nava";
+		next;
+		mes "[Titania]";
+		mes "If you need any help regarding the beginning in this world, you can use the Kafra's Guide accessible in your main menu.";
+		mes "<URL>How to Start your adventure on DaRO<INFO>http://mysticprojectro.com/wiki/index.php/How_to_start_your_adventure_on_DaRO#What_should_I_do_.3F</INFO></URL>";
+		next;
+		mes "[Titania]";
+		mes "You can use Basic Skill as an active skill and zoom in and out !";
+		next;
+		mes "[Titania]";
+		mes "Also, you should use ^ff0000CTRL + `^000000 to view where we are. You will be able to view Midgard North, you have never seen it before.";
+		next;
+		mes "[Titania]";
+		mes "Now, let me show you the configurations possible you can do !";
+		}
+		if(#langtype == 7) {
+		mes "[Titania]";
+		mes "C'est ici que je t'ai trouvé.";
+		next;
+		mes "[Titania]";
+		mes "Tu ne sais peut-être pas d'où tu viens, et nous ne savons pas non plus ce qui s'est passé...";
+		next;
+		mes "[Titania]";
+		mes "Je pense que tu trouveras plus d'informations à Midgard, la capitale de Rune-Midgarts North.";
+		next;
+		mes "[Titania]";
+		mes "Tu sembles avoir un grand potentiel, je le sens en toi.";
+		next;
+		mes "[Titania]";
+		mes "Voici comment tu vas faire ta formation. Tu dois atteindre le job level 10 et ensuite je te donnerai la possibilité de quitter Karakass.";
+		next;
+		mes "[Titania]";
+		mes "J'ai un petit cadeau pour toi. C'est une Monture. Tu vas pouvoir marcher beaucoup plus vite!";
+		mes "^ff0000Tip: Une monture possede 5 skills:";
+		mes "- Backsliding: Avance la monture de quelques cases en arriere.";
+		mes "- Jumping: Saute de quelques cases en avant.";
+		mes "- Acceleration: Augmente la vitesse de marche pendant quelques secondes.";
+		mes "- Run: Vitesse de marche augmentee. Impossible de bouger pendant le run.";
+		mes "- Riding: Permet de monter/descendre de sa monture.";
+		mes "Une monture peut apprendre plusieurs capacités. Vérifiez plus d'informations dans l'écurie de Midgard.";
+		mes "Lorsque la monture est utilisee, les HP/SP deviennent ceux de la monture.";
+		mes "<URL>Guide des Montures<INFO>http://mysticprojectro.com/wiki/index.php/Mount_System</INFO></URL>";
+		getitem 8504,1;
+		getitem 8522,1;
+		getitem 8523,1;
+		getitem 8524,1;
+		getitem 8525,1;
+		getitem 8976,1;
+		specialeffect2 8;
+		specialeffect2 9;
+		soundeffect "complete.wav",0;
+		.@maxhp = (((BaseLevel+1)*25)+(((BaseLevel+1)*25)/2)+((((BaseLevel+1)*25)/2)*((MountSkill&OPT_1)?1:0)));
+		.@maxsp = ((BaseLevel+1)+(((BaseLevel+1)/2)*((MountSkill&OPT_2)?1:0))+((BaseLevel+1)/2));
+		hp_mount = .@maxhp;
+		sp_mount = .@maxsp+20;
+		setmountinfo MOUNT_HP,hp_mount;
+		setmountinfo MOUNT_MAXHP,hp_mount;
+		setmountinfo MOUNT_SP,sp_mount;
+		setmountinfo MOUNT_MAXSP,sp_mount;
+		announce "[Mount System]: Congratulations !! You've got a new mount ! Put 'Mount Riding' in your shortcut bar to mount/dismount.",bc_blue|bc_self;
+		next;
+		callfunc("setnavi",1);
+		mes "[Titania]";
+		mes "Aussi, permet-moi de te présenter Nava, elle t'accompagnera et te guidera tout au long de ton aventure.";
+		mes "Nava est une fée de Rivendel, la ville antique d'où je viens.";
+		mes "Je communique avec elle par télépathie et par conséquent, je serai toujours là.";
+		mes "Tu peux la consulter en utilisant la commande @nava";
+		next;
+		mes "[Titania]";
+		mes "Si tu as besoin d'aide concernant le début dans ce monde, tu peux utiliser le Guide de Kafra accessible dans le menu principal.";
+		mes "<URL>Comment bien démarrer dans DaRO<INFO>http://mysticprojectro.com/wiki/index.php/How_to_start_your_adventure_on_DaRO#What_should_I_do_.3F</INFO></URL>";
+		next;
+		mes "[Titania]";
+		mes "Tu peux utiliser le Basic Skill comme un skill actif et Zoom In / Out";
+		next;
+		mes "[Titania]";
+		mes "Aussi, tu dois utiliser ^ff0000CTRL + `^000000 pour voir où nous sommes. Tu pourras voir la carte de Midgard North, tu ne l'as jamais vu auparavant.";
+		next;
+		mes "[Titania]";
+		mes "Maintenant, laisse-moi te montrer les configurations possibles que tu peux faire !";
+		}
+		callfunc("setnavi",0);
+		dispbottom "@menu is used for any configuration";
+		specialeffect2 37;
+		specialeffect2 42;
+		sc_start SC_BLESSING,300000,10;
+		sc_start SC_INCREASEAGI,300000,10;
+		close2;
+		addtimer 500,"OnInit::OnAtcommand";
+		end;
+	}
+}
+kar_fild04,146,68,8	script	Titania#int02	624,1,1,{
+	mes "[Titania]";
+	if(intronew >= 6) {
+		if(#langtype == 0) mes "You are ready to travel around Midgard ! Use the skill 'Return to Midgard' anytime to go to the capitale.";
+		if(#langtype == 7) mes "Tu es prêt à parcourir Midgard ! Utilise le skill 'Return to Midgard' quand tu veux pour aller à la capitale.";
+		close;
+	}
+	if(intronew >= 5) {
+		unitlookdir getcharid(3),DIR_SOUTH;
+		skill 5067,1,SKILL_PERM;
+		skill 1800,1,SKILL_PERM;
+		skill 1809,1,SKILL_PERM;
+		skill 1821,1,SKILL_PERM;
+		intronew = 6;
+		if(isbegin_quest(49200)) {
+			callfunc "END_QUEST", 49200,OPT_2;
+			callfunc "SET_QUEST", 49201;
+		}
+		if(#langtype == 0) {
+			mes "It looks like you've reached job level 10. Good job !";
+			next;
+			mes "[Titania]";
+			mes "You will now be able to use the skill 'Return to Midgard', it's an ability that allows you to return to the capital at anytime as well as return to your savepoint and memo points. You can register up to 3 memo points by using @memo.";
+			next;
+			mes "[Titania]";
+			mes "There will be a guide at the capitale who can help you to get acquainted with it.";
+			next;
+			mes "[Titania]";
+			mes "Furthermore, you will be able to choose a job. Visit Valencia at the capital's castle, she will take care of you.";
+			next;
+			mes "[Titania]";
+			mes "Also, you will see 3 new abilities:";
+			mes "- Zodiac skill is your ability linked to your zodiacal sign.";
+			mes "- Call pet skill is used to summon a pet or to put it away.";
+			mes "- Equip switch skill allows you to switch equipment with your 2nd equipment.";
+			close;
+		}
+		if(#langtype == 7) {
+			mes "Il semble que tu as atteint le level job 10. Bon travail !";
+			next;
+			mes "[Titania]";
+			mes "tu pourras désormais utiliser la compétence 'Return to Midgard', c'est une capacité qui te permet de retourner dans la capitale à tout moment ainsi que de revenir à votre point de sauvegarde et à vos points mémo. Vous pouvez enregistrer jusqu'à 3 points mémo en utilisant @memo.";
+			next;
+			mes "[Titania]";
+			mes "Il y a un guide à la capitale qui pourra te faire visiter la ville.";
+			next;
+			mes "[Titania]";
+			mes "De plus, tu pourras choisir un job. Va voir Valencia au château de la capitale, elle s'occupera de toi.";
+			next;
+			mes "[Titania]";
+			mes "Ah oui j'oubliais, vous verrez 3 nouvelles capacités:";
+			mes "- Zodiac skill c'est votre capacité liée à votre signe du zodiaque.";
+			mes "- Call pet skill est utilisé pour invoquer un animal de compagnie ou pour le ranger.";
+			mes "- Equip switch skill vous permet de changer d'équipement avec votre 2ème set d'équipement.";
+			close;
+		}
+		close;
+	}
+	if(intronew >= 3) {
+		if(#langtype == 0) mes "Come back when you will be Job level 10.";
+		if(#langtype == 7) mes "Reviens quand tu seras job level 10.";
+		mes "<URL>DaRO Start Guide<INFO>http://mysticprojectro.com/wiki/index.php/How_to_start_your_adventure_on_DaRO#What_should_I_do_.3F</INFO></URL>";
+		close;
+	}
+	mes "This is a strange light... I wonder if it's not connected to another dimension or something...";
+	close;
+}
+kar_fild04,141,74,6	script	Citizen#int02	10207,{
+	mes "[Citizen]";
+	if(#langtype == 0) mes "Did you know you can go to the capital by using the skill 'Return to Midgard' ?";
+	if(#langtype == 7) mes "Tu savais que tu pouvais retourner a la capitale en utilisant le skill 'Return to Midgard' ?";
+	close;
+}
+kar_fild04,150,90,6	script	Swordman#int03	10244,{
+	mes "[Swordman]";
+	if(#langtype == 0) mes "I came from there too. I still don't know my origins... Oh well, it's a great place to be here !";
+	if(#langtype == 7) mes "Je viens de là aussi. Je ne connais toujours pas mes origines... Eh bien, c'est un super endroit ici!";
+	close;
+}
+kar_fild04,162,101,6	script	Old box#int03	10250,{
+	mes "[^ff0000"+strcharinfo(0)+"^000000]";
+	if(intronew >= 4) {
+		mes "It's empty...";
+		close;
+	}
+	mes "What is it ?";
+	next;
+	mes "*Obtained: x50 Novice Potion*";
+	getitem 569,50;
+	intronew = 4;
+	close;
+}
+
+intro03,3,4,0	script	Unknown Voice::conversnew01	111,1,1,{
+end;
+OnTalk:
+unittalk getnpcid(0),"Unknown Voice: Doctor... This person came back to life.";
+emotion 1;
+end;
+OnTalk2:
+unittalk getnpcid(0),"Unknown Voice: I don't know what could have happened since this strange light appeared in the plains...";
+end;
+OnTalk3:
+unittalk getnpcid(0),"Voix inconnue : Docteur... Cette personne est revenue à la vie.";
+emotion 1;
+end;
+OnTalk4:
+unittalk getnpcid(0),"Voix inconnue : Je ne sais pas ce qui a pu se passer depuis que cette étrange lumière est apparue dans les plaines...";
+end;
+}
+
+intro03,3,4,0	script	Titania::conversnew03	111,1,1,{
+end;
+OnTalk:
+unittalk getnpcid(0),"Titania: Good.";
+end;
+OnTalk2:
+unittalk getnpcid(0),"Titania: Bien.";
+end;
+}
+
+intro03,12,4,0	script	Doctor::conversnew02	111,1,1,{
+end;
+OnTalk:
+unittalk getnpcid(0),"Doctor: Hmm... Interesting.";
+end;
+OnTalk2:
+unittalk getnpcid(0),"Doctor: I know Titania. I'll take care of it.";
+end;
+OnTalk3:
+unittalk getnpcid(0),"Docteur: Hmm... Intéressant.";
+end;
+OnTalk4:
+unittalk getnpcid(0),"Docteur: Je sais Titania. je vais m'en occuper.";
+end;
+}
+
+//============================================================
+// = Scene 4 - Player wakes up at Karakass OR fild if intro passed
+//============================================================
+kar_fild04,157,72,0	script	Entrance Point	139,{
+	end;
+OnStart:
+	end;
+OnInit:
+	fixeffect2 getnpcid(0),700,1;
+	end;
+}
+
+kar_fild04,153,88,4	script	Terrina#intro	103,{
+	if(rand(1) == 0) npctalk strnpcinfo(1)+": I have never seen anything like it !"; else npctalk strnpcinfo(1)+": Are there more coming ?!";
+	end;
+OnStart:
+	sleep 2000;
+	if(rand(1) == 0) npctalk strnpcinfo(1)+": Look y'all, one more !",bc_self; else npctalk strnpcinfo(1)+": Incredible !",bc_self;
+	sleep 3000;
+	if(rand(1) == 0) npctalk strnpcinfo(1)+": I don't know what's going on with this strange light !",bc_self; else npctalk strnpcinfo(1)+": It keeps coming !,bc_self";
+	end;
+}
+
+karak_01,109,50,0	warp	midint02	1,1,kar_in01,13,151
+
+//============================================================
+// = Tutorials
+//============================================================
+kar_fild04,117,93,8	script	Swordman Master#mid02	27328,{ callfunc "getManual",2819,"Swordman",getnpcid(0),strnpcinfo(0); end; OnTimer7000: npcwalkto 117+rand(15),93+rand(12); OnInit: npcspeed 170; initnpctimer; end; }
+kar_fild04,129,75,8	script	Thief Master#mid02	27329,{ callfunc "getManual",2820,"Thief",getnpcid(0),strnpcinfo(0); end; OnTimer7000: npcwalkto 129+rand(15),75+rand(12); OnInit: npcspeed 170; initnpctimer; end; }
+kar_fild04,132,57,8	script	Acolyte Master#mid02	27330,{ callfunc "getManual",2821,"Acolyte",getnpcid(0),strnpcinfo(0); end; OnTimer7000: npcwalkto 132+rand(15),57+rand(12); OnInit: npcspeed 170; initnpctimer; end; }
+kar_fild04,122,44,8	script	Archer Master#mid02	27331,{ callfunc "getManual",2822,"Archer",getnpcid(0),strnpcinfo(0); end; OnTimer7000: npcwalkto 122+rand(15),44+rand(12); OnInit: npcspeed 170; initnpctimer; end; }
+kar_fild04,140,111,8	script	Merchant Master#mid02	27332,{ callfunc "getManual",2823,"Merchant",getnpcid(0),strnpcinfo(0); end; OnTimer7000: npcwalkto 140+rand(15),111+rand(12); OnInit: npcspeed 170; initnpctimer; end; }
+kar_fild04,105,27,8	script	Magician Master#mid02	27333,{ callfunc "getManual",2824,"Magician",getnpcid(0),strnpcinfo(0); end; OnTimer7000: npcwalkto 105+rand(15),27+rand(12); OnInit: npcspeed 170; initnpctimer; end; }
+kar_fild04,67,123,8	script	Ninja Master#mid02	27334,{ callfunc "getManual",2940,"Ninja",getnpcid(0),strnpcinfo(0); end; OnTimer7000: npcwalkto 67+rand(15),123+rand(12); OnInit: npcspeed 170; initnpctimer; end; }
+kar_fild04,55,130,7	script	Gunslinger Master#mid02	27335,{ callfunc "getManual",2941,"Gunslinger",getnpcid(0),strnpcinfo(0); end; OnTimer7000: npcwalkto 55+rand(15),130+rand(12); OnInit: npcspeed 170; initnpctimer; end; }
+kar_fild04,60,155,7	script	Taekwon Master#mid02	27336,{ callfunc "getManual",2942,"Taekwon",getnpcid(0),strnpcinfo(0); end; OnTimer7000: npcwalkto 60+rand(15),155+rand(12); OnInit: npcspeed 170; initnpctimer; end; }
+
+function	script	getManual	{
+	unitstopwalk getarg(2);
+	unitwalkto getarg(2),getcharid(3);
+	.@n$ = getarg(1);
+	mes "["+.@n$+" Master]";
+	switch (rand(0,4)) {
+		case 0: mes "I ran as fast as I could. I've heard some newbies just arrived !"; break;
+		case 1: mes "I came right away. The news got to us from the capitale. It's incroyable what happened here!"; break;
+		case 2: mes "Look, I don't know where you're coming from, but if you want to be a "+.@n$+", I can teach you everything"; break;
+		case 3: mes "Be a "+.@n$+" just like me !"; break;
+		case 4: mes "Welcome dear, do you want to be a "+.@n$+" ?"; break;
+	}
+	next;
+	mes "["+.@n$+" Master]";
+	dispbottom ""+itemlink(getarg(0))+"";
+	mes "If you want to be a "+.@n$+", I can give you this manual !";
+	next;
+	mes "["+.@n$+" Master]";
+	mes "This is the best way to discover which class you wanna be.";
+	next;
+	mes "["+.@n$+" Master]";
+	mes "Do you want to explore the world of a "+.@n$+" ?";
+	next;
+	switch(select("Yes, I'd like to become a "+.@n$+":No, thanks.")) {
+		case 1:
+			mes "["+.@n$+" Master]";
+			if(countitem(getarg(0))) {
+				mes "Are you kidding me ? You already have it !";
+				close;
+			}
+			getitem getarg(0),1;
+			mes "Awesome ! I'm sure you will like to be a "+getarg(1)+"";
+			mes "Good luck !";
+			close;
+		case 2:
+			mes "["+.@n$+" Master]";
+			mes "Alright then, bye !";
+			close;
+	}
+}
+
+//============================================================
+// = Guide Instance
+//============================================================
+midgard,216,203,0	script	GuideStartMid	139,1,1,{
+	if(instance_id()) {
+		@intro = 1;
+		recalculatestat2;
+		callfunc "blockpj",1;
+		callfunc("setnavi",1);
+		unitlookdir getcharid(3),DIR_SOUTH;
+		for(.@i = 0; .@i < 100; .@i++) {
+			camerainfo 136000-1000*.@i,0,-4500+44*.@i;
+			sleep2 65;
+		}
+		@intro = 0;
+		recalculatestat2;
+		//camerainfo 45000,0,-100;
+		.@guideid = getnpcid(0,instance_npcname("Guide#MidGuide"));
+		// First time visit
+		if(intronew == 7) {
+			savepoint "midgard",216,203;
+			intronew = 8;
+		}
+		if(Class == Job_Novice || (Class == Job_Summoner && JobLevel <= 10)) {
+			unittalk getcharid(3),""+strcharinfo(0)+": Hmm... I must be at the capitale";
+			sleep2 1600;
+			unitlookdir getcharid(3),DIR_NORTHEAST;
+			unittalk getcharid(3),"Nava: Yes, Welcome to the capitale Midgard North, kingdom of Hildegard, first of his name.";
+			sleep2 3000;
+			unittalk getcharid(3),"Nava: You have the option to walk throughout with the guide or to pass the guide.";
+			sleep2 3000;
+			switch(prompt("- View Guide Scene:- Skip Guide Scene")) {
+				case 1: break;
+				case 2: default: case 255:
+					skill 1821,3,SKILL_PERM;
+					callfunc("setnavi",0);
+					intronew = 10;
+					callfunc "blockpj",0;
+					warp "midgard",219,179;
+					instance_destroy;
+					partyleave getcharid(0);
+					camerainfo 80000,0,-5000;
+					end;
+			}
+			if(Class == Job_Summoner && JobLevel <= 10)
+				skill 1821,3,SKILL_PERM;
+		}
+		unitwalk .@guideid,216,198;
+		unittalk .@guideid,"Guide: Oh here you are!";
+		sleep2 400;
+		unitlookdir getcharid(3),DIR_SOUTH;
+		sleep2 600;
+		unittalk getcharid(3),""+strcharinfo(0)+": ?!";
+		camerainfo 35000,15000,-4500;
+		sleep2 500;
+		unitlookdir getcharid(3),DIR_SOUTH;
+		sleep2 2500;
+		if(Class == Job_Novice) unittalk .@guideid,"Guide: I've heard about your coming. Let me show you around.";
+		else unittalk .@guideid,"Guide: Let me show you around.";
+		sleep2 3000;
+		camerainfo 80000,0,-5000;
+		.@m$[0] = "The Card remover allows to sell cards into card shards. Card shards are used to make card album.";
+		.@m$[1] = "This is the Pet Breeder. Everytime you drop an unknown egg, he will identify it. You can exchange all 'etc' items into Food to feed your pet. (Custom system)";
+		.@m$[2] = "This is the place you will come to heal your pet if your pet dies.";
+		.@m$[3] = "This is the south exit. Midgard North is filled with elite monsters are a much more powerful version of the regular monsters of this world.";
+		.@m$[4] = "You will find a few npcs here who will teach you about activities. This can be a great hobby. Fishing give conso items, Mining is used to get ores and crafting materials, Learning will increase EXP on monsters, Brewing will make amazing cocktails, Cooking is used to make food.";
+		.@m$[5] = "You will be able to enchant your equipments and add a quality/slot here.";
+		.@m$[6] = "Midgard's Library offers you the possibility to learn Kugan Skills and specilizations. There are like a second class or multi-class system. Kugan Level is your third level, each level gives you one point to learn kugans. You can Reborn here from BaseLv 80 to 98, it gives you stats points bonuses.";
+		.@m$[7] = "The academy offers you to train with a desired dummy (race, ele, def), break a test emperium recorded in time as well as completing Mercenaries Quests";
+		.@m$[8] = "The hunting boards are updated every week, there are avantages to farm certain monsters or maps.";
+		.@m$[9] = "The War of Emperium Domination is much more fun than the classic version. There are a lot of strategies. Sadrith Arena is a classic PVP event that happen every sunday.";
+		.@m$[10] = "We have a classic PVP room, a DB/MVP Room that allows you to buy a room and branches, and the Purgator Room which are classic MVP hard mode.";
+		.@m$[11] = "Looking to rent a peco or falcon ? You can do it here. You can train against MVP/DemiHuman dummies as well";
+		.@m$[12] = "Midgard Airline will transport you anywhere in Midgard North. The ferry service is accessible to some places as well.";
+		.@m$[13] = "The stylist is located here. You can change your clothes color, hair color, hair style and body costume (3rd & 4th Classes)";
+		.@m$[14] = "You can store all yours hats and use any of them anytime as a costume using @hat ! Nefasta can tell you what contains all boxes, and she can create any official hat of the game that aren't obtainable anywhere.";
+		.@m$[15] = "Midgard's Inn is here to rest. You will receive some boosts while staying there.";
+		.@m$[16] = "You can remove any cards or gems here. Gems can be equipped in slot 3 of Hats/Armor/Garment or Shoes. They are found on Witches that have a chance to appear when you kill a monster.";
+		.@m$[17] = "The market allows merchant to do their shops. Shops are unauthorized anywhere besides here.";
+		.@m$[18] = "You can buy a mount here. Mounts have active skills and passive abilities.";
+		.@m$[19] = "You can catch and raise a Peco Peco. There are many different kinds. Train it to participate to our Peco Peco Race.";
+		.@m$[20] = "You can try to find treasures with your Peco. If you don't have any, they will lend you one.";
+		.@m$[21] = "Central place - Valkyrie and our Quick Access will teleport you anywhere you want ! Restock NPC, healer, announcer, kafra, guild storage, space-time rifts, map parties, are all here.";
+		.@m$[22] = "Events calendar is displayed here. You also have an announcer on the left. There is a piano that can play any music of the game you desire.";
+		.@m$[23] = "Space-Time rifts are daily missions which grant Bronze Coins. Monster laboratory are map parties to complete with other players which give great amount of exp and zeny.";
+		.@m$[24] = "Hatori Henzo can forge Weapon Lv 5 and refine them up to +15. The blacksmith will repair any broken stuff anything you bypass him.";
+		.@m$[25] = "The regular forge is found here. You can find Taekwon Shoes (ATK) and Athletic Shoes (Walk Speed) inside.";
+		.@m$[26] = "Mammonith Bank is where all rewards can be claimed in exchange of coins, event tickets and such.";
+		.@m$[27] = "And finally, this is Midgard's Castle. I'll show you inside.";
+		setarray .@xJ,200,138,78,213,318,353,325,289,247,279,119,141,50,105,93,70,45,26,346,403,412,208,215,242,322,258,287,214;
+		setarray .@yJ,264,155,93,14,172,232,265,301,285,349,325,370,378,234,244,236,235,220,403,405,321,221,258,250,183,76,233,290;
+		setarray .@xN,205,142,81,216,322,357,330,293,250,283,123,145,54,109,96,75,50,26,350,406,412,205,218,245,319,260,284,219;
+		setarray .@yN,264,155,96,14,169,232,265,297,288,349,322,370,378,234,244,236,235,225,403,403,318,221,258,247,183,73,233,290;
+		nochecknear 1;
+		for (.@i = 0; .@i < getarraysize(.@xJ); .@i++) {
+			unitmove .@guideid,.@xN[.@i],.@yN[.@i];
+			unitmove getcharid(3),.@xJ[.@i],.@yJ[.@i];
+			mes "[Guide]";
+			mes .@m$[.@i];
+			next;
+		}
+		unitwalk .@guideid,216,293;
+		unitwalk getcharid(3),216,293;
+		sleep2 500;
+		callfunc "blockpj",0;
+		setmapflag instance_mapname("mid_castle"), MF_NOSKILL;
+		nochecknear 0;
+		warp instance_mapname("mid_castle"),103,22;
+		unitwarp .@guideid,instance_mapname("mid_castle"),101,22;
+		end;
+	}
+	if(intronew == 6) {
+		if(isbegin_quest(49201)) {
+			callfunc "END_QUEST", 49201,OPT_2;
+			callfunc "SET_QUEST", 49202;
+		}
+		savepoint "midgard",216,203;
+		if(getcharid(1))
+			partyleave getcharid(0);
+		sleep2 100;
+		if(party_create("Guide"+rand(10,100000)+"") < 0) {
+			dispbottom "Something went wrong. Please disconnect and reconnect.";
+			atcommand "@kick "+strcharinfo(0);
+			end;
+		}
+		sleep2 100;
+		intronew = 7;
+		setpcblock PCBLOCK_COMMANDS,true;
+		setpcblock PCBLOCK_IMMUNE,true;
+		setpcblock PCBLOCK_ATTACK,true;
+		instance_create("Guide");
+		sleep2 100;
+		instance_enter("Guide");
+	}
+	end;
+}
+mid_castle,103,22,0	script	GuideStartMid2	139,1,1,{
+	if(!instance_id()) end;
+	.@guideid = getnpcid(0,instance_npcname("Guide#MidGuide"));
+	setpcblock PCBLOCK_NPCCLICK,true;
+	unitwalk getcharid(3),103,37;
+	unitwalk .@guideid,100,37;
+	sleep2 150*15;
+	unitwalk getcharid(3),103,52;
+	unitwalk .@guideid,100,52;
+	sleep2 150*15;
+	unitwalk getcharid(3),103,67;
+	unitwalk .@guideid,100,67;
+	sleep2 150*15;
+	setpcblock PCBLOCK_NPCCLICK,false;
+	warp instance_mapname("mid_castle"),103,91;
+	unitwarp .@guideid,instance_mapname("mid_castle"),100,91;
+	end;
+}
+mid_castle,103,91,0	script	GuideStartMid3	139,1,1,{
+	if(!instance_id()) end;
+	.@guideid = getnpcid(0,instance_npcname("Guide#MidGuide"));
+	setpcblock PCBLOCK_NPCCLICK,true;
+	unitwalk getcharid(3),103,107;
+	unitwalk .@guideid,100,107;
+	sleep2 150*14;
+	unittalk .@guideid,"Guide: Those rooms are reserved for rewards. All reputations you gain accross the world can be exchanged for coins. There are many ways to gain reputations";
+	sleep2 5000;
+	unitwalk getcharid(3),103,123;
+	unitwalk .@guideid,100,123;
+	sleep2 150*16;
+	setpcblock PCBLOCK_NPCCLICK,false;
+	warp instance_mapname("mid_castle"),103,144;
+	unitwarp .@guideid,instance_mapname("mid_castle"),100,144;
+	end;
+}
+mid_castle,103,144,0	script	GuideStartMid4	139,1,1,{
+	if(!instance_id()) end;
+	.@guideid = getnpcid(0,instance_npcname("Guide#MidGuide"));
+	setpcblock PCBLOCK_NPCCLICK,true;
+	unitwalk getcharid(3),113,161;
+	unitwalk .@guideid,110,162;
+	sleep2 150*20;
+	unittalk .@guideid,"Guide: Here you can change your class if you qualify, and you can reset stats/skills and zodiac sign.";
+	sleep2 2000;
+	npctalk "Swordman Master : Hi there !",instance_npcname("Swordman Master#mid01");
+	npctalk "Thief Master : Welcome.",instance_npcname("Thief Master#mid01");
+	npctalk "Acolyte Master : Hey !",instance_npcname("Acolyte Master#mid01");
+	npctalk "Archer Master : Enjoy !",instance_npcname("Archer Master#mid01");
+	npctalk "Taekwon Master : Hi !",instance_npcname("Taekwon Master#mid01");
+	sleep2 5000;
+	if(intronew == 8) {
+		callfunc "blockpj",0;
+		intronew = 9;
+		unittalk .@guideid,"Guide: Since it is your first time changing classes, please go ahead and talk to Luccia, I'll wait you here.";
+		end;
+	}
+OnStart:
+	if(intronew == 9)
+		intronew = 10;
+	.@guideid = getnpcid(0,instance_npcname("Guide#MidGuide"));
+	unitwalk getcharid(3),100,160;
+	unitwalk .@guideid,100,163;
+	sleep2 150*10;
+	unitwalk getcharid(3),94,169;
+	unitwalk .@guideid,91,167;
+	sleep2 150*10;
+	unittalk .@guideid,"Guide: There are plenty of achievements to do. Every 5 levels, you can upgrade your Adventure rank and unlock bonuses. Each achievement level grants bonuses.";
+	sleep2 5000;
+	unittalk .@guideid,"Guide: That will do for now. If you need me to show you again, just come back to see me at the capitale !";
+	sleep2 4000;
+	callfunc "blockpj",0;
+	callfunc("setnavi",0);
+	warp "midgard",219,179;
+	unitlookdir getcharid(3),DIR_EAST;
+	removemapflag instance_mapname("mid_castle"), MF_NOSKILL;
+	instance_destroy;
+	partyleave getcharid(0);
+	end;
+}
+
+midgard,219,179,0	script	GuideStartMid02	139,1,1,{
+	if(intronew >= 8 && intronew <= 10 ) {
+		callfunc "blockpj",1;
+		if(isbegin_quest(49202)) {
+			BaseExp += callfunc("get_rate_xp",12);
+			JobExp += callfunc("get_rate_xp",12);
+			Zeny += callfunc("get_rate_zeny",5)/2;
+			callfunc "END_QUEST", 49202,OPT_2;
+		}
+		callfunc "SET_QUEST", 49203;
+		callfunc("setnavi",1);
+		unittalk getcharid(3),"Nava: Let me guide you through this world.",bc_self;
+		sleep2 3000;
+		unittalk getcharid(3),"Nava: First, let's use your mount.",bc_self;
+		sleep2 3000;
+		unittalk getcharid(3),"Nava: You can use it by accessing your inventory (Alt + E).",bc_self;
+		intronew = 11;
+		callfunc "blockpj",0;
+		announce "[Tip]: You better do the tutorial quests instead of exp to get acquainted with our capitale and contents as it gives you 1 level per task done (30 tasks available)",bc_self;
+		sleep2 1000;
+		callfunc("setnavi",0);
+		end;
+	}
+	end;
+}
+
+midgard,285,234,0	script	GuideStartMid03	139,7,7,{
+	if(isbegin_quest(49208))
+		navigateto("midgard",327,268);
+	if(isbegin_quest(49207)) {
+		callfunc("setnavi",1);
+		setpcblock PCBLOCK_COMMANDS,true;
+		setpcblock PCBLOCK_IMMUNE,true;
+		setpcblock PCBLOCK_ATTACK,true;
+		if(getcharid(1))
+			partyleave getcharid(0);
+		sleep2 100;
+		if(party_create("Guide2"+rand(10,100000)+"") < 0) {
+			dispbottom "Something went wrong. Please disconnect and reconnect.";
+			atcommand "@kick "+strcharinfo(0);
+			end;
+		}
+		sleep2 100;
+		instance_create("Guide2");
+		sleep2 100;
+		instance_enter("Guide2");
+	}
+	end;
+}
+
+midgard,294,233,0	script	GuideStarMid4	139,1,1,{
+	if(instance_id()) {
+		callfunc "blockpj",1;
+		camerainfo 50000,33000,-6000;
+		sleep2 500;
+		unitwalk getcharid(3),286,233;
+		sleep2 400;
+		unittalk getcharid(3),"Nava: This is the...",bc_self;
+		//sleep2 500;
+		monster instance_mapname("midgard"),273,233,"Clarice",27310,1;
+		'clarice = $@mobid[0];
+		setunitdata 'clarice,UMOB_MODE,1|8|32;
+		setunitdata 'clarice,UMOB_SPEED,60;
+		unitwalk 'clarice,287,233;
+		sleep2 60*14;
+		unitpush 'clarice,DIR_WEST,2;
+		unitpush getcharid(3),DIR_EAST,4;
+		specialeffect2 1;
+		sleep2 150;
+		sc_start SC_TRICKDEAD,3000,1;
+		sleep2 1500;
+		unitwalk 'clarice,288,233;
+		sleep2 1500;
+		if(sex) unittalk 'clarice,"Unknown Girl: Are you alright sir ?";
+		else unittalk 'clarice,"Unknown Girl: Are you alright ma'am ?";
+		sleep2 1000;
+		sc_end SC_TRICKDEAD;
+		unittalk 'clarice,"Unknown Girl: Sorry, I was running late and...";
+		sleep2 2500;
+		unittalk 'clarice,"Unknown Girl: Oh you have a fairy with you, you must be one of the Realmian ?";
+		sleep2 3000;
+		unittalk getcharid(3),strcharinfo(0)+": Sure am!";
+		sleep2 2500;
+		unittalk 'clarice,"Clarice: My name is Clarice by the way. I live down the street, by the pub.";
+		sleep2 3000;
+		unittalk 'clarice,"Clarice: You can meet me at the pub. Good bye !";
+		sleep2 3000;
+		unitwalk 'clarice,302,234;
+		sleep2 1000;
+		unitremove 'clarice;
+		unittalk getcharid(3),"Nava: That was interesting, people are always in a rush nowadays...";
+		sleep2 3000;
+		unittalk getcharid(3),"Nava: Here is the Bank of Mammonith. Let's go in.";
+		sleep2 1500;
+		unitwalk getcharid(3),286,235;
+		sleep2 500;
+		callfunc "blockpj",0;
+		warp instance_mapname("mid_in02"),39,28;
+		end;
+	}
+	end;
+}
+
+mid_in02,39,28,0	script	GuideStarMid5	139,1,1,{
+	if(!instance_id()) end;
+	callfunc "blockpj",1;
+	unitwalk getcharid(3),31,28;
+	sleep2 1000;
+	npctalk "Malebolgia : Welcome to the Bank of Mammonith !","Malebolgia#1",bc_self;
+	sleep2 2000;
+	unittalk getcharid(3),"Nava: You will get reputation points throughout your adventure.";
+	sleep2 3000;
+	unittalk getcharid(3),"Nava: You can display reputation gain in your main configuration (@menu)";
+	sleep2 3500;
+	unittalk getcharid(3),"Nava: Player Vs Event Reputation (PVE) can be obtained through daily quests, invasions, mercenary quests, World Boss, Event Boss, Purgator.";
+	sleep2 3500;
+	unittalk getcharid(3),"Nava: Player Vs Monster Reputation (PVM) are obtained in all dungeons.";
+	sleep2 3500;
+	unittalk getcharid(3),"Nava: Player vs Player Reputation (PVP) are obtained in War of Emperium and Sadrith Arena.";
+	sleep2 4000;
+	unittalk getcharid(3),"Nava: Bronze Coins are the main currency when doing daily quests. You can exchange them here.";
+	sleep2 4000;
+	unittalk getcharid(3),"Nava: The Casino has become a popular place with a lot of games if you want to relax. It's located in Comodo.";
+	sleep2 5000;
+	unittalk getcharid(3),"Nava: That is it for now =)";
+	sleep2 3000;
+	callfunc "blockpj",0;
+	warp "mid_in02",31,28;
+	instance_destroy;
+	partyleave getcharid(0);
+	end;
+}
+
+mid_in02,31,28,0	script	GuideStarMid6	139,1,1,{
+	if(isbegin_quest(49207)) {
+		callfunc "blockpj",1;
+		unittalk getcharid(3),"Nava: FYI, you will get event tickets if you participate to the events. You can exchange them here.",bc_self;
+		sleep2 3000;
+		BaseExp += callfunc("get_rate_xp",20);
+		JobExp += callfunc("get_rate_xp",20);
+		Zeny += callfunc("get_rate_zeny",5)/2;
+		callfunc "END_QUEST", 49207,OPT_2;
+		unittalk getcharid(3),"Nava: Let's go to the Kugan Library now.",bc_self;
+		callfunc "SET_QUEST", 49208;
+		callfunc "blockpj",0;
+		sleep2 1000;
+		callfunc("setnavi",0);
+	}
+	end;
+}
+
+midgard,327,266,0	script	GuideStarMid8	139,5,5,{
+	if(isbegin_quest(49210))
+		navigateto("midgard",320,215);
+	if(!isbegin_quest(49208)) end;
+	unitstopwalk getcharid(3),USW_FORCE_STOP;
+	callfunc "blockpj",1;
+	unitwalk getcharid(3),326,266;
+	callfunc("setnavi",1);
+	camerainfo 40000,34000,-4500;
+	npctalk "Wizard : Hey you, what can I do for you ?","Magical Item Seller#1",bc_self;
+	sleep2 2000;
+	if(sex) unittalk getcharid(3),"Nava: "+strcharinfo(0)+" will choose his first specialization.",bc_self;
+	else unittalk getcharid(3),"Nava: "+strcharinfo(0)+" will choose her first specialization.",bc_self;
+	sleep2 3000;
+	if(sex) npctalk "Wizard : I see, isn't he a little too young for that?","Magical Item Seller#1",bc_self;
+	else npctalk "Wizard : I see, isn't she a little too young for that?","Magical Item Seller#1",bc_self;
+	sleep2 3000;
+	unittalk getcharid(3),"Nava: We don't have time to wait. "+strcharinfo(0)+" must get ready for the divine ascension.",bc_self;
+	sleep2 2500;
+	npctalk "Wizard : Hum.. Hildegard requested the best soldiers in the search of the artefacts.","Magical Item Seller#1",bc_self;
+	sleep2 3000;
+	unittalk getcharid(3),"Nava: And I'll make "+strcharinfo(0)+" a strong warrior.",bc_self;
+	sleep2 3000;
+	npctalk "Wizard : Alright then. Pleasure to meet you "+strcharinfo(0)+". I'll be here if you need blue gemstones or other magical items.","Magical Item Seller#1",bc_self;
+	BaseExp += callfunc("get_rate_xp",23);
+	JobExp += callfunc("get_rate_xp",23);
+	Zeny += callfunc("get_rate_zeny",5)/2;
+	callfunc "END_QUEST", 49208,OPT_2;
+	callfunc "SET_QUEST", 49209;
+	sleep2 1000;
+	callfunc("setnavi",0);
+	unitwalk getcharid(3),327,272;
+	callfunc "blockpj",0;
+	end;
+}
+
+mid_lib,88,31,0	script	GuideStarMid9	139,1,1,{
+	if(!isbegin_quest(49209)) end;
+	navigateto("mid_lib",96,88);
+	end;
+}
+
+mid_lib,95,87,0	script	GuideStarMid10	139,2,3,{
+	if(!isbegin_quest(49209)) end;
+	callfunc("setnavi",1);
+	unittalk getcharid(3),"Nava: "+strcharinfo(0)+", You can reset kugan as many times as you want, as long as you are a Novice or 1st Class.",bc_self;
+	sleep2 4000;
+	unittalk getcharid(3),"Nava: Kugan is the most important thing you must know to become a great warrior.",bc_self;
+	sleep2 3500;
+	unittalk getcharid(3),"Nava: A Specialization reflects a job from a specific gameplay or skills set.",bc_self;
+	sleep2 3500;
+	unittalk getcharid(3),"Nava: Indeed, it's a sort of multi-classing, allowing you to be specialized and choose skills other than your own class.",bc_self;
+	sleep2 5000;
+	unittalk getcharid(3),"Nava: Your Kugan level will raise with your Base Level.",bc_self;
+	sleep2 3000;
+	unittalk getcharid(3),"Nava: Each time you gain 1 Kugan Level, you can place 1 Kugan Point into a set of skills from your specialization or classic passive / active / signature kugan.",bc_self;
+	sleep2 5000;
+	unittalk getcharid(3),"Nava: Now, choose wisely your specialization. Don't forget, you can forget and reset your kugan / specialization anytime here as long as you are Job 1.",bc_self;
+	sleep2 2000;
+	callfunc("setnavi",0);
+	if(KuganLevel < 2) {
+		KuganLevel = 5; KuganPoints = 5;
+		specialeffect2 338; specialeffect2 153; specialeffect2 215;
+		Announce "[Kugan] : Your Kugan Level increased ! You are now "+ KuganLevel +".",bc_self,0x9900CC;
+	}
+	end;
+}
+
+mid_in02,48,149,0	script	Old Treasure Box#int04	10005,{
+	mes "[^5555ff"+strcharinfo(0)+"^000000]";
+	if(!isbegin_quest(49210)){
+		mes "It's empty...";
+		close;
+	}
+	BaseExp += callfunc("get_rate_xp",25);
+	JobExp += callfunc("get_rate_xp",25);
+	Zeny += callfunc("get_rate_zeny",5)/2;
+	callfunc "END_QUEST", 49210,OPT_2;
+	callfunc "SET_QUEST", 49211;
+	callfunc("setnavi",1);
+	mes "*Obtained: x50 Yellow Potion*";
+	getitem 503,50;
+	close2;
+	unittalk getcharid(3),"Nava: All useful consommable and miscellaneous items are found here.",bc_self;
+	callfunc "blockpj",1;
+	sleep2 2500;
+	npctalk "Louitz: HELP !!","Louitz#mid",bc_self;
+	sleep2 2000;
+	unittalk getcharid(3),"Nava: ?!.",bc_self;
+	sleep2 2000;
+	unitwalk getcharid(3),39,145;
+	sleep2 1000;
+	unittalk getcharid(3),strcharinfo(0)+" : What is it ?",bc_self;
+	sleep2 1000;
+	callfunc("UnitLookDir",getcharid(3),getnpcid(0,"Louitz#mid"));
+	callfunc "Npc_LookDir",getnpcid(0);
+	sleep2 1000;
+	if(Sex) npctalk "Louitz: I need your help young man","Louitz#mid",bc_self;
+	else npctalk "Louitz: I need your help young lady","Louitz#mid",bc_self;
+	sleep2 3000;
+	npctalk "Louitz: Please return this to Chuby Itaki, his quality item is not quite on point !","Louitz#mid",bc_self;
+	sleep2 3500;
+	unittalk getcharid(3),strcharinfo(0)+" : Euh... Sure...",bc_self;
+	sleep2 2500;
+	npctalk "Louitz: Here ! Take it!","Louitz#mid",bc_self;
+	setarray .@OptID[0],RDMOPT_ASPD_RATE;
+	setarray .@OptVal[0],2;
+	setarray .@OptParam[0],0;
+	getitem3 2301,1,1,4,0,0,0,0,0,.@OptID,.@OptVal,.@OptParam;
+	callfunc "blockpj",0;
+	sleep2 1000;
+	callfunc("setnavi",0);
+	end;
+}
+
+midgard,147,133,4	script	Robert#int04	10085,5,5,{
+	if(isbegin_quest(49212)) {
+		callfunc("setnavi",1);
+		callfunc "blockpj",1;
+		npctalk "Robert : *Yawn*",strnpcinfo(0),bc_self;
+		sleep2 1500;
+		unittalk getcharid(3),strcharinfo(0)+" : Something's wrong ?",bc_self;
+		sleep2 2000;
+		npctalk "Robert : I'm just tired. I thought it would've never opened",strnpcinfo(0),bc_self;
+		sleep2 3000;
+		unittalk getcharid(3),strcharinfo(0)+" : What do you mean ?",bc_self;
+		sleep2 3000;
+		npctalk "Robert : Well, we finally opened. It's been 2 long years of work, you know?",strnpcinfo(0),bc_self;
+		sleep2 3500;
+		unittalk getcharid(3),strcharinfo(0)+" : I guess I'm just confused.",bc_self;
+		sleep2 3000;
+		npctalk "Robert : The market, we have built a whole market further west.",strnpcinfo(0),bc_self;
+		sleep2 3000;
+		unittalk getcharid(3),strcharinfo(0)+" : I was sent by Chuby Itaki.",bc_self;
+		sleep2 3000;
+		refresh;
+		npctalk "Robert : Moonstones, you say ?",strnpcinfo(0),bc_self;
+		sleep2 3000;
+		@countquest = -1;
+		npctalk "Robert : There is a dealer further west who can give you what you need.",strnpcinfo(0),bc_self;
+		callfunc("setnavi",0);
+		navigateto("midgard",26,224);
+		callfunc "blockpj",0;
+		end;
+	}
+	if(rand(1)) npctalk "Robert : The Indoor market contains all consommables and miscellaneous items.";
+	else npctalk "Robert : Two years to build it ! Can you imagine ?";
+	end;
+}
+market,181,98,0	script	GuideStarMid13	139,1,1,{
+	if(isbegin_quest(49212))
+		navigateto("market",61,65);
+	end;
+}
+
+market,61,65,4	script	Magasin#int05	10235,7,7,{
+	if(@countquest > 0) {
+		npctalk "Magasin : Get rid of the buggggs !!",strnpcinfo(0),bc_self;
+		end;
+	}
+	if(isbegin_quest(49212)) {
+		callfunc("setnavi",1);
+		callfunc "blockpj",1;
+		npctalk "Magasin : Well well, I said...",strnpcinfo(0),bc_self;
+		sleep2 1500;
+		unittalk getcharid(3),strcharinfo(0)+" : Excuse me ?",bc_self;
+		sleep2 1500;
+		npctalk "Magasin : Interruptioooonnn !!!",strnpcinfo(0),bc_self;
+		sleep2 1500;
+		if(sex) npctalk "Magasin : Unacceptable ! Haven't you learned the good manners poor boy ?",strnpcinfo(0),bc_self;
+		else npctalk "Magasin : Unacceptable ! Haven't you learned the good manners poor little girl ?",strnpcinfo(0),bc_self;
+		sleep2 3000;
+		unittalk getcharid(3),"Nava : That is no manner either !",bc_self;
+		sleep2 3000;
+		unittalk getcharid(3),strcharinfo(0)+" : I just come here to get moonstones. Robert has bought the wrong item and here they are.",bc_self;
+		sleep2 4000;
+		npctalk "Magasin : I shall accept your request ? Is that right ?",strnpcinfo(0),bc_self;
+		sleep2 3000;
+		unittalk getcharid(3),strcharinfo(0)+" : Please, if you would consider so.",bc_self;
+		sleep2 3500;
+		npctalk "Magasin : Well, if you help me getting rid of those bugs !",strnpcinfo(0),bc_self;
+		callfunc "blockpj",0;
+		@countquest = 10;
+		sleep2 3500;
+		callfunc("setnavi",0);
+		unittalk getcharid(3),"Nava : "+strcharinfo(0)+", now is time to fight. Don't be scared, I'll be with you.",bc_self;
+		announce "[Quest]: Get rid of 10 thief bug",bc_self;
+		end;
+	}
+	if(rand(1)) npctalk "Magasin : Moonstones ! Bradium ! Cranium ! Enriched ! Blacksmith Blessing !",strnpcinfo(0),bc_self;
+	else npctalk "Magasin : Souls can be obtained mostly in nightmare dungeons, did you know that ?",strnpcinfo(0),bc_self;
+	end;
+OnStart:
+	if(isbegin_quest(49212)) {
+		if(@countquest == -1)
+			end;
+		if(@countquest > 0) {
+			showscript @countquest+"/10";
+			@countquest--;
+		}
+		if(!@countquest) {
+			callfunc("setnavi",1);
+			npctalk "Magasin : Thanks ! That was brilliant.",strnpcinfo(0),bc_self;
+			callfunc "blockpj",1;
+			sleep2 2500;
+			callfunc "blockpj",0;
+			npctalk "Magasin : Alright then, here is the moonstones",strnpcinfo(0),bc_self;
+			BaseExp += callfunc("get_rate_xp",25);
+			JobExp += callfunc("get_rate_xp",25);
+			Zeny += callfunc("get_rate_zeny",5)/2;
+			callfunc "END_QUEST", 49212,OPT_2;
+			callfunc "SET_QUEST", 49213;
+			navigateto("market",180,98);
+			sleep2 1500;
+			callfunc("setnavi",0);
+			end;
+		}
+	}
+	end;
+}
+market,61,90,4	script	Boudhist Marcel#int005	10122,5,5,{
+	if(rand(1)) npctalk "Boudhist Marcel : Cooking is my passion, have you find yours ?";
+	else npctalk "Boudhist Marcel : I love making special food, it increases all your stength !";
+	end;
+}
+market,64,63,5,5	monster	Thief Bug	2290,5,0,0,"Magasin#int05::OnStart"
+
+midgard,191,398,4	script	Yggdrasil Tree	111,2,2,{
+	unitwalk midgard,191,396;
+	getmapxy .@map$,.@x,.@y;
+	if(distance(.@x,.@y,getnpcinfo(NPC_X),getnpcinfo(NPC_Y)) > 2)
+		end;
+OnTouch:
+	if(Get_Item[1] == 1+gettime(DT_DAYOFWEEK))
+		unittalk getcharid(3),strcharinfo(0)+" : I should come back tomorrow",bc_self;
+	else {
+		Get_Item[1] = 1+gettime(DT_DAYOFWEEK);
+		getitembound 608,1,Bound_Char;
+		specialeffect2 1;
+		unitbattlemode getcharid(3);
+		showscript "Yaaa !!";
+		sleep2 1000;
+		unitskilleffect getcharid(3),getcharid(3),1013,1,0;
+		showscript "Collect !!";
+		announce "Yggdrasil Seed collected.",bc_self;
+	}
+	if(isbegin_quest(49214)) {
+		callfunc("setnavi",1);
+		setnight;
+		callfunc "blockpj",1;
+		BaseExp += callfunc("get_rate_xp",30);
+		JobExp += callfunc("get_rate_xp",30);
+		Zeny += callfunc("get_rate_zeny",10)/2;
+		callfunc "END_QUEST", 49214,OPT_2;
+		callfunc "SET_QUEST", 49215;
+		sleep2 2000;
+		unittalk getcharid(3),"Nava : It's getting dark "+strcharinfo(0)+"";
+		sleep2 2500;
+		unittalk getcharid(3),"Nava : Let's rest at the inn tonight. You've done well today.";
+		setpcblock PCBLOCK_NPCCLICK,false;
+		sleep2 3000;
+		callfunc "blockpj",0;
+		callfunc("setnavi",0);
+		warp "midgard",73,239;
+		sleep2 100;
+		setnight;
+	}
+	end;
+}
+midgard,254,400,4	script	Royal Jelly Tree	111,{
+	if(isbegin_quest(49214))
+		navigateto("midgard",191,396);
+	unitwalk midgard,253,398;
+	getmapxy .@map$,.@x,.@y;
+	if(distance(.@x,.@y,getnpcinfo(NPC_X),getnpcinfo(NPC_Y)) > 2)
+		end;
+OnTouch:
+	if(Get_Item[0] == 1+gettime(DT_DAYOFWEEK)) {
+		unittalk getcharid(3),strcharinfo(0)+" : I should come back tomorrow",bc_self;
+		end;
+	}
+	Get_Item[0] = 1+gettime(DT_DAYOFWEEK);
+	getitembound 526,rand(5,10),Bound_Char;
+	specialeffect2 1;
+	unitmoveskill getcharid(3),getcharid(3),5;
+	showscript "Yaaa !!";
+	sleep2 1000;
+	unitskilleffect getcharid(3),getcharid(3),1013,1,0;
+	showscript "Collect !!";
+	announce "Royal Jelly collected.",bc_self;
+	end;
+}
+
+mid_inn,219,150,0	script	GuideStartMid16	139,1,1,{
+	if(@busy) end;
+	@busy = 1;
+	camerainfo 50000,3500,-6000;
+	specialeffect2 673;
+	sc_start SC_TRICKDEAD,28000,1;
+	soundeffect "se_bug03.wav",0;
+	initnpctimer instance_npcname("GuideStartMid16"),getcharid(3);
+	sleep2 4000;
+	soundeffect "se_scream01.wav",0;
+	monster strnpcinfo(4),224,145,"Holy Light",20164,1,"",0,AI_BOMB,63;
+	setunitdata $@mobid[0],UMOB_CLASS,10083;
+	setunitdata $@mobid[0],UMOB_MODE,1|8|32;
+	'ghost = $@mobid[0];
+	sleep2 2000;
+	unittalk getcharid(3),strcharinfo(0)+" : ?!";
+	sleep2 500;
+	sc_end SC_TRICKDEAD;
+	sc_end SC_SLEEP;
+	sc_end SC_DRESSUP;
+	sc_end SC_SUMMER;
+	unitmove getcharid(3),216,150;
+	refresh;
+	specialeffect2 673;
+	unitlookdir getcharid(3),DIR_SOUTH;
+	unitwalk 'ghost,237,151;
+	soundeffect "whisper_move.wav",0;
+	sleep2 600;
+	soundeffect "whisper_move.wav",0;
+	sleep2 600;
+	unitremove 'ghost;
+	soundeffect "whisper_move.wav",0;
+	donpcevent instance_npcname("Shining Statue")+"::OnStart";
+	end;
+OnTimer8000:
+	stopnpctimer instance_npcname("GuideStartMid16"),getcharid(3);
+	if(strcharinfo(3) != instance_mapname("mid_inn")) end;
+	soundeffect "se_bug03.wav",0;
+	initnpctimer instance_npcname("GuideStartMid16"),getcharid(3);
+	end;
+}
+
+mid_inn,210,284,0	script	mid_inn2-11	45,1,1,{ warp instance_mapname("mid_inn"),241,219; specialeffect2 673; end; }
+mid_inn,236,219,0	script	mid_inn2-12	45,1,1,{
+	if(@busy < 3) { npctalk "*Locked*"; end; }
+	warp instance_mapname("mid_inn"),206,284;
+	specialeffect2 673;
+	soundeffect "se_scream01.wav",0;
+	monster strnpcinfo(4),202,280,"Holy Light",20164,1,"",0,AI_BOMB,63;
+	setunitdata $@mobid[0],UMOB_SPEED,150;
+	setunitdata $@mobid[0],UMOB_CLASS,10083;
+	setunitdata $@mobid[0],UMOB_MODE,1|8|32;
+	'ghost = $@mobid[0];
+	unitwalk 'ghost,217,270;
+	soundeffect "whisper_move.wav",0;
+	sleep2 9*150;
+	soundeffect "whisper_move.wav",0;
+	sleep2 9*150;
+	unitwalk 'ghost,237,270;
+	sleep2 18*150;
+	unitwalk 'ghost,245,276;
+	sleep2 1000;
+	unitremove 'ghost;
+	end;
+}
+mid_inn,250,278,0	script	mid_inn3-11	45,1,1,{
+	if(@busy < 5) { npctalk "*Locked*"; end; }
+	sc_start SC_SLEEP,180000,1,10000,SCSTART_NOAVOID,getnpcid(0,instance_npcname("Assassin#midin2"));
+	disablenpc instance_npcname("Bloody Mary");
+	warp instance_mapname("mid_inn"),265,278;
+	specialeffect2 673;
+	soundeffect "se_scream01.wav",0;
+	monster strnpcinfo(4),265,278,"Holy Light",20164,1,"",0,AI_BOMB,63;
+	setunitdata $@mobid[0],UMOB_SPEED,150;
+	setunitdata $@mobid[0],UMOB_CLASS,10083;
+	setunitdata $@mobid[0],UMOB_MODE,1|8|32;
+	'ghost = $@mobid[0];
+	unitwalk 'ghost,287,273;
+	soundeffect "whisper_move.wav",0;
+	sleep2 9*150;
+	soundeffect "whisper_move.wav",0;
+	sleep2 9*150;
+	soundeffect "se_scream01.wav",0;
+	unitremove 'ghost;
+	enablenpc instance_npcname("Bloody Mary");
+	end;
+}
+mid_inn,287,273,0	script	Bloody Mary	10083,5,5,{
+	unitwalk getcharid(3),285,277;
+	end;
+OnTouch:
+	if(@busy == 100) end;
+	@busy = 100;
+	npctalk "Mary: *sob*";
+	emotion ET_CRY;
+	sleep2 1000;
+	//unittalk getcharid(3),"H... Hey?";
+	sleep2 1000;
+	callfunc "Npc_LookDir",getnpcid(0);
+	npctalk "Mary: ?! Who are you ? Can you see me ?";
+	soundeffect "se_scream01.wav",0;
+	sleep2 1500;
+	unittalk getcharid(3),strcharinfo(0)+": Y... Yes?";
+	sleep2 1500;
+	getmapxy .@map$,.@x,.@y;
+	unitwalk getnpcid(0),.@x,.@y;
+	soundeffect "whisper_move.wav",0;
+	sleep2 1000;
+	npctalk "Mary: Please... My.. husband";
+	emotion ET_CRY;
+	sleep2 1500;
+	npctalk "Mary: You must tell him that I'm no longer part of this world. My name is Mary.";
+	sleep2 3500;
+	unittalk getcharid(3),strcharinfo(0)+": Sure.. I'll do.";
+	sleep2 4000;
+	npctalk "Mary: I'm sorry I've been haunting this inn ever since I passed away.";
+	sleep2 4000;
+	npctalk "Mary: He is drinking here every night, tell him I'm not happy about that !!";
+	sleep2 5000;
+	unittalk getcharid(3),strcharinfo(0)+": Euuhh... Sure.";
+	sleep2 1000;
+	npctalk "Mary: He has to move on and look forward.";
+	sleep2 2000;
+	unittalk getcharid(3),strcharinfo(0)+": You can count on me.";
+	sleep2 1000;
+	specialeffect2 334;
+	sleep2 2000;
+	specialeffect2 334;
+	sleep2 1000;
+	specialeffect2 334;
+	warp "mid_in02",219,150;
+	sleep2 100;
+	.@dir = DIR_SOUTH;
+	playbgm "182";
+	sc_start SC_TRICKDEAD,28000,1;
+	sleep2 1;
+	sc_start SC_SLEEP,28000,1;
+	if(Sex) sc_start SC_DRESSUP,28000,1; else sc_start SC_SUMMER,28000,1;
+	unitlookdir getcharid(3),.@dir;
+	sleep2 1000;
+	specialeffect2 334;
+	sleep2 1000;
+	specialeffect2 334;
+	sleep2 1000;
+	specialeffect2 334;
+	sleep2 1000;
+	sc_end SC_TRICKDEAD;
+	sc_end SC_SLEEP;
+	sc_end SC_DRESSUP;
+	sc_end SC_SUMMER;
+	warp "mid_in02",216,150; unitlookdir getcharid(3),DIR_SOUTH;
+	specialeffect2 457;
+	heal 99999,99999;
+	skilleffect 28,99999;
+	skilleffect 34,0;
+	skilleffect 29,0;
+	sc_start SC_BLESSING,600000,10;
+	sc_start SC_INCREASEAGI,600000,10;
+	sleep2 4000;
+	removenight;
+	playbgm "M65";
+	end;
+}
+
+mid_inn,285,270,2	script	Assassin#midin2	697,{
+	npctalk "Mysterious Assassin : Zzzz";
+	end;
+OnInit:
+	sc_start SC_SLEEP,60000,1,10000,SCSTART_NOAVOID,getnpcid(0);
+	end;
+}
+
+mid_inn,261,278,0	script	mid_inn3-12	45,1,1,{ warp instance_mapname("mid_inn"),246,278; specialeffect2 673; end; }
+mid_inn,254,212,0	script	mid_inn4-11	45,1,1,{ if(@busy < 2) { npctalk "*Locked*"; end; } warp instance_mapname("mid_inn"),273,212; specialeffect2 673; end; }
+mid_inn,269,212,0	script	mid_inn4-12	45,1,1,{ warp instance_mapname("mid_inn"),250,212; specialeffect2 673; end; }
+mid_inn,238,169,0	script	mid_inn5-11	45,1,1,{ warp instance_mapname("mid_inn"),238,150; specialeffect2 673; end; }
+mid_inn,238,154,0	script	mid_inn5-12	45,1,1,{
+	warp instance_mapname("mid_inn"),238,173;
+	specialeffect2 673;
+	soundeffect "se_scream01.wav",0;
+	monster strnpcinfo(4),238,179,"Holy Light",20164,1,"",0,AI_BOMB,63;
+	setunitdata $@mobid[0],UMOB_SPEED,150;
+	setunitdata $@mobid[0],UMOB_CLASS,10083;
+	setunitdata $@mobid[0],UMOB_MODE,1|8|32;
+	'ghost = $@mobid[0];
+	unitwalk 'ghost,237,191;
+	soundeffect "whisper_move.wav",0;
+	sleep2 5*150;
+	soundeffect "whisper_move.wav",0;
+	sleep2 6*150;
+	unitwalk 'ghost,242,209;
+	sleep2 18*150;
+	unitwalk 'ghost,238,219;
+	sleep2 1000;
+	unitremove 'ghost;
+	end;
+}
+mid_inn,231,182,0	script	mid_inn6-11	45,1,1,{ warp instance_mapname("mid_inn"),212,182; specialeffect2 673; end; }
+mid_inn,216,182,0	script	mid_inn6-12	45,1,1,{ warp instance_mapname("mid_inn"),235,182; specialeffect2 673; end; }
+mid_inn,231,200,0	script	mid_inn7-11	45,1,1,{ warp instance_mapname("mid_inn"),212,200; specialeffect2 673; end; }
+mid_inn,216,200,0	script	mid_inn7-12	45,1,1,{ warp instance_mapname("mid_inn"),235,200; specialeffect2 673; end; }
+
+mid_inn,238,173,0	script	GuideStartMid17	139,1,1,{ specialeffect2 673; end; }
+mid_inn,229,222,0	script	Shining Statue	111,1,1,{
+	unitwalk getcharid(3),229,221;
+	end;
+OnTouch:
+	if(@busy == 1) {
+		stopnpctimer instance_npcname("Shining Statue");
+		@busy = 2;
+		npctalk "*Obtained: x1 Chamber key";
+		donpcevent instance_npcname("Chamber Desk")+"::OnStart";
+	}
+	end;
+OnStart:
+	initnpctimer instance_npcname("Shining Statue");
+	end;
+OnTimer5000:
+	misceffect 753;
+	stopnpctimer instance_npcname("Shining Statue");
+	initnpctimer instance_npcname("Shining Statue");
+	end;
+}
+
+mid_inn,271,223,0	script	Chamber Desk	111,1,1,{
+	unitwalk getcharid(3),272,222;
+	end;
+OnTouch:
+	if(@busy == 2) {
+		stopnpctimer instance_npcname("Chamber Desk");
+		@busy = 3;
+		npctalk "*Obtained: x1 Downstair Key";
+		monster instance_mapname("mid_inn"),279,220,"Ghost",27350,1,instance_npcname("Chamber Desk")+"::OnStart2";
+		disablenpc instance_npcname("mid_inn4-12");
+	}
+	end;
+OnStart2:
+	enablenpc instance_npcname("mid_inn4-12");
+	end;
+OnStart:
+	initnpctimer instance_npcname("Chamber Desk");
+	end;
+OnTimer5000:
+	misceffect 753;
+	stopnpctimer instance_npcname("Chamber Desk");
+	initnpctimer instance_npcname("Chamber Desk");
+	end;
+}
+
+mid_inn,219,285,0	script	Hidden Object	111,3,3,{
+	if(@busy >= 4) end;
+	@busy = 4;
+	npctalk "*Obtained: x1 Desk Key";
+	end;
+}
+mid_inn,231,282,0	script	Desk Drawer	111,3,3,{
+	if(@busy >= 5) end;
+	if(@busy < 4) { npctalk "*Locked*"; end; }
+	@busy = 5;
+	npctalk "*Obtained: x1 Bar Key";
+	end;
+}
+
+mid_in02,286,270,8	script	Assassin#midin	698,{
+	mes "[Mysterious Assassin]";
+	mes "...";
+	if((@busy >= 100 || intronew == 12) && isbegin_quest(49215)) {
+		next;
+		mes "[^5555ff"+strcharinfo(0)+"^000000]";
+		mes "Hmm... Sir ?";
+		next;
+		mes "[Mysterious Assassin]";
+		mes "What do you want ?";
+		next;
+		mes "[^5555ff"+strcharinfo(0)+"^000000]";
+		mes "I have a message from someone.";
+		next;
+		mes "[^5555ff"+strcharinfo(0)+"^000000]";
+		mes "I saw Mary last night while I was resting upstairs in a room";
+		next;
+		mes "[Mysterious Assassin]";
+		mes "Impossible. Mary died a while ago.";
+		next;
+		mes "[^5555ff"+strcharinfo(0)+"^000000]";
+		mes "I know it is hard to believe but I've seen her ghost. She is upset that you spend your time drinking and ruminating...";
+		next;
+		mes "[Mysterious Assassin]";
+		mes "HA ! Mary was always complaining about that but I doubt what you're saying is true.";
+		next;
+		mes "[^5555ff"+strcharinfo(0)+"^000000]";
+		mes "She said she is in peace now and that you should move on.";
+		next;
+		mes "*At this very moment, a light touches the gentleman*";
+		next;
+		misceffect 9;
+		next;
+		mes "[Mysterious Assassin]";
+		mes "Mary ?!";
+		next;
+		mes "[^5555ff"+strcharinfo(0)+"^000000]";
+		mes "I'm telling you, she won't leave as long as you keep ruminating !";
+		next;
+		mes "[Mysterious Assassin]";
+		mes "You're right. I must forgive and find peace.";
+		next;
+		setnight;
+		BaseExp += callfunc("get_rate_xp",30);
+		JobExp += callfunc("get_rate_xp",30);
+		Zeny += callfunc("get_rate_zeny",10)/2;
+		callfunc "END_QUEST", 49215,OPT_2;
+	}
+	close;
+}
+
+midgard,73,240,0	script	GuideStartMid18	139,1,1,{
+	if(intronew == 12 && !isbegin_quest(49216)) {
+		removenight;
+		callfunc("setnavi",1);
+		callfunc "blockpj",1;
+		unittalk getcharid(3),"Nava: You did well last night, good job !",bc_self;
+		sleep2 2000;
+		unittalk getcharid(3),"Nava: We should go to the Academy.",bc_self;
+		if(isbegin_quest(49215))
+			callfunc "END_QUEST", 49215,OPT_2;
+		callfunc "SET_QUEST", 49216;
+		intronew = 13;
+		sleep2 2500;
+		unittalk getcharid(3),"Nava: It is not far from here. The stylist is right there on the right, you might as well refresh yourself.",bc_self;
+		callfunc "blockpj",0;
+		sleep2 3000;
+		navigateto("midgard",292,298);
+		callfunc("setnavi",0);
+	}
+}
+
+mid_in03,100,28,0	script	GuideStartMid19	139,1,1,{
+	if(isbegin_quest(49216))
+		navigateto("mid_in03",52,76);
+	end;
+}
+
+mid_in03,52,76,0	script	Lieutenant Morgan	666,3,3,{
+	if(isbegin_quest(49216)) {
+		callfunc "blockpj",1;
+		callfunc("setnavi",1);
+		npctalk "Lieutenant Morgan: Yes ?",strnpcinfo(0),bc_self;
+		sleep2 1000;
+		unittalk getcharid(3),"Nava: "+strcharinfo(0)+", this is the lieutenant Morgan, taking care of the daily missions of the Realm.",bc_self;
+		sleep2 3500;
+		unittalk getcharid(3),strcharinfo(0)+": My name is "+strcharinfo(0)+", from the Green Light of Karakass.",bc_self;
+		sleep2 3500;
+		npctalk "Lieutenant Morgan: Hmm... Are you one of the Ragnarok survivor ?",strnpcinfo(0),bc_self;
+		sleep2 3000;
+		unittalk getcharid(3),strcharinfo(0)+": The Ragnarok ?",bc_self;
+		sleep2 2000;
+		npctalk "Lieutenant Morgan: According to the historians of the Realm, the Ragnarok is described to be a the ultimate battle, between Gods and mortals",strnpcinfo(0),bc_self;
+		sleep2 4000;
+		npctalk "Lieutenant Morgan: It is a myth though, but the rumor says the Green Light is the result of a catastrophy that happened in the past or the future, no one really knows.",strnpcinfo(0),bc_self;
+		sleep2 5000;
+		npctalk "Lieutenant Morgan: In any cases, we are in the present time now and that's what matters.",strnpcinfo(0),bc_self;
+		sleep2 4000;
+		npctalk "Lieutenant Morgan: You must serve your king, Hildegard and accomplish quests in a daily basis. You will be rewarded of course.",strnpcinfo(0),bc_self;
+		sleep2 5000;
+		callfunc("setnavi",0);
+		refresh;
+		npctalk "Lieutenant Morgan: Bring this to the library please.",strnpcinfo(0),bc_self;
+		navigateto("mid_in03",154,81);
+		callfunc "blockpj",0;
+		end;
+	}
+	switch(rand(5)) {
+		case 0: npctalk "Lieutenant Morgan: 1 mercenary quest type per day.",strnpcinfo(0),bc_self; break;
+		case 1: npctalk "Lieutenant Morgan: Everyday, we need help to achieve some missions called Mercenary Quests.",strnpcinfo(0),bc_self; break;
+		case 2: npctalk "Lieutenant Morgan: You can validate a quest for your whole party.",strnpcinfo(0),bc_self; break;
+		case 3: npctalk "Lieutenant Morgan: Soooo much paper here !!",strnpcinfo(0),bc_self; break;
+		case 4: npctalk "Lieutenant Morgan: We need help for the Realm !",strnpcinfo(0),bc_self; break;
+		case 5: npctalk "Lieutenant Morgan: Please, accept one mission.",strnpcinfo(0),bc_self; break;
+	}
+	end;
+}
+
+mid_in03,154,81,0	script	GuideStartMid017	139,3,3,{
+	if(isbegin_quest(49216)) {
+		callfunc("setnavi",1);
+		unittalk getcharid(3),"*You are putting back the book given by Lieutenant Morgan*",bc_self;
+		sleep2 2500;
+		unittalk getcharid(3),"Nava: Did you know that all monsters of this world exist as Elite monsters ? A much more dangerous form of the regular ones.",bc_self;
+		sleep2 5000;
+		unittalk getcharid(3),"Nava: For example, open a book and search for Poring Elite (ID: 1002)",bc_self;
+		sleep2 3000;
+		callfunc("setnavi",0);
+		end;
+	}
+}
+
+midgard,215,57,0	script	GuideStarMid21	139,5,5,{
+	if(isbegin_quest(49217)) {
+		callfunc "blockpj",1;
+		camerainfo 37500,4500,-4000;
+		callfunc("setnavi",1,0);
+		unitlookdir getcharid(3),DIR_SOUTH;
+		switch(rand(6)) {
+			case 0: warp "midgard",214,58; break;
+			case 1: warp "midgard",213,58; break;
+			case 2: warp "midgard",212,58; break;
+			case 3: warp "midgard",211,58; break;
+			case 4: warp "midgard",217,58; break;
+			case 5: warp "midgard",218,58; break;
+			case 6: warp "midgard",219,58; break;
+		}
+		playbgm "M203";
+		sit;
+		unittalk getcharid(3),"Nava: Citizens of Midgard come here to pray the statue of the Lake.",bc_self;
+		sleep2 3500;
+		unittalk getcharid(3),"Nava: The legend says that if you make a donation, your wishes will be granted.",bc_self;
+		sleep2 3500;
+		unittalk getcharid(3),"Nava: But who knows, people always say a lot of stories to make a fortune!",bc_self;
+		sleep2 3500;
+		unittalk getcharid(3),"Nava: "+strcharinfo(0)+", you must know your faith is sealed.",bc_self;
+		sleep2 3000;
+		unittalk getcharid(3),"Nava: There is a threat we all must face - Gileyn Fu Arma, the overlord of the past has returned.",bc_self;
+		sleep2 4000;
+		unittalk getcharid(3),"Nava: His return doesn't predict anything good.",bc_self;
+		sleep2 3000;
+		unittalk getcharid(3),"Nava: We think he is responsible for the green dimension in Karakass.",bc_self;
+		sleep2 3000;
+		unittalk getcharid(3),"Nava: You must find out what's behind all this.",bc_self;
+		sleep2 3000;
+		unittalk getcharid(3),"Nava: You must train.",bc_self;
+		sleep2 2000;
+		unittalk getcharid(3),"Nava: But first of all, you shall prepare a place to rest. After all, you don't have enough money to sleep at the inn everyday hihi.",bc_self;
+		sleep2 4000;
+		unittalk getcharid(3),"Nava: Let's go behind the city walls, there is a quiet and lovely place.",bc_self;
+		BaseExp += callfunc("get_rate_xp",30);
+		JobExp += callfunc("get_rate_xp",30);
+		Zeny += callfunc("get_rate_zeny",10)/2;
+		navigateto("midgard",87,39);
+		callfunc "blockpj",0;
+		callfunc "END_QUEST", 49217,OPT_2;
+		callfunc "SET_QUEST", 49218;
+		sleep2 2000;
+		callfunc("setnavi",0);
+		playbgm "M07";
+	}
+	end;
+}
+midgard,215,66,14,9	monster	Blue Plant	1079,2,90000,90000
+midgard,215,66,14,9	monster	Red Plant	1078,2,90000,90000
+midgard,215,66,14,9	monster	Yellow Plant	1081,2,90000,90000
+midgard,215,66,14,9	monster	White Plant	1082,2,90000,90000
+midgard,215,66,14,9	monster	Green Plant	1080,2,90000,90000
+midgard,215,66,14,9	monster	Shining Plant	1083,2,180000,180000
+
+midgard,90,43,0	script	Pile of Wood	10026,2,2,{
+	unitwalk getcharid(3),89,42;
+	getmapxy .@map$,.@x,.@y;
+	if(distance(.@x,.@y,getnpcinfo(NPC_X),getnpcinfo(NPC_Y)) > 2)
+		end;
+OnTouch:
+	if(Get_Item[2] == 1+gettime(DT_DAYOFWEEK)) {
+		unittalk getcharid(3),strcharinfo(0)+" : I should come back tomorrow",bc_self;
+		end;
+	}
+	if(@busy2) end;
+	specialeffect2 1;
+	unitmoveskill getcharid(3),getcharid(3),5;
+	@trunk++;
+	showscript "Yaaa !! ("+(15-@trunk)+"/15 HP)";
+	@busy2 = 1;
+	sleep2 1000;
+	@busy2 = 0;
+	if(@trunk >= 15) {
+		if(.@count = countitem(1019))
+			delitem 1019,.@count;
+		@trunk = 0;
+		unitskilleffect getcharid(3),getcharid(3),1013,1,0;
+		showscript "Collect !!";
+		announce "Trunk collected.",bc_self;
+		Get_Item[2] = 1+gettime(DT_DAYOFWEEK);
+		getitem 1019,.@count+rand(5,10);
+	}
+	end;
+}
+
+kar_fild04,156,99,6	script	Fireplace#int01	10252,3,3,{
+OnTouch:
+	if(intronew == 15) end;
+	mes "[^ff0000"+strcharinfo(0)+"^000000]";
+	mes "...";
+	camerainfo 37500,4500,-4000;
+	next;
+	if(isbegin_quest(49218))
+		.@menu = select("- Settle a spot here:- Keep going");
+	else .@menu = select("- Rest:- Keep going");
+	switch(.@menu) {
+		case 1:
+			if((isbegin_quest(49218) || isbegin_quest(49222)) && (Get_Item[2] != 1+gettime(DT_DAYOFWEEK))) {
+				mes "[^ff0000"+strcharinfo(0)+"^000000]";
+				mes "Let's prepare some wood then.";
+				unitlookdir getcharid(3),DIR_NORTHEAST;
+				close;
+			}
+			callfunc "blockpj",1;
+			setnight;
+			switch (rand(0,2)) {
+				case 0: setarray .@pos,getnpcinfo(NPC_X)-2,getnpcinfo(NPC_Y),DIR_EAST; break;
+				case 1: setarray .@pos,getnpcinfo(NPC_X),getnpcinfo(NPC_Y)-2,DIR_NORTH; break;
+				case 2: setarray .@pos,getnpcinfo(NPC_X),getnpcinfo(NPC_Y)+2,DIR_SOUTH; break;
+			}
+			warp strnpcinfo(4),.@pos[0],.@pos[1];
+			sleep2 200;
+			sit;
+			unitlookdir getcharid(3),.@pos[2];
+			if(isbegin_quest(49218) || isbegin_quest(49222)) {
+				initnpctimer strnpcinfo(0),getcharid(3);
+				playbgm "182";
+				callfunc("setnavi",1,0);
+				sleep2 6000;
+				if(isbegin_quest(49222)) {
+					unittalk getcharid(3),"Nava: Tomorrow, you will finally see Rivendel.",bc_self;
+					sleep2 4000;
+					unittalk getcharid(3),"Nava: We will have to take the airplane to go to the west mountains.",bc_self;
+					sleep2 4000;
+					unittalk getcharid(3),"Nava: If you open your world map (Alt + `), you will see Midgard North and its surroundings.",bc_self;
+					sleep2 5000;
+					unittalk getcharid(3),"Nava: The Ragnarok Airplane can bring you to many places but you have to visit them first.",bc_self;
+					sleep2 5000;
+					unittalk getcharid(3),"Nava: Why ? It's a policy we can't contradict. Once you proof your efforts to each guard of each map, you will be able to access it easily.",bc_self;
+					sleep2 6000;
+					unittalk getcharid(3),"Nava: That's just the way it is. I didn't create the world and the rules.",bc_self;
+					sleep2 3500;
+					unittalk getcharid(3),"Nava: Let's take some rest now.",bc_self;
+				}
+				if(isbegin_quest(49218)) {
+					unittalk getcharid(3),"Nava: It is very peaceful here.",bc_self;
+					sleep2 3000;
+					unittalk getcharid(3),"Nava: Tell me, do you have any memories of your life before ?",bc_self;
+					sleep2 4000;
+					unittalk getcharid(3),strcharinfo(0)+": Vaguely.. It feels like a dream when I try remembering it",bc_self;
+					sleep2 4500;
+					unittalk getcharid(3),"Nava: We will find out what happens, there will be more clues when we get to Rivendel",bc_self;
+					sleep2 4000;
+					unittalk getcharid(3),strcharinfo(0)+": Rivendel ?",bc_self;
+					sleep2 2000;
+					unittalk getcharid(3),"Nava: Yes, Rivendel is where all fairies live.",bc_self;
+					sleep2 3000;
+					unittalk getcharid(3),"Nava: We try to protect the world from the outerworld.",bc_self;
+					sleep2 3500;
+					unittalk getcharid(3),strcharinfo(0)+": The outerworld ?",bc_self;
+					sleep2 2000;
+					unittalk getcharid(3),"Nava: It is an evil land. The most dangerous creatures live there.",bc_self;
+					sleep2 3500;
+					unittalk getcharid(3),strcharinfo(0)+": I see...",bc_self;
+					sleep2 3000;
+					unittalk getcharid(3),"Nava: The world is not a safe place sweety.",bc_self;
+					sleep2 3000;
+					unittalk getcharid(3),"Nava: We must prepare ourselves for the worst to come.",bc_self;
+					sleep2 3500;
+					unittalk getcharid(3),"Nava: Let's get some rest... Tomorrow we will meet with the chief of wars Alexa Kurtis.",bc_self;
+				}
+				sleep2 4000;
+				callfunc("setnavi",0);
+				refresh;
+				disguise 10031;
+				sc_start SC_SLEEP,9000,1;
+				sleep2 9000;
+				if(isbegin_quest(49222)) {
+					monster "midgard",73,47,"Python",1025,1,"",2;
+					setunitdata $@mobid[0],UMOB_DMGIMMUNE,1;
+					.@python = $@mobid[0];
+					unitwalk .@python,94,31;
+					soundeffect "boitata_damage.wav",0;
+					sleep2 4000;
+					unitremove .@python;
+					unittalk getcharid(3),"?!",bc_self;
+					sleep2 1000;
+					refresh;
+					undisguise;
+					intronew = 15;
+					navigateto("midgard",267,4);
+					callfunc "blockpj",0;
+					callfunc("setnavi",1);
+					unittalk getcharid(3),"Nava: "+strcharinfo(0)+", find the python.",bc_self;
+					@notyet = 0;
+					sleep2 2000;
+					callfunc("setnavi",0);
+					end;
+				} else
+					navigateto("midgard",307,360);
+				undisguise;
+				if(isbegin_quest(49222)) {
+OnEnd:
+					if(!playerattached()) end;
+					if(!isbegin_quest(49222) || @notyet) end;
+					callfunc "blockpj",1;
+					intronew = 16;
+					callfunc("setnavi",1);
+					unittalk getcharid(3),"Nava: Good job !",bc_self;
+					sleep2 2000;
+					unittalk getcharid(3),"Nava: Hmm... That was close.",bc_self;
+					sleep2 3000;
+					unittalk getcharid(3),"Nava: We must get some rest now.",bc_self;
+					sleep2 3500;
+					callfunc("setnavi",0);
+					warp "midgard",83,42;
+					disguise 10031;
+					sc_start SC_SLEEP,9000,1;
+					sleep2 9000;
+					undisguise;
+					callfunc "END_QUEST", 49222,OPT_2;
+					callfunc "SET_QUEST", 49223;
+					BaseExp += callfunc("get_rate_xp",40);
+					JobExp += callfunc("get_rate_xp",40);
+					Zeny += callfunc("get_rate_zeny",10)/2;
+					playbgm "210";
+					removenight;
+					percentheal 80,80;
+					callfunc "blockpj",0;
+					warp "midgard",83,42;
+					stand;
+					sleep2 1000;
+					navigateto("midgard",66,385);
+					end;
+				}
+				callfunc "END_QUEST", 49218,OPT_2;
+				callfunc "SET_QUEST", 49219;
+				BaseExp += callfunc("get_rate_xp",40);
+				JobExp += callfunc("get_rate_xp",40);
+				Zeny += callfunc("get_rate_zeny",10)/2;
+				playbgm "210";
+			} else
+				sleep2 6000;
+			removenight;
+			percentheal 80,80;
+			callfunc "blockpj",0;
+			warp strnpcinfo(4),.@pos[0],.@pos[1];
+			stand;
+			end;
+		case 2:
+			end;
+	}
+	end;
+OnTimer100: OnTimer8000: OnTimer16000: OnTimer24000: OnTimer32000: OnTimer40000: OnTimer48000:
+	soundeffect "se_bug03.wav",0;
+	end;
+OnTimer56000:
+	stopnpctimer strnpcinfo(0),getcharid(3);
+	end;
+}
+midgard,85,42,4	duplicate(Fireplace#int01)	Fireplace#int04	10252
+midgard,260,4,5,2	monster	Python	1025,5,0,0,"Fireplace#int01::OnEnd",2
+
+midgard,306,363,6	script	Alexa Kurtis	10058,{
+	if(isbegin_quest(49221) && intronew == 14) {
+		mes "[Alexa Kurtis]";
+		mes ""+strcharinfo(0)+" ! You've found it.";
+		next;
+		mes "[Alexa Kurtis]";
+		mes "We appreciate your help. I'm sure we will need you more in the near future.";
+		next;
+		mes "[Alexa Kurtis]";
+		mes "Have you got a chance to talk with a recruiter of my brother ?";
+		next;
+		mes "[Alexa Kurtis]";
+		mes "The Shadows have strike again, you've proven your strength and loyalty to your majesty.";
+		next;
+		if(!QP2) {
+			mes "[^5555FFQUEST LOG^000000]";
+			mes "Quest level: ^5555FF 1-95 ^000000";
+			mes "Subject: ^5555FFMain Quest 2: The Shadow Chronicles ^000000";
+			mes "Quest: Experience one of the greatest adventures, with RP settings, puzzles, quests, mini-games,...";
+			mes "Rewards: ^ff0000Items^000000, ^ff0000Base XP^000000, ^ff0000Job XP^000000, ^ff0000Rate XP^000000, ^ff0000Gems^000000, ...";
+			next;
+			if(select("- Accept.:- Refuse") == 1) {
+				callfunc "SET_QUEST", 50100;
+				mes "[Alexa Kurtis]";
+				mes "My brother thinks that something is happening at the castle.";
+			}
+		}
+		setnight;
+		navigateto("midgard",156,99);
+		BaseExp += callfunc("get_rate_xp",40);
+		JobExp += callfunc("get_rate_xp",40);
+		Zeny += callfunc("get_rate_zeny",10)/2;
+		callfunc "END_QUEST", 49221,OPT_2;
+		callfunc "SET_QUEST", 49222;
+		@notyet = 1;
+		close;
+	}
+	if(isbegin_quest(49219)) {
+		mes "[Alexa Kurtis]";
+		mes "Hi !";
+		mes "My name is Alexa Kurtis, chief of wars and this is my brother Mohham Kurtis, secretary of wars.";
+		next;
+		mes "[Alexa Kurtis]";
+		mes "Together, we are assuring your majesty's protection.";
+		next;
+		mes "[Alexa Kurtis]";
+		mes "His majesty's assets are well important.";
+		mes "We are taking care of the War of Emperium Domination, Sadrith Arena and the protection of the Realm.";
+		next;
+		mes "[Alexa Kurtis]";
+		mes "My brother's job is more secretive, if you want to apply, you should find a recruiter in Prontera.";
+		next;
+		mes "[Alexa Kurtis]";
+		mes "Lately, the King Hildegard hasn't been feeling himself.";
+		mes "We are suspecting it's due to poisoning from one of his subject.";
+		next;
+		mes "[Alexa Kurtis]";
+		mes "We must find out what happens. Perhaps the chevalry lead know something about it.";
+		BaseExp += callfunc("get_rate_xp",40);
+		JobExp += callfunc("get_rate_xp",40);
+		Zeny += callfunc("get_rate_zeny",10)/2;
+		callfunc "END_QUEST", 49219,OPT_2;
+		callfunc "SET_QUEST", 49220;
+		navigateto("midgard",142,374);
+		close;
+	}
+	mes "[Alexa Kurtis]";
+	mes "My brother and I are protecting your majesty, Hildegard.";
+	close;
+}
+mid_in02,40,284,4	script	Chevalry Lead	56,{
+	if(isbegin_quest(49220)) {
+		refresh;
+		callfunc "blockpj",1;
+		callfunc("setnavi",1,0);
+		npctalk "Leader: Poison you say ?",strnpcinfo(0),bc_self;
+		sleep2 2000;
+		npctalk "Leader: You must find an Izidor seed, it is not easy to find...",strnpcinfo(0),bc_self;
+		sleep2 3000;
+		npctalk "Leader: Only a great Peco Peco can find one...",strnpcinfo(0),bc_self;
+		sleep2 2500;
+		npctalk "Leader: Please, I give you the permission to take a peco from the kingdom and search in the far east forest for one...",strnpcinfo(0),bc_self;
+		BaseExp += callfunc("get_rate_xp",40);
+		JobExp += callfunc("get_rate_xp",40);
+		Zeny += callfunc("get_rate_zeny",10)/2;
+		callfunc "END_QUEST", 49220,OPT_2;
+		callfunc "SET_QUEST", 49221;
+		callfunc "blockpj",0;
+		sleep2 3000;
+		callfunc("setnavi",0);
+		end;
+	}
+	mes "[Chevalry Lead]";
+	mes "What a fine job working for the chevalry of Midgard.";
+	close;
+}
+
+rivendel,171,59,0	script	GuideStarMid23	139,1,1,{
+	if(isbegin_quest(49223)) {
+		callfunc "blockpj",1;
+		callfunc("setnavi",1,0);
+		unittalk getcharid(3),"Nava: This is Rivendel, my home.";
+		sleep2 2500;
+		refresh;
+		setoption Option_Invisible,1;
+		for(.@i = 0; .@i < 200; .@i++) {
+			if(.@i2 < 21)
+				.@i2++;
+			unitmove getcharid(3),171+.@i2,59+.@i;
+			camerainfo 130000-220*.@i,0,-4500+22*.@i;
+			sleep2 35;
+		}
+		sleep2 2000;
+		warp "rivendel",176,62;
+		setoption Option_Invisible,0;
+		camerainfo 37500,4500,-4000;
+		sleep2 2500;
+		unittalk getcharid(3),"Nava: Let's visit Titania first.";
+		sleep2 2000;
+		callfunc "blockpj",0;
+		BaseExp += callfunc("get_rate_xp",40);
+		JobExp += callfunc("get_rate_xp",40);
+		Zeny += callfunc("get_rate_zeny",10)/2;
+		callfunc "END_QUEST", 49223,OPT_2;
+		callfunc "SET_QUEST", 49224;
+		navigateto("rivendel",191,254);
+		callfunc("setnavi",0);
+	}
+	end;
+}
+
+rivendel,191,254,5	script	Titania#new	624,{
+	if(isbegin_quest(49224)) {
+		callfunc("setnavi",1,0);
+		callfunc "blockpj",1;
+		npctalk "Titania: "+strcharinfo(0)+" ! Welcome to Rivendel.",strnpcinfo(0),bc_self;
+		sleep2 1500;
+		npctalk "Titania: You've come a long way but your journey has just begun.",strnpcinfo(0),bc_self;
+		sleep2 3500;
+		setpcblock PCBLOCK_COMMANDS,true;
+		setpcblock PCBLOCK_IMMUNE,true;
+		setpcblock PCBLOCK_ATTACK,true;
+		callfunc("setnavi",0);
+		intronew = 15;
+		setoption Option_Invisible,1;
+		callfunc "blockpj",0;
+		if(getcharid(1))
+			partyleave getcharid(0);
+		sleep2 100;
+		if(party_create("Guide4"+rand(10,100000)+"") < 0) {
+			dispbottom "Something went wrong. Please disconnect and reconnect.";
+			atcommand "@kick "+strcharinfo(0);
+			end;
+		}
+		sleep2 100;
+		instance_create("Guide4");
+		sleep2 100;
+		instance_enter("Guide4");
+		end;
+	}
+	if(Class==Job_Novice)&&(JobLevel<10) {
+		mes "[Titania]";
+		mes "Oh, ^ff0000"+strcharinfo(0)+"^000000, You shall train close to the cascades.";
+		next;
+		if(select("-Bring me there.:-Leave.") == 2) {
+			mes "[Titania]";
+			mes "May the Gods protect you.";
+			close;
+		} else
+			warp "rivendel",286,121;
+		end;
+	}
+	mes "[Titania]";
+	mes "Hello, ^ff0000"+strcharinfo(0)+"^000000. I hope your training is going well.";
+	next;
+	mes "[Titania]";
+	mes "May the Gods be with you";
+	close;
+}
+
+
+mid_castle,81,166,0	script	GuideStarMid24	139,1,1,{
+	if(intronew == 15) {
+		callfunc "blockpj",1;
+		monster instance_mapname("mid_castle"),82,168,"Nebuchadnezzar",27340,1,"",0,AI_FLORA; 'nebu = $@mobid[0];
+		monster instance_mapname("mid_castle"),84,168,"Aleksander",27341,1,"",0,AI_FLORA; 'alek = $@mobid[0];
+		monster instance_mapname("mid_castle"),80,168,"Melusine",27339,1,"",0,AI_FLORA; 'melu = $@mobid[0];
+		monster instance_mapname("mid_castle"),78,168,"Zheir",1647,1,"",0,0; 'zheir = $@mobid[0];
+		unitlookdir 'nebu,DIR_NORTH;
+		unitlookdir 'alek,DIR_NORTH;
+		unitlookdir 'zheir,DIR_NORTH;
+		unitlookdir 'melu,DIR_NORTH;
+		setunitdata 'nebu,UMOB_MODE,1|8|32|64;
+		setunitdata 'melu,UMOB_MODE,1|8|32|64;
+		setunitdata 'alek,UMOB_MODE,1|8|32|64;
+		setunitdata 'zheir,UMOB_MODE,1|8|32|64;
+		sleep2 3000;
+		announce "[Titania]: You see, long ago, Zheir, Melusine, Nebuchadnezzar and Aleksander were lord of the Realm, at the service of your majesty Hildegard.",bc_self;
+		sleep2 6000;
+		unitremove 'nebu;
+		unitremove 'alek;
+		unitremove 'zheir;
+		unitremove 'melu;
+		warp instance_mapname("aby_05"),248,368;
+		monster instance_mapname("aby_05"),245,375,"Valkyrie Kyria",27090,1,"",0,0; 'valk = $@mobid[0];
+		setunitdata 'valk,UMOB_CLASS,811;
+		unitlookdir 'valk,DIR_SOUTH;
+		monster instance_mapname("aby_05"),248,374,"Jormungandr",27090,1,"",0,0; 'jormun = $@mobid[0];
+		monster instance_mapname("aby_05"),248,368,"Zheir",1647,1,"",0,0; 'zheir = $@mobid[0];
+		setunitdata 'valk,UMOB_MODE,1|8|32|64;
+		setunitdata 'jormun,UMOB_MODE,1|8|32|64;
+		setunitdata 'zheir,UMOB_MODE,1|8|32|64;
+		unitlookdir 'zheir,DIR_NORTH;
+		unitlookdir 'jormun,DIR_SOUTH;
+		sleep2 3000;
+		announce "[Titania]: Jormungandr, the master of Abyssal Depths, has stolen a precious artefact from Valkyrie Kyria.",bc_self;
+		sleep2 5000;
+		announce "[Titania]: He made a pact with one of the Realm's lord, Zheir.",bc_self;
+		sleep2 6000;
+		warp instance_mapname("intro09"),106,81;
+		monster instance_mapname("intro09"),106,82,"Nebuchadnezzar",27340,1,"",0,AI_FLORA; 'nebu = $@mobid[0];
+		monster instance_mapname("intro09"),106,78,"Aleksander",27341,1,"",0,AI_FLORA; 'alek = $@mobid[0];
+		monster instance_mapname("intro09"),108,80,"Yunalesca",3963,1,"",0,AI_FLORA; 'yuna = $@mobid[0];
+		monster instance_mapname("intro09"),104,80,"Melusine",27339,1,"",0,AI_FLORA; 'melu = $@mobid[0];
+		monster instance_mapname("intro09"),106,81,"Zheir",1647,1,"",0,0; 'zheir = $@mobid[0];
+		unitlookdir 'nebu,DIR_SOUTH;
+		unitlookdir 'melu,DIR_EAST;
+		unitlookdir 'yuna,DIR_WEST;
+		setunitdata 'nebu,UMOB_MODE,1|8|32|64;
+		setunitdata 'alek,UMOB_MODE,1|8|32|64;
+		setunitdata 'yuna,UMOB_MODE,1|8|32|64;
+		setunitdata 'melu,UMOB_MODE,1|8|32|64;
+		setunitdata 'zheir,UMOB_MODE,1|8|32|64;
+		setunitdata 'zheir,UMOB_CLASS,697;
+		sleep2 3000;
+		announce "[Titania]: When Zheir has succombed to the assault from the other lords, the artefact broke into 3 pieces.",bc_self;
+		sleep2 5000;
+		announce "[Titania]: Ever since, they have gone mad and isolated themselves into their own castles...",bc_self;
+		sleep2 5000;
+		announce "[Titania]: Yunalesca remained safe and unharmed.",bc_self;
+		sleep2 5000;
+		announce "[Titania]: Aleksander found refuge in the Fortress of Midgard.",bc_self;
+		sleep2 5000;
+		announce "[Titania]: Melusine has used her magic to build an empire close to Vigrid, the eternal war.",bc_self;
+		sleep2 5000;
+		announce "[Titania]: Nebuchadnezzar has taken over Tolaria's Academy.",bc_self;
+		sleep2 5000;
+		announce "[Titania]: Thereby, all three lords have separated from the Realm.",bc_self;
+		sleep2 5000;
+		warp instance_mapname("arm_boss"),48,55;
+		monster instance_mapname("arm_boss"),48,55,"Gileyn Fu Arma",27050,1,"",0,AI_FLORA; 'gileyn = $@mobid[0];
+		announce "[Titania]: However, Gileyn Fu Arma, the Overlord of the Past has made his return.",bc_self;
+		sleep2 5000;
+		announce "[Titania]: He is hidden in the Neverending Citadel.",bc_self;
+		sleep2 5000;
+		announce "[Titania]: That doesn't predict any good "+strcharinfo(0)+".",bc_self;
+		sleep2 5000;
+		warp "rivendel",191,251;
+		setoption Option_Invisible,0;
+		npctalk "Titania: You must help us to stop them all.","Titania#new",bc_self;
+		sleep2 4000;
+		npctalk "Titania: Go and train yourself now. You will know when you will be ready.","Titania#new",bc_self;
+		sleep2 4000;
+		npctalk "Titania: Until we meet again...","Titania#new",bc_self;
+		sleep2 2000;
+		intronew = 16;
+		BaseExp += callfunc("get_rate_xp",40);
+		JobExp += callfunc("get_rate_xp",40);
+		Zeny += callfunc("get_rate_zeny",10)/2;
+		callfunc "END_QUEST", 49224,OPT_2;
+		callfunc "SET_QUEST", 49225;
+		callfunc "Quest_49225";
+		callfunc("setnavi",0);
+		callfunc "blockpj",0;
+	}
+	end;
+OnCount:
+	if(!playerattached())
+		end;
+	@ratinfestation++;
+	if(isbegin_quest(49227) && @ratinfestation <= 100)
+		showscript ""+@ratinfestation+"/100";
+	end;
+}
+
+function	script	Quest_49225	{
+	if(JobLevel >= 40) && (intronew == 16) && (isbegin_quest(49225)) {
+		callfunc("setnavi",1);
+		callfunc "blockpj",1;
+		if(Class != 4218)
+			unittalk getcharid(3),"Nava: "+strcharinfo(0)+", You are ready to change job but I recommand you to wait until Job Level 50.",bc_self;
+		sleep2 2000;
+		callfunc "blockpj",0;
+		BaseExp += callfunc("get_rate_xp",40);
+		JobExp += callfunc("get_rate_xp",40);
+		Zeny += callfunc("get_rate_zeny",10)/2;
+		callfunc "END_QUEST", 49225,OPT_2;
+		if(Class == 4218)
+			callfunc "SET_QUEST", 49227;
+		else callfunc "SET_QUEST", 49226;
+		callfunc("setnavi",0);
+	}
+	return;
+}
+
+midgard,43,262,5,10	monster	Mini Rat	27351,5,0,0,"GuideStarMid24::OnCount",1
+midgard,43,262,5,10	monster	Rat	27351,2,0,0,"GuideStarMid24::OnCount"
+midgard,43,262,5,10	monster	Big Rat	27351,1,0,0,"GuideStarMid24::OnCount",2

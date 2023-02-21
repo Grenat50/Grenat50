@@ -1,0 +1,1869 @@
+//===== Mystic Project Script ================================
+//= Qpets System
+//===== By: ==================================================
+//= Grenat
+//===== Current Version: =====================================
+//= 3.0
+//===== Description: =========================================
+//= Custom Qpets System scripts.
+//===== Additional Comments: =================================
+//= 1.0 System Familier released.
+//= 2.0 System Familier v2 (SQL based) released.
+//= 3.0 Initial script released.
+// ====	Documentation: =======================================
+// [Egg]:
+// An egg is drop randomly on every monster.
+// Pet Breeder has to identify the egg.
+// Once the egg reaches 100% intimacy (overtime/feeding) it hashes.
+//
+// [Pet]:
+// Has 2 random opt bonuses depending on pet stats. (see database down below).
+// Looses HP (Hunger) depending on evolution level.
+// Double click on food automatically full heal the pet.
+// Gain Intimacy over time.
+// Can evolve once 100% intimacy reached (3 evolutions max).
+// Summon a pet by equipping it or use "Call Pet" Skill.
+// Pet aren't eggs anymore, it's a custom design illust/item/collection monster
+// that can be equipped. It can break if the pet dies but can be restored at the
+// veterinary.
+// The last evolution has many costumes obtained at the shop.
+//
+// [Intimacy Gain]:
+// intimacy +1 each 30sec / 5min = 1% => 8h to evolve (Each 15 times / food)    2sec 8h
+// Intimacy +1 each 90sec / 10min = 1% => 24h to evolve (Each 22 times / food)  4sec 12h
+// Intimacy +1 each 180sec / 15min = 1% => 48h to evolve (Each 30 times / food) 6sec 18h
+// Intimacy +1 each 240sec / 25min = 1% => 64h to evolve (Each 24 times / food) 10sec
+// 
+// [Hunger]:
+// no evolution - 1 food = 1 hp, looses 1hp every 2->4sec (100 hunger = 400 HP 400sec to die)
+// 1ere evolution - 2 food = 1 hp, looses 1hp every 4->7sec (100 hunger = 700 HP 700sec to die)
+// 2eme evolution - 3 food = 1 hp, looses 1hp every 6->10sec (100 hunger = 1000 HP 1000sec to die)
+// 3eme evolution - 5 food = 1 hp, looses 1hp every 10->13sec (100 hunger = 1300 HP 1300sec to die)
+// 1800 consumed food per hour
+//
+// [Performance]:
+// 1. Walks around the Player following a certain pattern.
+// 2. Flip and jump randomly around the Player.
+// 3. Turns rapidly on himself and become little for a few seconds.
+//
+// [Evolution]:
+// Custom cutins instead of evolution window.
+// 2 evolutions per pet except the final evolution.
+// Evolution depends on the given seed.
+// Random Opt given after the evolution.
+//
+// [Resurrection]:
+// A pet dies when Hunger is below 1.
+// A died pet appears as broken in the inventory.
+// Midgard's hospital or Resurrect Elixir to revive the pet.
+//
+// [Items]:
+// - Miraculous Seed = Chooses which stat bonus will occur during the evolution.
+// - Seed of Oblivion = Retrieve one random opt bonus stat for a better one.
+// - Regression Seed = Looses 1 Evolution to retrieve the random opt gained.
+// - Pet Elixir = Uses Refine system to give "many" lifes to the pet so he wont die but looses 1 refine instead.
+// - Pet Antidote = Allows the pet to drink another Elixir.
+// - Pet Resurrect = Recovers a pet that died instantly.
+// - Food = Feed the pet. (Double click consume the necessary amount of food to fully heal the pet)
+// - Accessory Lv1 2 3 = Switch to the alternative skin when equipped.
+// - Costumes Special Evolution = Can be obtained in the shop.
+//
+// [Pet Breeder]:
+// Uses to create food based on misc items collected (Fluff, four life clover etc). The rarer, the better.
+// Identify Unknown Eggs found on monsters.
+// Exchange 10 unknown egg for a pet.
+// 
+// [Pet Groomer]:
+// Only use for Special Evolution. It allows the pet to return to any previous form.
+// (set Hungry Delay after changepet to where it evolved)
+//============================================================
+
+//============================================================
+// = Configuration
+//============================================================
+-	script	Pet_Config	-1,{
+	callfunc "PetTamer";
+
+OnInit:
+	// Configs
+	.pet_drop = 15;					// Unknown Egg Drop Rate on every monsters. (Default: 0,15%)
+	.pet_food = 1; 					// amount of HP healed each food consumed
+	setarray $@pet_hungerdelay[0],2,4,6,10;		// The amount of time in seconds it takes for hunger to decrease (Default: 2/4/6/10 sec)
+	setarray $@pet_food[0],1,2,3,5;			// amount of food consumed every 2/4/6/10 sec depending on Evolution number. (Default: 1/2/3/5)
+	setarray $@pet_intimacy[0],15,22,30,24;		// amount of times to increase intimacy (Default: 15/22/30/24 times per 2/4/6/10 sec)
+	end;
+}
+
+//============================================================
+// = Pet Feeding scripts.
+//============================================================
+prontera,0,0,0	script	Pet_Feed	-1,{ callfunc "PetTamer"; end2; }
+
+function	script	PetTamer	{
+	// Autofood automatic
+	if(!playerattached()) {
+		.@GID = $@GID;
+		.@charid = convertpcinfo($@GID,CPC_CHAR);
+		if(!getpetinfo(PETINFO_HUNGERDELAY,.@charid))
+			end;
+		// Heal Qpet
+		switch ((getpetinfo(PETINFO_HUNGERDELAY,.@charid)/1000)) {
+			case 8: default: .@index = 2; .@intimate = 7; break;
+			case 10: .@index = 3; .@intimate = 11; break;
+			case 12: .@index = 4; .@intimate = 15; break;
+			case 14: .@index = 5; .@intimate = 12; break;
+		}
+
+		// .@hunger = Pet HP remaining
+		.@hunger = 100-getpetinfo(PETINFO_HUNGRY,.@charid);
+
+		// If Pet Full
+		if (.@hunger == 0)
+			end;
+
+		// Food requirement
+		if ((countitem("Food",.@GID))<.@index) {
+			dispbottom "Not enough Food. Put away your pet until you find food.",0,.@charid;
+			end;
+		}
+
+		// Taking all food if it's not enough to fill up remaining HP
+		if ((countitem("Food",.@GID))<.@hunger*.@index) {
+			.@hunger = countitem("Food",.@GID);
+			delitem "Food",(.@hunger),.@GID;
+		} else {
+			delitem "Food",(.@hunger*.@index),.@GID;
+			.@index = 1;
+		}
+
+		// We set Hunger (Remaining HP) depending on how much food the player has
+		setunitdata getpetinfo(PETINFO_BLOCKID,.@charid),UPET_HUNGER,getpetinfo(PETINFO_HUNGRY,.@charid)+.@hunger/.@index;
+
+		// Calculate Intimacy
+		setd "@intimacy",getvar2("@intimacy",.@charid) + (.@hunger/.@index),.@charid;
+		if(getvar2("@intimacy",.@charid) >= .@intimate) {
+			.@gain = getvar2("@intimacy",.@charid)/.@intimate;
+			if(getskilllv(1334,.@GID))
+				.@gain += .@gain * 10 * getskilllv(1334,.@GID) / 100;
+			setunitdata getpetinfo(PETINFO_BLOCKID,.@charid),UPET_INTIMACY,getpetinfo(PETINFO_INTIMATE,.@charid)+.@gain;
+			setd "@intimacy",getvar2("@intimacy",.@charid) - (getvar2("@intimacy",.@charid) / .@intimate) * .@intimate,.@charid;
+			if(getvar(#setting,.@charid) & OPT_8)
+				dispbottom "Pet Intimacy : "+(getpetinfo(PETINFO_INTIMATE,.@charid)*100)/1000+","+((getpetinfo(PETINFO_INTIMATE,.@charid))-((getpetinfo(PETINFO_INTIMATE,.@charid)*10)/100)*10)+"%",0,.@charid;
+		}
+		end;
+	}
+
+	// Regular feeding (through item food)
+	if(pet_on) {
+
+		// Checking if it's an egg
+		switch (getpetinfo(PETINFO_CLASS)) {
+			case 1047: case 1048: case 1097: case 1218: case 1232: case 2090: case 3805: case 3806: .@egg = 1; break;
+		}
+
+		if(.@egg) {
+			// .@intimacy = Egg EXP remained to reach 100%
+			.@intimacy = 1000-getpetinfo(PETINFO_INTIMATE);
+			if (.@intimacy == 0) {
+				dispbottom "Your egg is ready to hatch. Please visit the Pet Breeder at Midgard City.";
+				end2;
+			}
+			if (countitem("Food") < 10 ) {
+				dispbottom "You need at least 10 food.";
+				end2;
+			}
+			if (countitem("Food") < (.@intimacy*10) ) {
+				.@intimacy = countitem("Food");
+				.@count = 10;
+				delitem "Food",.@intimacy;
+				.@intimacy2 = 1;
+			} else { 
+				.@count = 1;
+				delitem "Food",(.@intimacy*10);
+				.@intimacy2 = 10;
+			}
+			setunitdata getpetinfo(PETINFO_BLOCKID),UPET_INTIMACY,getpetinfo(PETINFO_INTIMATE)+(.@intimacy/.@count);
+			dispbottom "Your egg gained "+(.@intimacy*.@intimacy2)+" Intimacy. ("+(getpetinfo(PETINFO_INTIMATE)*100)/1000+","+((getpetinfo(PETINFO_INTIMATE))-((getpetinfo(PETINFO_INTIMATE)*10)/100)*10)+"%)";
+			if(getpetinfo(PETINFO_INTIMATE) >= 1000) {
+				dispbottom "Your egg has reached 100%. Let it hatch ?";
+				mes "^ff0000Your egg has reached 100%. Let it hatch ?^000000";
+				switch(select("- Hatch Egg:- Wait")) {
+					case 1: break;
+					case 2: dispbottom "Visit the Pet Breeder of Midgard when you are ready."; end2;
+				}
+				close2;
+				.@mob_id = callfunc("Pet_Get_Random",0);
+				dispbottom "Congrats ! You've got a "+getmonsterinfo(.@mob_id,MOB_NAME)+" !";
+				callfunc "Achievements_Check_100",124001;
+				end;
+			}
+			return;
+		}
+
+		// Heal Qpet
+		switch ((getpetinfo(PETINFO_HUNGERDELAY)/1000)) {
+			case 8: default: .@index = 2; .@intimate = 7; break;
+			case 10: .@index = 3; .@intimate = 11; break;
+			case 12: .@index = 4; .@intimate = 15; break;
+			case 14: .@index = 5; .@intimate = 12; break;
+		}
+
+		// .@hunger = Pet HP remaining
+		.@hunger = 100-getpetinfo(PETINFO_HUNGRY);
+
+		// If Pet Full
+		if (.@hunger == 0) {
+			dispbottom "Pet hunger full";
+			return;
+		}
+
+		// Food requirement
+		if ((countitem("Food"))<.@index) {
+			dispbottom "Not enough Food. Put away your pet until you find food.";
+			return;
+		}
+
+		// Taking all food if it's not enough to fill up remaining HP
+		if ((countitem("Food"))<.@hunger*.@index) {
+			.@hunger = countitem("Food");
+			delitem "Food",(.@hunger);
+		} else {
+			delitem "Food",(.@hunger*.@index);
+			.@index = 1;
+		}
+
+		// We set Hunger (Remaining HP) depending on how much food the player has
+		setunitdata getpetinfo(PETINFO_BLOCKID),UPET_HUNGER,getpetinfo(PETINFO_HUNGRY)+.@hunger/.@index;
+
+		// Calculate Intimacy
+		@intimacy = @intimacy+(.@hunger/.@index);
+		if(@intimacy>=.@intimate) {
+			.@gain = @intimacy/.@intimate;
+			if(getkuganlv(1334))
+				.@gain += .@gain * 10 * getkuganlv(1334) / 100;
+			setunitdata getpetinfo(PETINFO_BLOCKID),UPET_INTIMACY,getpetinfo(PETINFO_INTIMATE)+.@gain;
+			@intimacy -= (@intimacy/.@intimate)*.@intimate;
+			if(#setting & OPT_8) dispbottom "Pet Intimacy : "+(getpetinfo(PETINFO_INTIMATE)*100)/1000+","+((getpetinfo(PETINFO_INTIMATE))-((getpetinfo(PETINFO_INTIMATE)*10)/100)*10)+"%";
+		}
+		return;
+	}
+	clearnpc();
+	return;
+}
+
+//============================================================
+// = Summon/Return Pet (skill "call pet") scripts.
+//============================================================
+-	script	callPet	-1,{
+	switch (pet_on) {
+		case 1:
+			returnpet;
+			pet_on = 0;
+			break;
+		case 0:
+			bpet;
+			break;
+	}
+	clearnpc();
+	end2;
+OnRecalc:
+	specialeffect3 getpetinfo(PETINFO_BLOCKID),215;
+	if(hat_pet)
+		sethat 0,hat_pet;
+	recalculatestat;
+	end;
+}
+function	script	pet_equip	{
+	clearnpc();
+	if(@no_calc) end2;
+	if(pet_on) returnpet;
+	pet_on = 1;
+	summonpet getequipcardid(EQI_SHADOW_ARMOR,1);
+	sleep2 50; //A Sleep command is necessary otherwise the specialeffect won't display on the pet
+	addtimer 50,"callPet::OnRecalc";
+	end2;
+}
+function	script	pet_return	{
+	clearnpc();
+	if(@no_calc) end2;
+	if(pet_on) {
+		pet_on = 0;
+		if(getpetinfo(PETINFO_CLASS)) {
+			.@gid = getcharid(3);
+			detachrid;
+			returnpet .@gid;
+		}
+	}
+	end2;
+}
+
+//============================================================
+// = Random Option Bonuses scripts.
+//============================================================
+// getarg(0) = 0 : New pet
+// getarg(0) = x : Stat ID chosen (right after evolution)
+function	script	Pet_Get_Random	{
+
+	if(getarg(0) == 0) {
+	//=======================================================
+	// = Random pet obtained
+	//=======================================================
+		switch (rand(1,24)) {
+		case 1: setarray .@mob_id,1167,1,2; break;
+		case 2: setarray .@mob_id,1095,1,3; break;
+		case 3: setarray .@mob_id,1107,1,4; break;
+		case 4: setarray .@mob_id,2013,1,5; break;
+		case 5: setarray .@mob_id,1175,1,6; break;
+		case 6: setarray .@mob_id,1004,2,3; break;
+		case 7: setarray .@mob_id,1049,2,4; break;
+		case 8: setarray .@mob_id,2963,2,5; break;
+		case 9: setarray .@mob_id,1007,2,6; break;
+		case 10: setarray .@mob_id,1051,3,4; break;
+		case 11: setarray .@mob_id,1191,3,5; break;
+		case 12: setarray .@mob_id,1012,3,6; break;
+		case 13: setarray .@mob_id,1161,4,5; break;
+		case 14: setarray .@mob_id,1179,4,6; break;
+		case 15: setarray .@mob_id,1170,5,6; break;
+		case 16: 
+			.@stat[0] = rand(1,6);
+			do { .@stat[1] = rand(1,6); } while (.@stat[0] == .@stat[1]);
+			setarray .@mob_id,1002,.@stat[0],.@stat[1];
+			break;
+		case 17: setarray .@mob_id,1109,7,rand(1,6); break;
+		case 18: setarray .@mob_id,1076,8,rand(1,6); break;
+		case 19: setarray .@mob_id,1063,9,rand(1,6); break;
+		case 20: setarray .@mob_id,1129,10,rand(1,6); break;
+		case 21: setarray .@mob_id,2192,11,rand(1,6); break;
+		case 22: setarray .@mob_id,1122,12,rand(1,6); break;
+		case 23: setarray .@mob_id,1162,13,rand(1,6); break;
+		case 24: setarray .@mob_id,1619,14,rand(1,6); break;
+		}
+	}
+	.@round = 2;
+	if(getarg(1,0)) {
+		.@stat[0] = rand(1,6);
+		do { .@stat[1] = rand(1,6); } while (.@stat[0] == .@stat[1]);
+		setarray .@mob_id,21520,.@stat[0],.@stat[1],rand(1,6);
+		.@round = 3;
+	}
+
+	//=======================================================
+	// = Random Bonuses Attribution
+	//=======================================================
+	// For = Loop twice if it's a new pet (2 random opt attributed), Loop once if it's an evolution (add 1 random opt)
+	// .@id[0] = Random Opt ID
+	// .@id[1] = Random Opt Minimum Value
+	// .@id[2] = Random Opt Maximum Value
+	// getarg(0) = Stat ID chosen
+	if (getarg(0))
+		.@mob_id[1] = getarg(0);
+	for( .@i = 1; .@i <= .@round; .@i++ ) {
+		switch (.@mob_id[.@i]) {
+		//=======================================================
+		// = STR random bonuses
+		//=======================================================
+		case 1:
+			switch (rand(1,11)) {
+				case 1: setarray .@id,RDMOPT_PET_STR1,2,4; break;	// [STR] Physical damage +x~y% (Default: 1~3)
+				case 2: setarray .@id,RDMOPT_PET_STR2,5,15; break;	// [STR] Maximum Weight +x~y% (Default: 5~15)
+				case 3: setarray .@id,RDMOPT_PET_STR3,5,20; break;	// [STR] ATK +x~y (Default: 5~15)
+				case 4: setarray .@id,RDMOPT_PET_STR4,10,40; break;	// [STR] ATK2 +x~y% (Default: 10~30)
+				case 5: setarray .@id,RDMOPT_PET_STR5,2,4; break;	// [STR] Short range critical +x~y (Default: 2~4)
+				case 6: setarray .@id,RDMOPT_PET_STR6,1,3; break;	// [STR] x~y% chance to break armor when attacking (Default: 1~3)
+				case 7: setarray .@id,RDMOPT_PET_STR7,5,15; break;	// [STR] x~y% chance to not be knockback (Default: 5~15)
+				case 8: setarray .@id,RDMOPT_PET_STR8,2,4; break;	// [STR] Front physical damage +x~y% (Default: 2~4)
+				case 9: setarray .@id,RDMOPT_PET_STR9,10,20; break;	// [STR] ATK damage when HP Low +x~y% (Default: 10~20)
+				case 10: setarray .@id,RDMOPT_PET_STR10,3,5; break;	// [STR] Damage facing multiple enemies +x~y% (Default: 3~5)
+				case 11: setarray .@id,RDMOPT_PET_STR,1,3; break;	// [STR] STR +x~y  (Default: 1~3)
+			}
+			break;
+		//=======================================================
+		// = VIT random bonuses
+		//=======================================================
+		case 2:
+			switch (rand(1,12)) {
+				case 1: setarray .@id,RDMOPT_PET_VIT1,2,5; break;	// [VIT] Physical damage resistance +x~y%
+				case 2: setarray .@id,RDMOPT_PET_VIT2,2,5; break;	// [VIT] MaxHP +x~y%
+				case 3: setarray .@id,RDMOPT_PET_VIT3,15,30; break;	// [VIT] HP Regeneration +x~y%
+				case 4: setarray .@id,RDMOPT_PET_VIT4,4,8; break;	// [VIT] After Hit Delay -x~y%
+				case 5: setarray .@id,RDMOPT_PET_VIT5,1,3; break;	// [VIT] DEF +x~y
+				case 6: setarray .@id,RDMOPT_PET_VIT6,2,6; break;	// [VIT] MaxHP +x~y
+				case 7: setarray .@id,RDMOPT_PET_VIT7,3,6; break;	// [VIT] DEF +x~y
+				case 8: setarray .@id,RDMOPT_PET_VIT8,4,8; break;	// [VIT] Increases Healing items +x~y%
+				case 9: setarray .@id,RDMOPT_PET_VIT9,4,8; break;	// [VIT] Increases Healing received +x~y%
+				case 10: setarray .@id,RDMOPT_PET_VIT10,5,15; break;	// [VIT] Cast Cancel resistance +x~y%
+				case 11: setarray .@id,RDMOPT_PET_VIT11,5,15; break;	// [VIT] x~y% chance of resistance against break/strip
+				case 12: setarray .@id,RDMOPT_PET_VIT,1,3; break;	// [VIT] VIT +x~y
+			}
+			break;
+		//=======================================================
+		// = DEX random bonuses
+		//=======================================================
+		case 3:
+			switch (rand(1,10)) {
+				case 1: setarray .@id,RDMOPT_PET_DEX1,5,10; break;	// [DEX] x~y% chance of ignoring a break/strip immunity
+				case 2: setarray .@id,RDMOPT_PET_DEX2,3,6; break;	// [DEX] Double Attack chance +x~y%
+				case 3: setarray .@id,RDMOPT_PET_DEX3,5,15; break;	// [DEX] HIT +x~y
+				case 4: setarray .@id,RDMOPT_PET_DEX4,2,4; break;	// [DEX] Critical damage +x~y%
+				case 5: setarray .@id,RDMOPT_PET_DEX5,3,7; break;	// [DEX] Perfect Hit +x~y%
+				case 6: setarray .@id,RDMOPT_PET_DEX6,2,5; break;	// [DEX] Cast time -x~y%
+				case 7: setarray .@id,RDMOPT_PET_DEX7,2,4; break;	// [DEX] Special (misc) damage +x~y%
+				case 8: setarray .@id,RDMOPT_PET_DEX8,3,6; break;	// [DEX] Ignore x~y% of physical and magical defense
+				case 9: setarray .@id,RDMOPT_PET_DEX9,2,4; break;	// [DEX] Critical long range +x~y
+				case 10: setarray .@id,RDMOPT_PET_DEX,1,3; break;	// [DEX] DEX +x~y
+			}
+			break;
+		//=======================================================
+		// = AGI random bonuses
+		//=======================================================
+		case 4:
+			switch (rand(1,10)) {
+				case 1: setarray .@id,RDMOPT_PET_AGI1,3,6; break;	// [AGI] Damage from the back +x~y%
+				case 2: setarray .@id,RDMOPT_PET_AGI2,5,12; break;	// [AGI] Flee +x~y
+				case 3: setarray .@id,RDMOPT_PET_AGI3,2,5; break;	// [AGI] Walking speed +x~y%
+				case 4: setarray .@id,RDMOPT_PET_AGI4,1,4; break;	// [AGI] ASPD +x~y%
+				case 5: setarray .@id,RDMOPT_PET_AGI5,2,5; break;	// [AGI] After Skill Delay -x~y%
+				case 6: setarray .@id,RDMOPT_PET_AGI6,2,5; break;	// [AGI] Physical Perfect Flee +x~y%
+				case 7: setarray .@id,RDMOPT_PET_AGI7,2,5; break;	// [AGI] Magical Perfect Flee +x~y%
+				case 8: setarray .@id,RDMOPT_PET_AGI8,1,3; break;	// [AGI] All Perfect Flee +x~y%
+				case 9: setarray .@id,RDMOPT_PET_AGI9,15,35; break;	// [AGI] Reduces walking speed penalties by x~y%
+				case 10: setarray .@id,RDMOPT_PET_AGI,1,3; break;	// [AGI] AGI +x~y
+			}
+			break;
+		//=======================================================
+		// = INT random bonuses
+		//=======================================================
+		case 5:
+			switch (rand(1,14)) {
+				case 1: setarray .@id,RDMOPT_PET_INT1,5,15; break;	// [INT] Damage received while casting reduced by x~y%
+				case 2: setarray .@id,RDMOPT_PET_INT2,2,4; break;	// [INT] Increases Healing skills by x~y%
+				case 3: setarray .@id,RDMOPT_PET_INT3,10,30; break;	// [INT] MDEF2 +x~y%
+				case 4: setarray .@id,RDMOPT_PET_INT4,2,4; break;	// [INT] Increases Magical damage by x~y%
+				case 5: setarray .@id,RDMOPT_PET_INT5,2,5; break;	// [INT] MaxSP +x~y%
+				case 6: setarray .@id,RDMOPT_PET_INT6,10,20; break;	// [INT] SP Regeneration +x~y%
+				case 7: setarray .@id,RDMOPT_PET_INT7,5,20; break;	// [INT] MATKmax +x~y
+				case 8: setarray .@id,RDMOPT_PET_INT8,1,3; break;	// [INT] MDEF +x~y
+				case 9: setarray .@id,RDMOPT_PET_INT9,5,10; break;	// [INT] EXP gained +x~y%
+				case 10: setarray .@id,RDMOPT_PET_INT10,2,6; break;	// [INT] MaxSP +x~y
+				case 11: setarray .@id,RDMOPT_PET_INT11,5,15; break;	// [INT] Increases attributes bonuses from skills by x~y%
+				case 12: setarray .@id,RDMOPT_PET_INT12,15,30; break;	// [INT] x~y% chance to do not consume a scroll
+				case 13: setarray .@id,RDMOPT_PET_INT13,5,15; break;	// [INT] MATK damage when SP Low +x~y%
+				case 14: setarray .@id,RDMOPT_PET_INT,1,3; break;	// [INT] INT +x~y
+			}
+			break;
+		//=======================================================
+		// = LUK random bonuses
+		//=======================================================
+		case 6:
+			switch (rand(1,11)) {
+				case 1: setarray .@id,RDMOPT_PET_LUK1,2,4; break;	// [LUK] Critical +x~y
+				case 2: setarray .@id,RDMOPT_PET_LUK2,5,10; break;	// [LUK] Critical resistance +x~y%
+				case 3: setarray .@id,RDMOPT_PET_LUK3,5,10; break;	// [LUK] Increases resistance to all status by x~y%
+				case 4: setarray .@id,RDMOPT_PET_LUK4,3,7; break;	// [LUK] Increases chance of inflicting status by +x~y%
+				case 5: setarray .@id,RDMOPT_PET_LUK5,2,5; break;	// [LUK] Drop rate +x~y%
+				case 6: setarray .@id,RDMOPT_PET_LUK6,15,25; break;	// [LUK] Zeny gained from monsters +x~y%
+				case 7: setarray .@id,RDMOPT_PET_LUK7,3,5; break;	// [LUK] Perfect Flee +x~y%
+				case 8: setarray .@id,RDMOPT_PET_LUK8,10,20; break;	// [LUK] x~y% chance of ignoring ammo/spirit/gemstone cost
+				case 9: setarray .@id,RDMOPT_PET_LUK9,3,7; break;	// [LUK] Increases damage from DoT +x~y%
+				case 10: setarray .@id,RDMOPT_PET_LUK10,3,7; break;	// [LUK] High Critical rate +x~y%
+				case 11: setarray .@id,RDMOPT_PET_LUK,1,3; break;	// [LUK] LUK +x~y
+			}
+			break;
+		//=======================================================
+		// = Dark Elemental random bonuses
+		//=======================================================
+		case 7:
+			switch (rand(1,8)) {
+				case 1: setarray .@id,RDMOPT_PET_ELE6_1,3,7; break;	// [Dark] x~y% chance of auto-casting Dark Strike Lv 3 when attacking
+				case 2: setarray .@id,RDMOPT_PET_ELE6_2,3,7; break;	// [Dark] x~y% chance of auto-casting Dark Strike Lv 3 when being attacked
+				case 3: setarray .@id,RDMOPT_PET_ELE6_3,2,4; break;	// [Dark] Increases Dark damage by x~y%
+				case 4: setarray .@id,RDMOPT_PET_ELE6_4,10,20; break;	// [Dark] Resistance against Dark Element +x~y%
+				case 5: setarray .@id,RDMOPT_PET_ELE6_5,4,7; break;	// [Dark] x~y% chance of inflicting Curse when attacking
+				case 6: setarray .@id,RDMOPT_PET_ELE6_6,1,3; break;	// [Dark] x~y% chance of auto-casting Grand Cross of Darkness Lv 2 when attacking
+				case 7: setarray .@id,RDMOPT_PET_ELE6_7,3,7; break;	// [Dark] Damage against Dark monster +x~y%
+				case 8: setarray .@id,RDMOPT_PET_ELE6_8,6,14; break;	// [Dark] Resistance against Dark monsters +x~y%
+			}
+			break;
+		//=======================================================
+		// = Undead Elemental random bonuses
+		//=======================================================
+		case 8:
+			switch (rand(1,8)) {
+				case 1: setarray .@id,RDMOPT_PET_ELE8_1,3,7; break;	// [Undead] x~y% chance of auto-casting Undead Attack Lv 3 when attacking
+				case 2: setarray .@id,RDMOPT_PET_ELE8_2,3,7; break;	// [Undead] x~y% chance of auto-casting Undead Attack Lv 3 when being attacked
+				case 3: setarray .@id,RDMOPT_PET_ELE8_3,2,4; break;	// [Undead] Increases Undead damage by +x~y%
+				case 4: setarray .@id,RDMOPT_PET_ELE8_4,10,20; break;	// [Undead] Resistance against Undead Element +x~y%
+				case 5: setarray .@id,RDMOPT_PET_ELE8_5,4,7; break;	// [Undead] x~y% chance of inflicting Confusion when attacking
+				case 6: setarray .@id,RDMOPT_PET_ELE8_6,1,3; break;	// [Undead] x~y% chance of auto-casting Quagmire Lv 2 when being attacked
+				case 7: setarray .@id,RDMOPT_PET_ELE8_7,3,7; break;	// [Undead] Damage against Undead monster +x~y%
+				case 8: setarray .@id,RDMOPT_PET_ELE8_8,6,14; break;	// [Undead] Resistance against Undead monsters +x~y%
+			}
+			break;
+		//=======================================================
+		// = Holy Elemental random bonuses
+		//=======================================================
+		case 9:
+			switch (rand(1,8)) {
+				case 1: setarray .@id,RDMOPT_PET_ELE5_1,3,7; break;	// [Holy] 
+				case 2: setarray .@id,RDMOPT_PET_ELE5_2,3,7; break;	// [Holy] 
+				case 3: setarray .@id,RDMOPT_PET_ELE5_3,2,4; break;	// [Holy] 
+				case 4: setarray .@id,RDMOPT_PET_ELE5_4,10,20; break;	// [Holy] 
+				case 5: setarray .@id,RDMOPT_PET_ELE5_5,4,7; break;	// [Holy] 
+				case 6: setarray .@id,RDMOPT_PET_ELE5_6,1,3; break;	// [Holy] 
+				case 7: setarray .@id,RDMOPT_PET_ELE5_7,3,7; break;	// [Holy] 
+				case 8: setarray .@id,RDMOPT_PET_ELE5_8,6,14; break;	// [Holy] 
+			}
+			break;
+		//=======================================================
+		// = Fire Elemental random bonuses
+		//=======================================================
+		case 10:
+			switch (rand(1,8)) {
+				case 1: setarray .@id,RDMOPT_PET_ELE3_1,3,7; break;	// [Fire] 
+				case 2: setarray .@id,RDMOPT_PET_ELE3_2,3,7; break;	// [Fire] 
+				case 3: setarray .@id,RDMOPT_PET_ELE3_3,2,4; break;	// [Fire] 
+				case 4: setarray .@id,RDMOPT_PET_ELE3_4,10,20; break;	// [Fire] 
+				case 5: setarray .@id,RDMOPT_PET_ELE3_5,4,7; break;	// [Fire] 
+				case 6: setarray .@id,RDMOPT_PET_ELE3_6,1,3; break;	// [Fire] 
+				case 7: setarray .@id,RDMOPT_PET_ELE3_7,3,7; break;	// [Fire] 
+				case 8: setarray .@id,RDMOPT_PET_ELE3_8,6,14; break;	// [Fire] 
+			}
+			break;
+		//=======================================================
+		// = Water Elemental random bonuses
+		//=======================================================
+		case 11:
+			switch (rand(1,8)) {
+				case 1: setarray .@id,RDMOPT_PET_ELE1_1,3,7; break;	// [Water] 
+				case 2: setarray .@id,RDMOPT_PET_ELE1_2,3,7; break;	// [Water] 
+				case 3: setarray .@id,RDMOPT_PET_ELE1_3,2,4; break;	// [Water] 
+				case 4: setarray .@id,RDMOPT_PET_ELE1_4,10,20; break;	// [Water] 
+				case 5: setarray .@id,RDMOPT_PET_ELE1_5,4,7; break;	// [Water] 
+				case 6: setarray .@id,RDMOPT_PET_ELE1_6,1,3; break;	// [Water] 
+				case 7: setarray .@id,RDMOPT_PET_ELE1_7,3,7; break;	// [Water] 
+				case 8: setarray .@id,RDMOPT_PET_ELE1_8,6,14; break;	// [Water] 
+			}
+			break;
+		//=======================================================
+		// = Wind Elemental random bonuses
+		//=======================================================
+		case 12:
+			switch (rand(1,8)) {
+				case 1: setarray .@id,RDMOPT_PET_ELE4_1,3,7; break;	// [Wind] 
+				case 2: setarray .@id,RDMOPT_PET_ELE4_2,3,7; break;	// [Wind] 
+				case 3: setarray .@id,RDMOPT_PET_ELE4_3,2,4; break;	// [Wind] 
+				case 4: setarray .@id,RDMOPT_PET_ELE4_4,10,20; break;	// [Wind] 
+				case 5: setarray .@id,RDMOPT_PET_ELE4_5,4,7; break;	// [Wind] 
+				case 6: setarray .@id,RDMOPT_PET_ELE4_6,1,3; break;	// [Wind] 
+				case 7: setarray .@id,RDMOPT_PET_ELE4_7,3,7; break;	// [Wind] 
+				case 8: setarray .@id,RDMOPT_PET_ELE4_8,6,14; break;	// [Wind] 
+			}
+			break;
+		//=======================================================
+		// = Earth Elemental random bonuses
+		//=======================================================
+		case 13:
+			switch (rand(1,8)) {
+				case 1: setarray .@id,RDMOPT_PET_ELE2_1,3,7; break;	// [Earth] 
+				case 2: setarray .@id,RDMOPT_PET_ELE2_2,3,7; break;	// [Earth] 
+				case 3: setarray .@id,RDMOPT_PET_ELE2_3,2,4; break;	// [Earth] 
+				case 4: setarray .@id,RDMOPT_PET_ELE2_4,10,20; break;	// [Earth] 
+				case 5: setarray .@id,RDMOPT_PET_ELE2_5,4,7; break;	// [Earth] 
+				case 6: setarray .@id,RDMOPT_PET_ELE2_6,1,3; break;	// [Earth] 
+				case 7: setarray .@id,RDMOPT_PET_ELE2_7,3,7; break;	// [Earth] 
+				case 8: setarray .@id,RDMOPT_PET_ELE2_8,6,14; break;	// [Earth] 
+			}
+			break;
+		//=======================================================
+		// = Neutral Elemental random bonuses
+		//=======================================================
+		case 14:
+			switch (rand(1,8)) {
+				case 1: setarray .@id,RDMOPT_PET_ELE0_1,3,7; break;	// [Neutral] 
+				case 2: setarray .@id,RDMOPT_PET_ELE0_2,3,7; break;	// [Neutral] 
+				case 3: setarray .@id,RDMOPT_PET_ELE0_3,2,4; break;	// [Neutral] 
+				case 4: setarray .@id,RDMOPT_PET_ELE0_4,2,4; break;	// [Neutral] 
+				case 5: setarray .@id,RDMOPT_PET_ELE0_5,4,7; break;	// [Neutral] 
+				case 6: setarray .@id,RDMOPT_PET_ELE0_6,1,3; break;	// [Neutral] 
+				case 7: setarray .@id,RDMOPT_PET_ELE0_7,3,7; break;	// [Neutral] 
+				case 8: setarray .@id,RDMOPT_PET_ELE0_8,6,14; break;	// [Neutral] 
+			}
+			break;
+		}
+
+		// = Additional random opt for existing pet (Evolution System)
+		if(getarg(0)) {
+			// Check if the PJ already has the bonus
+			for( .@i2 = 0; .@i2 <= 4; .@i2++ )
+				if(.@id[0] == getequiprandomoption(EQI_SHADOW_ARMOR,.@i2,ROA_ID))
+					.@i -= 1;
+			if(!@Pet_Rand_Opt || (@Pet_Rand_Opt && .@i != 0)) {
+				// If it is a Retrieve with Seed of Oblivion item
+				if (@Pet_Rand_Opt) {
+					.@drop = rand(.@id[1],.@id[2]);
+					setpetrandomoption(EQI_SHADOW_ARMOR,(@Pet_Rand_Opt-1),.@id[0],.@drop,(@Pet_Rand_Opt-1));
+					callfunc "Random_Opt_Name",.@id[0]; .@rand$ = ""+@rand$[0]+" +"+.@drop+""+@rand$[1]+"";
+					dispbottom "New Bonus: "+.@rand$+"";
+					@Pet_Rand_Opt = 0;
+					return;
+				}
+				// If the PJ doesn't have the bonus already, grants it
+				if(.@i) {
+					for( .@i = 2; .@i <= 4; .@i++ ) {
+						if(!getequiprandomoption(EQI_SHADOW_ARMOR,.@i,ROA_ID)) {
+							setpetrandomoption(EQI_SHADOW_ARMOR,.@i,.@id[0],rand(.@id[1],.@id[2]),.@i);
+							return;
+						}
+					}
+					return;
+				}
+			}
+		}
+
+		setarray getd(".@bonus_stat"+.@i+""),.@id[0],.@id[1],.@id[2];
+	}
+
+	// = New pet creation (From existing egg) + random bonuses
+	changepet .@mob_id[0];
+	setunitdata getpetinfo(PETINFO_BLOCKID),UPET_INTIMACY,1;
+
+	// Making sure that it doesn't have a random yet
+	if(!getequiprandomoption(EQI_SHADOW_ARMOR,0,ROA_ID)) {
+		setpetrandomoption(EQI_SHADOW_ARMOR,0,.@bonus_stat1[0],rand(.@bonus_stat1[1],.@bonus_stat1[2]),0);
+		setpetrandomoption(EQI_SHADOW_ARMOR,1,.@bonus_stat2[0],rand(.@bonus_stat2[1],.@bonus_stat2[2]),1);
+		if(getarg(1,0))
+			setpetrandomoption(EQI_SHADOW_ARMOR,2,.@bonus_stat3[0],rand(.@bonus_stat3[1],.@bonus_stat3[2]),2);
+	}
+
+	return .@mob_id[0];
+}
+
+//============================================================
+// = Evolution & Costumes scripts.
+//============================================================
+// (5 = Evolution) (0 = Return to its initial form) (1 = Costume Lv 1) (2 = Costume Lv 2) (3 = Costume Lv 3)
+-	script	Pet_Evolution	-1,{ callfunc "Pet_Change",5; clearnpc(); end2; }
+
+function	script	Pet_Change	{
+	disable_items;
+	//=======================================================
+	//= Get Randoms Stats obtained at the pet's creation
+	//=======================================================
+	for( .@i = 0; .@i <= 1; .@i++ ) {
+		switch (getequiprandomoption(EQI_SHADOW_ARMOR,.@i,ROA_ID)) {
+			default: case 1500: case 1501: case 1502: case 1503: case 1504: case 1505: case 1506: case 1507: case 1508: case 1509: case 1510: case 1720: .@random[.@i] = 8070; break;
+			case 1520: case 1521: case 1522: case 1523: case 1524: case 1525: case 1526: case 1527: case 1528: case 1529: case 1530: case 1722: .@random[.@i] = 8071; break;
+			case 1540: case 1541: case 1542: case 1543: case 1544: case 1545: case 1546: case 1547: case 1548: case 1549: case 1550: case 1723: .@random[.@i] = 8074; break;
+			case 1560: case 1561: case 1562: case 1563: case 1564: case 1565: case 1566: case 1567: case 1568: case 1569: case 1570: case 1721: .@random[.@i] = 8073; break;
+			case 1580: case 1581: case 1582: case 1583: case 1584: case 1585: case 1586: case 1587: case 1588: case 1589: case 1590: case 1724: .@random[.@i] = 8072; break;
+			case 1600: case 1601: case 1602: case 1603: case 1604: case 1605: case 1606: case 1607: case 1608: case 1609: case 1610: case 1725: .@random[.@i] = 8075; break;
+		}
+	}
+	//=======================================================
+	//= Configuration
+	//=======================================================
+	// .@ID[0] = Evolution number (1~3)
+	// .@ID[1] = 1st Evolution (mob_id)
+	// .@ID[2] = 2nd Evolution (mob_id)
+	// .@ID[3] = Seed Requirement 1 (item_id)
+	// .@ID[4] = Seed Requirement 2 (item_id)
+	// .@ID[5] = Costume ID 1 (mob_id)
+	// .@ID[6] = Costume ID 2 (mob_id)
+	// .@ID[7] = Costume ID 3 (mob_id)
+	// .@ID[8] = Costume ID 4 (mob_id)
+	//=======================================================
+	// = Seed Item ID:
+	// 8070 - Strength Seed
+	// 8071 - Vitality Seed
+	// 8072 - Dexterious Seed
+	// 8073 - Agility Seed
+	// 8074 - Intellect Seed
+	// 8075 - Lucky Seed
+	// 8076 - Elemental Seed
+	// 8077 - Special Seed
+	switch (getpetinfo(PETINFO_CLASS)) {
+		//=======================================================
+		//= STR/VIT - Savage Babe
+		//=======================================================
+		case 1167: setarray .@ID,1,1094,1166,8070,8071; break;		// [Savage Babe -> Ambernite / Savage]
+		case 1094: setarray .@ID,2,1128,2152,8070,8071,29938; break;	// [Ambernite -> Horn / Comodo]
+		case 29938: setarray .@ID,2,1128,2152,8070,8071,1094; break;	// [Electric Snail -> Horn / Comodo]
+		case 1166: setarray .@ID,2,2152,1060,8070,8071,1311; break;	// [Savage -> Comodo / Bigfoot]
+		case 1311: setarray .@ID,2,2152,1060,8070,8071,1166; break;	// [Gullinbursti -> Comodo / Bigfoot]
+		case 1128: setarray .@ID,3,1205,0,8077,0,1494; break;		// [Horn -> Executioner]
+		case 1494: setarray .@ID,3,1205,0,8077,0,1128; break;		// [Beetle -> Executioner]
+		case 2152: setarray .@ID,3,1205,0,8077,0,1687; break;		// [Comodo -> Executioner]
+		case 1687: setarray .@ID,3,1205,0,8077,0,2152; break;		// [Green Iguina -> Executioner]
+		case 1060: setarray .@ID,3,1205,0,8077,0,1243; break;		// [Bigfoot -> Executioner]
+		case 1243: setarray .@ID,3,1205,0,8077,0,1060; break;		// [Sasquatch -> Executioner]
+		case 1205: setarray .@ID,4,0,0,0,0,2313,3736,1204; break;	// [Executioner] Costumes
+		case 2313: setarray .@ID,4,0,0,0,0,1205,3736,1204; break;	// [Tikbalang] Costumes
+		case 3736: setarray .@ID,4,0,0,0,0,2313,1205,1204; break;	// [Bandit Buffalo] Costumes
+		case 1204: setarray .@ID,4,0,0,0,0,2313,3736,3736; break;	// [Tirfing] Costumes
+
+		//=======================================================
+		//= STR/DEX - Andre
+		//=======================================================
+		case 1095: setarray .@ID,1,1001,1005,8070,8072,1160; break;	// [Andre -> Scorpion / Familiar]
+		case 1160: setarray .@ID,1,1001,1005,8070,8072,1095; break;	// [Piere -> Scorpion / Familiar]
+		case 1001: setarray .@ID,2,1139,1024,8070,8072,1212; break;	// [Scorpion -> Mantis / Worm Tail]
+		case 1212: setarray .@ID,2,1139,1024,8070,8072,1001; break;	// [Iron Fist -> Mantis / Worm Tail]
+		case 1005: setarray .@ID,2,1024,20674,8070,8072,1111; break;	// [Familiar -> Worm Tail / Papila]
+		case 1111: setarray .@ID,2,1024,20674,8070,8072,1005; break;	// [Drainliar -> Worm Tail / Papila]
+		case 1139: setarray .@ID,3,2133,0,8077,0,1294; break;		// [Mantis -> Angra Mantis]
+		case 1294: setarray .@ID,3,2133,0,8077,0,1139; break;		// [Killer Mantis -> Angra Mantis]
+		case 1024: setarray .@ID,3,2133,0,8077,0,1215; break;		// [Worm Tail -> Angra Mantis]
+		case 1215: setarray .@ID,3,2133,0,8077,0,1024; break;		// [Stem Worm -> Angra Mantis]
+		case 20669: setarray .@ID,3,2133,0,8077,0,20674; break;		// [Papila -> Angra Mantis]
+		case 20674: setarray .@ID,3,2133,0,8077,0,20669; break;		// [Papila Cyan -> Angra Mantis]
+		case 2133: setarray .@ID,4,0,0,0,0,20671,29905; break;		// [Angra Mantis] Costumes
+		case 20671: setarray .@ID,4,0,0,0,0,2133,29905; break;		// [Papila Red] Costumes
+		case 29905: setarray .@ID,4,0,0,0,0,20671,2133; break;		// [Emelit] Costumes
+
+		//=======================================================
+		//= STR/AGI - Baby Desert Wolf
+		//=======================================================
+		case 1107: setarray .@ID,1,1013,1415,8070,8073; break;		// [Bb Desert Wolf -> Wolf / Baby Leopard]
+		case 1013: setarray .@ID,2,1783,1146,8070,8073,3442; break;	// [Wolf -> Galion / Matyr]
+		case 3442: setarray .@ID,2,1783,1146,8070,8073,1013; break;	// [Frozen Wolf -> Galion / Matyr]
+		case 1415: setarray .@ID,2,1783,1989,8070,8073,1782; break;	// [Baby Leopard -> Galion / Hillsrion]
+		case 1782: setarray .@ID,2,1783,1989,8070,8073,1415; break;	// [Roween -> Galion / Hillsrion]
+		case 1146: setarray .@ID,3,1115,0,8077,0,1866; break;		// [Matyr -> Eddga]
+		case 1866: setarray .@ID,3,1115,0,8077,0,1146; break;		// [Hell Poodle -> Eddga]
+		case 1783: setarray .@ID,3,1115,0,8077,0,3739; break;		// [Galion -> Eddga]
+		case 3739: setarray .@ID,3,1115,0,8077,0,1783; break;		// [Coyote -> Eddga]
+		case 1989: setarray .@ID,3,1115,0,8077,0,1515; break;		// [Hillsrion -> Eddga]
+		case 1515: setarray .@ID,3,1115,0,8077,0,1989; break;		// [Baby Garm -> Eddga]
+		case 1115: setarray .@ID,4,0,0,0,0,1252,1991,29878; break;	// [Eddga] Costumes
+		case 1252: setarray .@ID,4,0,0,0,0,1115,1991,29878; break;	// [Garm] Costumes
+		case 29878: setarray .@ID,4,0,0,0,0,1115,1991,1252; break;	// [Warg] Costumes
+		case 1991: setarray .@ID,4,0,0,0,0,1252,1115,29878; break;	// [Tendrillion] Costumes
+
+		//=======================================================
+		//= STR/INT - Draco
+		//=======================================================
+		case 2013: setarray .@ID,1,1155,1384,8070,8074; break;		// [Draco -> Petite / Deleter]
+		case 1155: setarray .@ID,2,1717,1716,8070,8074,1156; break;	// [Petite -> Ferus Green / Acidus Blue]
+		case 1156: setarray .@ID,2,1717,1716,8070,8074,1155; break;	// [Petite -> Ferus Green / Acidus Blue]
+		case 1384: setarray .@ID,2,1716,1713,8070,8074,1385; break;	// [Deleter -> Acidus Bleu / Acidus]
+		case 1385: setarray .@ID,2,1716,1713,8070,8074,1384; break;	// [Deleter -> Acidus Bleu / Acidus]
+		case 1714: setarray .@ID,3,2319,0,8077,0,20612; break;		// [Ferus Green -> Buwaya]
+		case 1717: setarray .@ID,3,2319,0,8077,0,20612; break;		// [Ferus Green -> Buwaya]
+		case 20612: setarray .@ID,3,2319,0,8077,0,1717; break;		// [Ferus Pink -> Buwaya]
+		case 1716: setarray .@ID,3,2319,0,8077,0,20614; break;		// [Acidus Blue -> Buwaya]
+		case 20614: setarray .@ID,3,2319,0,8077,0,1716; break;		// [Acidus Black -> Buwaya]
+		case 1713: setarray .@ID,3,2319,0,8077,0,20615; break;		// [Acidus -> Buwaya]
+		case 20615: setarray .@ID,3,2319,0,8077,0,1713; break;		// [Acidus White -> Buwaya]
+		case 2319: setarray .@ID,4,0,0,0,0,1831,20617,29915; break;	// [Buwaya] Costumes
+		case 1831: setarray .@ID,4,0,0,0,0,2319,20617,29915; break;	// [Salamander] Costumes
+		case 20617: setarray .@ID,4,0,0,0,0,1831,2319,29915; break;	// [Bone Acidus] Costumes
+		case 29915: setarray .@ID,4,0,0,0,0,1831,20617,2319; break;	// [Metal Dragon] Costumes
+
+		//=======================================================
+		//= STR/LUK - Tarou
+		//=======================================================
+		case 1175: setarray .@ID,1,1057,1199,8070,8075,1209; break;	// [Tarou -> Yoyo / Punk]
+		case 1209: setarray .@ID,1,1057,1199,8070,8075,1175; break;	// [Cramp -> Yoyo / Punk]
+		case 1057: setarray .@ID,2,1056,1104,8070,8075,1214; break;	// [Yoyo -> Smokie / Coco]
+		case 1214: setarray .@ID,2,1056,1104,8070,8075,1057; break;	// [Choco -> Smokie / Coco]
+		case 1199: setarray .@ID,2,1104,1165,8070,8075,2919; break;	// [Punk -> Coco / Sandman]
+		case 2919: setarray .@ID,2,1104,1165,8070,8075,1199; break;	// [Neo Punk -> Coco / Sandman]
+		case 1056: setarray .@ID,3,1159,0,8077,0; break;		// [Smokie -> Phreeoni]
+		case 1104: setarray .@ID,3,1159,0,8077,0,29529; break;		// [Coco -> Phreeoni]
+		case 29529: setarray .@ID,3,1159,0,8077,0,1104; break;		// [Chipmunk -> Phreeoni]
+		case 1165: setarray .@ID,3,1159,0,8077,0,29547; break;		// [Sandman -> Phreeoni]
+		case 29547: setarray .@ID,3,1159,0,8077,0,1165; break;		// [Sandy -> Phreeoni]
+		case 1159: setarray .@ID,4,0,0,0,0,2017,2336; break;		// [Phreeoni] Costumes
+		case 2017: setarray .@ID,4,0,0,0,0,1159,2336; break;		// [Rata] Costumes
+		case 2336: setarray .@ID,4,0,0,0,0,1159,2017; break;		// [Domovoi] Costumes
+
+		//=======================================================
+		//= VIT/DEX - Hornet
+		//=======================================================
+		case 1004: setarray .@ID,1,1174,1114,8071,8072,3498; break;	// [Hornet -> Stainer / Dustiness]
+		case 3498: setarray .@ID,1,1174,1114,8071,8072,1004; break;	// [Hornet -> Stainer / Dustiness]
+		case 1174: setarray .@ID,2,1100,1408,8071,8072,1211; break;	// [Stainer -> Argos / Bloody Butterfly]
+		case 1211: setarray .@ID,2,1100,1408,8071,8072,1174; break;	// [Brilight -> Argos / Bloody Butterfly]
+		case 1114: setarray .@ID,2,1408,1303,8071,8072,29531; break;	// [Dustiness -> Bloody Butterfly / Giant Hornet]
+		case 29531: setarray .@ID,2,1408,1303,8071,8072,1114; break;	// [Fire Moth -> Bloody Butterfly / Giant Hornet]
+		case 1100: setarray .@ID,3,1059,0,8077,0,1304; break;		// [Argos -> Mistress]
+		case 1304: setarray .@ID,3,1059,0,8077,0,1100; break;		// [Argos -> Mistress]
+		case 1408: setarray .@ID,3,1059,0,8077,0; break;		// [Bloody Butterfly -> Mistress]
+		case 1303: setarray .@ID,3,1059,0,8077,0; break;		// [Giant Hornet -> Mistress]
+		case 1059: setarray .@ID,4,0,0,0,0,27387,26019; break;		// [Mistress] Costumes
+		case 27387: setarray .@ID,4,0,0,0,0,1059,26019; break;		// [Sera] Costumes
+		case 26019: setarray .@ID,4,0,0,0,0,27387,1059; break;		// [Airboat Mos] Costumes
+
+		//=======================================================
+		//= VIT/AGI - Picky
+		//=======================================================
+		case 1049: setarray .@ID,1,1011,1009,8071,8073,1050; break;	// [Picky -> Chonchon / Condor]
+		case 1050: setarray .@ID,1,1011,1009,8071,8073,1049; break;	// [Picky -> Chonchon / Condor]
+		case 1011: setarray .@ID,2,2153,1019,8071,8073,1042; break;	// [Chonchon -> Cendrawasih -> Peco peco]
+		case 1042: setarray .@ID,2,2153,1019,8071,8073,1011; break;	// [Steel Chonchon -> Cendrawasih -> Peco peco]
+		case 1009: setarray .@ID,2,1019,2073,8071,8073,3020; break;	// [Condor -> Peco Peco / Toucan]
+		case 3020: setarray .@ID,2,1019,2073,8071,8073,1009; break;	// [Fire Condor -> Peco Peco / Toucan]
+		case 2153: setarray .@ID,3,2363,0,8077,0; break;		// [Cendrawasih -> Menblatt]
+		case 1019: setarray .@ID,3,2363,0,8077,0; break;		// [Pecopeco -> Menblatt]
+		case 2073: setarray .@ID,3,2363,0,8077,0,1391; break;		// [Galapago -> Menblatt]
+		case 1391: setarray .@ID,3,2363,0,8077,0,2073; break;		// [Toucan -> Menblatt]
+		case 2363: setarray .@ID,4,0,0,0,0,1369,3900,1035; break;	// [Menblatt] Costumes
+		case 1369: setarray .@ID,4,0,0,0,0,2363,3900,1035; break;	// [Grand Peco] Costumes
+		case 3900: setarray .@ID,4,0,0,0,0,1369,2363,1035; break;	// [Owl] Costumes
+		case 1035: setarray .@ID,4,0,0,0,0,1369,2363,3900; break;	// [Hunter Fly] Costumes
+
+		//=======================================================
+		//= VIT/INT - Woodie
+		//=======================================================
+		case 2963: setarray .@ID,1,1932,1033,8071,8074,1010; break;	// [Woodie -> Garden Keeper / Elder Willow]
+		case 1010: setarray .@ID,1,1932,1033,8071,8074,2963; break;	// [Willow -> Garden Keeper / Elder Willow]
+		case 1932: setarray .@ID,2,1281,1497,8071,8074,29969; break;	// [Garden Keeper -> Sageworm / Wood Golem]
+		case 29969: setarray .@ID,2,1281,1497,8071,8074,1932; break;	// [Simbatta -> Sageworm / Wood Golem]
+		case 1033: setarray .@ID,2,1497,1880,8071,8074,1503; break;	// [Elder Willow -> Wood Golem]
+		case 1503: setarray .@ID,2,1497,1880,8071,8074,1033; break;	// [Gibbet -> Wood Goblin]
+		case 1281: setarray .@ID,3,1493,0,8077,0; break;		// [Sageworm -> Dryad]
+		case 1497: setarray .@ID,3,1493,0,8077,0,26027; break;		// [Wood Golem -> Dryad]
+		case 26027: setarray .@ID,3,1493,0,8077,0,1497; break;		// [Wood Warrior -> Dryad]
+		case 1880: setarray .@ID,3,1493,0,8077,0,26021; break;		// [Wood Goblin -> Dryad]
+		case 26021: setarray .@ID,3,1493,0,8077,0,1880; break;		// [Airboat Tree -> Dryad]
+		case 1493: setarray .@ID,4,0,0,0,0,2310,26026; break;		// [Dryad] Costumes
+		case 2310: setarray .@ID,4,0,0,0,0,1493,26026; break;		// [Engkanto] Costumes
+		case 26026: setarray .@ID,4,0,0,0,0,2310,1493; break;		// [Wooden Fairy] Costumes
+
+		//=======================================================
+		//= VIT/LUK - Fabre
+		//=======================================================
+		case 1007: setarray .@ID,1,1052,1018,8071,8075,3497; break;	// [Fabre -> Rocker / Creamy]
+		case 3497: setarray .@ID,1,1052,1018,8071,8075,1007; break;	// [Dr Fabre -> Rocker / Creamy]
+		case 1052: setarray .@ID,2,2137,1103,8071,8075,1058; break;	// [Rocker -> Miming / Caramel]
+		case 1058: setarray .@ID,2,2137,1103,8071,8075,1052; break;	// [Metaller -> Miming / Caramel]
+		case 1018: setarray .@ID,2,1103,1176,8071,8075,1293; break;	// [Creamy -> Caramel / Vitata]
+		case 1293: setarray .@ID,2,1103,1176,8071,8075,1018; break;	// [Creamy Fear -> Caramel / Vitata]
+		case 2137: setarray .@ID,3,1618,0,8077,0,3306; break;		// [Miming -> Ungoliant]
+		case 3306: setarray .@ID,3,1618,0,8077,0,2137; break;		// [Tamadora -> Ungoliant]
+		case 1103: setarray .@ID,3,1618,0,8077,0,3443; break;		// [Caramel -> Ungoliant]
+		case 3443: setarray .@ID,3,1618,0,8077,0,1103; break;		// [Taffy -> Ungoliant]
+		case 1176: setarray .@ID,3,1618,0,8077,0; break;		// [Vitata -> Ungoliant]
+		case 1618: setarray .@ID,4,0,0,0,0,1289,20601,20683,3370; break;// [Ungoliant] Costumes
+		case 1289: setarray .@ID,4,0,0,0,0,1618,20601,20683,3370; break;// [Maya Purple] Costumes
+		case 20601: setarray .@ID,4,0,0,0,0,1618,1289,20683,3370; break;// [Jungoliant] Costumes
+		case 20683: setarray .@ID,4,0,0,0,0,1618,20601,1289,3370; break;// [Bookworm] Costumes
+		case 3370: setarray .@ID,4,0,0,0,0,1618,20601,1289,20683; break;// [Queen Scaraba] Costumes
+
+		//=======================================================
+		//= DEX/AGI - Thief Bug
+		//=======================================================
+		case 1051: setarray .@ID,1,1025,1054,8072,8073,1070; break;	// [Thief Bug -> Snake / Male Thief Bug]
+		case 1070: setarray .@ID,1,1025,1054,8072,8073,1051; break;	// [Kukre -> Snake / Male Thief Bug]
+		case 1025: setarray .@ID,2,1029,1773,8072,8073,1037; break;	// [Snake -> Isis / Hodremlin]
+		case 1037: setarray .@ID,2,1029,1773,8072,8073,1025; break;	// [Side Winder -> Isis / Hodremlin]
+		case 1054: setarray .@ID,2,1773,1321,8072,8073,29527; break;	// [Male Thief Bug -> Hodremlin / Dragon Tail]
+		case 29527: setarray .@ID,2,1773,1321,8072,8073,1054; break;	// [Bron G -> Hodremlin / Dragon Tail]
+		case 1029: setarray .@ID,3,1086,0,8077,0,3636; break;		// [Isis -> Boitata]
+		case 3636: setarray .@ID,3,1086,0,8077,0,1029; break;		// [Isis -> Boitata]
+		case 1773: setarray .@ID,3,1086,0,8077,0,29804; break;		// [Hodremlin -> Golden Thief Bug]
+		case 29804: setarray .@ID,3,1086,0,8077,0,1773; break;		// [Red Hodremlin -> Golden Thief Bug]
+		case 1321: setarray .@ID,3,1086,0,8077,0; break;		// [Dragon Tail -> Luciola Vespa]
+		case 1086: setarray .@ID,4,0,0,0,0,2068,1994; break;		// [Golden Thief Bug] Costumes
+		case 2068: setarray .@ID,4,0,0,0,0,1086,1994; break;		// [Boitata] Costumes
+		case 1994: setarray .@ID,4,0,0,0,0,2068,1086; break;		// [Luciola Vespa] Costumes
+
+		//=======================================================
+		//= DEX/INT - Mimic
+		//=======================================================
+		case 1191: setarray .@ID,1,1193,1195,8072,8074,2356; break;	// [Mimic -> Alarm / Rideword]
+		case 2356: setarray .@ID,1,1193,1195,8072,8074,1191; break;	// [N Mimic -> Alarm / Rideword]
+		case 1193: setarray .@ID,2,1699,1269,8072,8074,2917; break;	// [Alarm -> Ancient Mimic / Clock]
+		case 2917: setarray .@ID,2,1699,1269,8072,8074,1193; break;	// [Big Bell -> Ancient Mimic / Clock]
+		case 1195: setarray .@ID,2,1269,1698,8072,8074; break;		// [Rideword -> Clock / Deathword]
+		case 1699: setarray .@ID,3,1377,0,8077,0; break;		// [Ancient Mimic -> Treasure Mimic]
+		case 1269: setarray .@ID,3,1377,0,8077,0; break;		// [Clock -> Clock Tower Manager]
+		case 1698: setarray .@ID,3,1377,0,8077,0,20780; break;		// [Deathword -> Elder]
+		case 20780: setarray .@ID,3,1377,0,8077,0,1698; break;		// [Book of Death -> Elder]
+		case 1377: setarray .@ID,4,0,0,0,0,20613,20781,1270; break;	// [Elder] Costumes
+		case 20613: setarray .@ID,4,0,0,0,0,1377,20781,1270; break;	// [Treasure Mimic] Costumes
+		case 20781: setarray .@ID,4,0,0,0,0,20613,1377,1270; break;	// [Eldest] Costumes
+		case 1270: setarray .@ID,4,0,0,0,0,20613,1377,20781; break;	// [Clock Tower Manager] Costumes
+
+		//=======================================================
+		//= DEX/LUK - Roda Frog
+		//=======================================================
+		case 1012: setarray .@ID,1,1014,1300,8072,8075,3499; break;	// [Roda Frog -> Spore / Caterpillar]
+		case 3499: setarray .@ID,1,1014,1300,8072,8075,1012; break;	// [Sweet Frog -> Spore / Caterpillar]
+		case 1014: setarray .@ID,2,1402,1796,8072,8075,3501; break;	// [Spore -> Poison Toad  / Aunoe]
+		case 3501: setarray .@ID,2,1402,1796,8072,8075,1014; break;	// [Spore -> Poison Toad  / Aunoe]
+		case 1300: setarray .@ID,2,1796,1099,8072,8075,1279; break;	// [Caterpillar -> Aunoe / Argiope]
+		case 1279: setarray .@ID,2,1796,1099,8072,8075,1300; break;	// [Tri Joint -> Aunoe / Argiope]
+		case 1402: setarray .@ID,3,1987,0,8077,0; break;		// [Poison Toad -> Centipede]
+		case 1796: setarray .@ID,3,1987,0,8077,0,1797; break;		// [Aunoe -> Centipede]
+		case 1797: setarray .@ID,3,1987,0,8077,0,1796; break;		// [Fanat -> Centipede]
+		case 1099: setarray .@ID,3,1987,0,8077,0,1305; break;		// [Argiope -> Centipede]
+		case 1305: setarray .@ID,3,1987,0,8077,0,1099; break;		// [Ancient Worm -> Centipede]
+		case 1987: setarray .@ID,4,0,0,0,0,2092,3741; break;		// [Centipede] Costumes
+		case 2092: setarray .@ID,4,0,0,0,0,1987,3741; break;		// [Dolomedes] Costumes
+		case 3741: setarray .@ID,4,0,0,0,0,2092,1987; break;		// [Mechaspider] Costumes
+
+		//=======================================================
+		//= AGI/INT - Plankton
+		//=======================================================
+		case 1161: setarray .@ID,1,1158,1141,8073,8074,2404; break;	// [Plankton -> Phen / Marina]
+		case 2404: setarray .@ID,1,1158,1141,8073,8074,1161; break;	// [Plankton -> Phen / Marina]
+		case 1158: setarray .@ID,2,1108,1044,8073,8074,20643; break;	// [Phen -> Deviace / Obeaune]
+		case 20643: setarray .@ID,2,1108,1044,8073,8074,1158; break;	// [Phen -> Deviace / Obeaune]
+		case 1141: setarray .@ID,2,1044,1264,8073,8074,1144; break;	// [Marina -> Obeaune / Merman]
+		case 1144: setarray .@ID,2,1044,1264,8073,8074,1141; break;	// [Marse -> Obeaune / Merman]
+		case 1108: setarray .@ID,3,2204,0,8077,0,1045; break;		// [Deviace -> Sedora]
+		case 1045: setarray .@ID,3,2204,0,8077,0,1108; break;		// [Marc -> Sedora]
+		case 1044: setarray .@ID,3,2204,0,8077,0,2069; break;		// [Obeaune -> Sedora]
+		case 2069: setarray .@ID,3,2204,0,8077,0,1044; break;		// [Iara -> Sedora]
+		case 1264: setarray .@ID,3,2204,0,8077,0; break;		// [Merman -> Sedora]
+		case 2204: setarray .@ID,4,0,0,0,0,2016,20591,2020; break;	// [Sedora] Costumes
+		case 2016: setarray .@ID,4,0,0,0,0,2204,20591,2020; break;	// [Aqua Elemental] Costumes
+		case 20591: setarray .@ID,4,0,0,0,0,2016,2204,2020; break;	// [Papare] Costumes
+		case 2020: setarray .@ID,4,0,0,0,0,2204,20591,2016; break;	// [Rhyncho] Costumes
+
+		//=======================================================
+		//= AGI/LUK - Whisper
+		//=======================================================
+		case 1179: setarray .@ID,1,1186,1110,8073,8075,29323; break;	// [Whisper -> Giant Whisper / Dokebi]
+		case 29323: setarray .@ID,1,1186,1110,8073,8075,1179; break;	// [Green Whisper -> Giant Whisper / Dokebi]
+		case 1186: setarray .@ID,2,1120,1867,8073,8075,1375; break;	// [Giant Whisper -> Ghostring / Banshee]
+		case 1375: setarray .@ID,2,1120,1867,8073,8075,1186; break;	// [The Paper -> Ghostring / Banshee]
+		case 1110: setarray .@ID,2,1867,1505,8073,8075,1301; break;	// [Dokebi -> Banshee / Loli Ruri]
+		case 1301: setarray .@ID,2,1867,1505,8073,8075,1110; break;	// [Am Mut -> Banshee / Loli Ruri]
+		case 1120: setarray .@ID,3,1200,0,8077,0; break;		// [Ghostring -> Zealotus]
+		case 1867: setarray .@ID,3,1200,0,8077,0; break;		// [Banshee -> Banshee Master]
+		case 1505: setarray .@ID,3,1200,0,8077,0; break;		// [Loli Ruri -> Bluemoon Loli Ruri]
+		case 1200: setarray .@ID,4,0,0,0,0,29829,1974,26000; break;	// [Zealotus] Costumes
+		case 29829: setarray .@ID,4,0,0,0,0,1200,1974,26000; break;	// [Golden Zealotus] Costumes
+		case 1974: setarray .@ID,4,0,0,0,0,29829,1200,26000; break;	// [Banshee Master] Costumes
+		case 26000: setarray .@ID,4,0,0,0,0,29829,1974,1200; break;	// [Bluemoon Loli Ruri] Costumes
+
+		//=======================================================
+		//= INT/LUK - Sohee
+		//=======================================================
+		case 1170: setarray .@ID,1,1404,1143,8074,8075; break;		// [Sohee -> Miyabi Ningyo / Marionette]
+		case 1404: setarray .@ID,2,1416,1370,8074,8075; break;		// [Miyabi Ningyo -> Wicked Nymph / Succubus]
+		case 1143: setarray .@ID,2,1370,1374,8074,8075,2994; break;	// [Marionette -> Succubus / Incubus]
+		case 2994: setarray .@ID,2,1370,1374,8074,8075,1143; break;	// [XM Marionette -> Succubus / Incubus]
+		case 1416: setarray .@ID,3,1518,0,8077,0; break;		// [Wicked Nymph -> Bacsojin]
+		case 1370: setarray .@ID,3,1518,0,8077,0; break;		// [Succubus -> Bacsojin]
+		case 1374: setarray .@ID,3,1518,0,8077,0; break;		// [Incubus -> Bacsojin]
+		case 1518: setarray .@ID,4,0,0,0,0,2254,1689; break;		// [Bacsojin] Costumes
+		case 2254: setarray .@ID,4,0,0,0,0,1518,1689; break;		// [Soheon] Costumes
+		case 1689: setarray .@ID,4,0,0,0,0,2254,1518; break;		// [Bacsojin2] Costumes
+
+		//=======================================================
+		//= Random/Random - Poring
+		//=======================================================
+		case 1002: setarray .@ID,1,1090,1242,.@random[0],.@random[1],1113; break;	// [Poring -> Mastering / Marin]
+		case 1113: setarray .@ID,1,3495,1031,.@random[0],.@random[1],1002; break;	// [Drops -> Eggring / Poporing]
+		case 1090: setarray .@ID,2,1096,1582,.@random[0],.@random[1],1062; break;	// [Mastering -> Angeling / Deviling]
+		case 1062: setarray .@ID,2,1096,1582,.@random[0],.@random[1],1090; break;	// [Santa Poring -> Angeling / Deviling]
+		case 1242: setarray .@ID,2,1582,1894,.@random[0],.@random[1]; break;		// [Marin -> Deviling / Pouring]
+		case 3495: setarray .@ID,2,1096,1582,.@random[0],.@random[1]; break;		// [Eggring -> Angeling / Deviling]
+		case 1031: setarray .@ID,2,1582,1894,.@random[0],.@random[1],29593; break;	// [Poporing -> Deviling / Pouring]
+		case 29593: setarray .@ID,2,1582,1894,.@random[0],.@random[1],1031; break;	// [Leafing -> Deviling / Pouring]
+		case 1096: setarray .@ID,3,1388,0,8077,0; break;			// [Angeling -> Archangeling]
+		case 1582: setarray .@ID,3,1388,0,8077,0; break;			// [Deviling -> Archangeling]
+		case 1894: setarray .@ID,3,1388,0,8077,0; break;			// [Pouring -> Archangeling]
+		case 1388: setarray .@ID,4,0,0,0,0,20604,20605,1755; break;		// [Archangeling] Costumes
+		case 20604: setarray .@ID,4,0,0,0,0,1388,20605,1755; break;		// [Angelgolt] Costumes
+		case 20605: setarray .@ID,4,0,0,0,0,20604,1388,1755; break;		// [Angelgolt2] Costumes
+		case 1755: setarray .@ID,4,0,0,0,0,20604,20605,1388; break;		// [Skeggiold] Costumes
+
+		//=======================================================
+		//= Dark/Random - Deviruchi
+		//=======================================================
+		case 1109: setarray .@ID,1,1869,1508,8076,.@random[1],1109; break;	// [Deviruchi -> Flame Skull / Quve]
+		case 1382: setarray .@ID,1,1869,1508,8076,.@random[1],1382; break;	// [Diabolic -> Flame Skull / Quve]
+		case 1869: setarray .@ID,2,1707,1208,8076,.@random[1]; break;		// [Flame Skull -> Dolor / Wanderer]
+		case 1508: setarray .@ID,2,1208,1101,8076,.@random[1],1506; break;	// [Quve -> Wanderer / Baphomet Jr]
+		case 1506: setarray .@ID,2,1208,1101,8076,.@random[1],1508; break;	// [Disguise -> Wanderer / Baphomet Jr]
+		case 1707: setarray .@ID,3,1752,0,8077,0; break;			// [Dolor -> Skogul]
+		case 1208: setarray .@ID,3,1752,0,8077,0; break;			// [Wanderer -> Skogul]
+		case 1101: setarray .@ID,3,1752,0,8077,0; break;			// [Bapho Jr -> Skogul]
+		case 1752: setarray .@ID,4,0,0,0,0,20607,29771,20420; break;		// [Skogul] Costumes
+		case 20607: setarray .@ID,4,0,0,0,0,1752,29771,20420; break;		// [Holy Skogul] Costumes
+		case 29771: setarray .@ID,4,0,0,0,0,20607,1752,20420; break;		// [Cyan Dolor] Costumes
+		case 20420: setarray .@ID,4,0,0,0,0,20607,29771,1752; break;		// [Corrupted Wanderer] Costumes
+
+		//=======================================================
+		//= Undead/Random - Skeleton
+		//=======================================================
+		case 1076: setarray .@ID,1,1026,1041,8076,.@random[1],2405; break;	// [Skeleton -> Munak / Mummy]
+		case 2405: setarray .@ID,1,1026,1041,8076,.@random[1],1076; break;	// [Weak Skeleton -> Munak / Mummy]
+		case 1026: setarray .@ID,2,1512,1297,8076,.@random[1],1188; break;	// [Munak -> Hyegun / Ancient Mummy]
+		case 1188: setarray .@ID,2,1512,1297,8076,.@random[1],1026; break;	// [Bongun -> Hyegun / Ancient Mummy]
+		case 1041: setarray .@ID,2,1297,1032,8076,.@random[1],29628; break;	// [Mummy -> Ancient Mummy / Verit]
+		case 29628: setarray .@ID,2,1297,1032,8076,.@random[1],1041; break;	// [Mummy girl -> Ancient Mummy / Verit]
+		case 1512: setarray .@ID,3,1098,0,8077,0; break;			// [Hyegun -> Anubis]
+		case 1297: setarray .@ID,3,1098,0,8077,0; break;			// [Ancient Mummy -> Anubis]
+		case 1032: setarray .@ID,3,1098,0,8077,0; break;			// [Verit -> Anubis]
+		case 1098: setarray .@ID,4,0,0,0,0,1157,1038; break;			// [Anubis] Costumes
+		case 1157: setarray .@ID,4,0,0,0,0,1098,1038; break;			// [Pharaoh] Costumes
+		case 1038: setarray .@ID,4,0,0,0,0,1157,1098; break;			// [Osiris] Costumes
+
+		//=======================================================
+		//= Holy/Random - Lunatic
+		//=======================================================
+		case 1063: setarray .@ID,1,1586,1509,8076,.@random[1],29552; break;	// [Lunatic -> Leaf Cat / Lude]
+		case 29552: setarray .@ID,1,1586,1509,8076,.@random[1],1063; break;	// [Cottony -> Leaf Cat / Lude]
+		case 1586: setarray .@ID,2,1261,2256,8076,.@random[1],20653; break;	// [Leaf Cat -> Wild Rose / Rudo]
+		case 20653: setarray .@ID,2,1261,2256,8076,.@random[1],1586; break;	// [Pitaya -> Wild Rose / Rudo]
+		case 1509: setarray .@ID,2,2256,1933,8076,.@random[1],26028; break;	// [Lude -> Rudo / Garden Watcher]
+		case 26028: setarray .@ID,2,2256,1933,8076,.@random[1],1509; break;	// [Lude -> Rudo / Garden Watcher]
+		case 1261: setarray .@ID,3,1275,0,8077,0; break;			// [Wild Rose -> Wild Rider]
+		case 2256: setarray .@ID,3,1275,0,8077,0; break;			// [Rudo -> Alice]
+		case 1933: setarray .@ID,3,1275,0,8077,0,1371; break;			// [Garden Watcher -> Alice]
+		case 1371: setarray .@ID,3,1275,0,8077,0,1933; break;			// [Fake Angel -> Alice]
+		case 1275: setarray .@ID,4,0,0,0,0,1737,1735,2208; break;		// [Alice] Costumes
+		case 1737: setarray .@ID,4,0,0,0,0,1275,1735,2208; break;		// [Aliza] Costumes
+		case 1735: setarray .@ID,4,0,0,0,0,1737,1275,2208; break;		// [Alicel] Costumes
+		case 2208: setarray .@ID,4,0,0,0,0,1737,1735,1275; break;		// [Wild Rider] Costumes
+
+		//=======================================================
+		//= Fire/Random - Horong
+		//=======================================================
+		case 1129: setarray .@ID,1,1367,1383,8076,.@random[1],1309; break;	// [Horong -> Blazer / Explosion]
+		case 1309: setarray .@ID,1,1367,1383,8076,.@random[1],1129; break;	// [Horong -> Blazer / Explosion]
+		case 1367: setarray .@ID,2,1180,1837,8076,.@random[1],2023; break;	// [Blazer -> Nine Tail / Fire Imp]
+		case 2023: setarray .@ID,2,1180,1837,8076,.@random[1],1367; break;	// [Dark Shadow -> Nine Tail / Fire Imp]
+		case 1383: setarray .@ID,2,1837,1318,8076,.@random[1],20376; break;	// [Explosion -> Fire Imp / Heater]
+		case 20376: setarray .@ID,2,1837,1318,8076,.@random[1],1383; break;	// [Explosion H -> Fire Imp / Heater]
+		case 1180: setarray .@ID,3,1307,0,8077,0; break;			// [Nine Tail -> Cat O Nine Tail]
+		case 1837: setarray .@ID,3,1307,0,8077,0; break;			// [Fire Imp -> Cat O Nine Tail]
+		case 1318: setarray .@ID,3,1307,0,8077,0; break;			// [Heater -> Cat O Nine Tail]
+		case 1307: setarray .@ID,4,0,0,0,0,1150,29502,29919; break;		// [Cat O Nine Tail] Costumes
+		case 1150: setarray .@ID,4,0,0,0,0,1307,29502,22919; break;		// [Moonlight Flower] Costumes
+		case 29502: setarray .@ID,4,0,0,0,0,1150,1307,22919; break;		// [Mini Moonlight] Costumes
+		case 29919: setarray .@ID,4,0,0,0,0,1150,1307,29502; break;		// [Rubylit] Costumes
+
+		//=======================================================
+		//= Water/Random - Small Octopus
+		//=======================================================
+		case 2192: setarray .@ID,1,1776,2070,8076,.@random[1],29960; break;	// [Small Octopus -> Siroma / Piranha]
+		case 29960: setarray .@ID,1,1776,2070,8076,.@random[1],2192; break;	// [Small Octopus -> Siroma / Piranha]
+		case 1776: setarray .@ID,2,1775,1319,8076,.@random[1]; break;		// [Siroma -> Snowier / Freezer]
+		case 2070: setarray .@ID,2,1319,1317,8076,.@random[1],20646; break;	// [Piranha -> Freezer / Seal]
+		case 20646: setarray .@ID,2,1319,1317,8076,.@random[1],2070; break;	// [Red Piranha -> Freezer / Seal]
+		case 1775: setarray .@ID,3,1312,0,8077,0; break;			// [Snowier -> Turtle General]
+		case 1319: setarray .@ID,3,1312,0,8077,0; break;			// [Freezer -> Turtle General]
+		case 1317: setarray .@ID,3,1312,0,8077,0,1323; break;			// [Seal -> Turtle General]
+		case 1323: setarray .@ID,3,1312,0,8077,0,1317; break;			// [Sea Otter -> Turtle General]
+		case 1312: setarray .@ID,4,0,0,0,0,29830,29920,1777; break;		// [Turtle General] Costumes
+		case 29830: setarray .@ID,4,0,0,0,0,1312,29920,1777; break;		// [Red Turtle General] Costumes
+		case 29920: setarray .@ID,4,0,0,0,0,29830,1312,1777; break;		// [Sapphalit] Costumes
+		case 1777: setarray .@ID,4,0,0,0,0,29830,29920,1312; break;		// [Ice Titan] Costumes
+
+		//=======================================================
+		//= Wind/Random - Goblin
+		//=======================================================
+		case 1122: setarray .@ID,1,1133,1633,8076,.@random[1],1258; break;	// [Goblin -> Kobold / Beholder]
+		case 1258: setarray .@ID,1,1133,1633,8076,.@random[1],1122; break;	// [Goblin Archer -> Kobold / Beholder]
+		case 1133: setarray .@ID,2,1513,1314,8076,.@random[1],1282; break;	// [Kobold -> Civil Servant / Permeter]
+		case 1282: setarray .@ID,2,1513,1314,8076,.@random[1],1133; break;	// [Kobold Archer -> Civil Servant / Permeter]
+		case 1633: setarray .@ID,2,1314,1140,8076,.@random[1],3444; break;	// [Beholder -> Permeter -> Marduk]
+		case 3444: setarray .@ID,2,1314,1140,8076,.@random[1],1633; break;	// [Watcher -> Permeter -> Marduk]
+		case 1513: setarray .@ID,3,1263,0,8077,0; break;			// [Civil Servant -> Wind Ghost]
+		case 1314: setarray .@ID,3,1263,0,8077,0; break;			// [Permeter -> Wind Ghost]
+		case 1140: setarray .@ID,3,1263,0,8077,0,1102; break;			// [Marduk -> Wind Ghost]
+		case 1102: setarray .@ID,3,1263,0,8077,0,1140; break;			// [Bathory -> Wind Ghost]
+		case 1263: setarray .@ID,4,0,0,0,0,20379,29922; break;			// [Wind Ghost] Costumes
+		case 20379: setarray .@ID,4,0,0,0,0,1263,29922; break;			// [Ice Ghost] Costumes
+		case 29922: setarray .@ID,4,0,0,0,0,20379,1263; break;			// [Topalit] Costumes
+
+		//=======================================================
+		//= Earth/Random - Rafflesia
+		//=======================================================
+		case 1162: setarray .@ID,1,1040,1881,8076,.@random[1],20624; break;	// [Rafflesia -> Golem / Les]
+		case 20624: setarray .@ID,1,1040,1881,8076,.@random[1],1162; break;	// [Dry Rafflesia -> Golem / Les]
+		case 1040: setarray .@ID,2,1278,1316,8076,.@random[1],29513; break;	// [Golem -> Stalactic Golem / Solider]
+		case 29513: setarray .@ID,2,1278,1316,8076,.@random[1],1040; break;	// [Golem -> Stalactic Golem / Solider]
+		case 1881: setarray .@ID,2,1316,1995,8076,.@random[1]; break;		// [Les -> Solider / Pinguicula]
+		case 1278: setarray .@ID,3,1884,0,8077,0,1366; break;			// [Stalactic Golem -> Bradium Golem]
+		case 1366: setarray .@ID,3,1884,0,8077,0,1278; break;			// [Lava Golem -> Bradium Golem]
+		case 1316: setarray .@ID,3,1884,0,8077,0; break;			// [Solider -> Mavka]
+		case 1995: setarray .@ID,3,1884,0,8077,0,2015; break;			// [Pinguicula -> Mavka]
+		case 2015: setarray .@ID,3,1884,0,8077,0,1995; break;			// [Pinguicula Dark -> Mavka]
+		case 1884: setarray .@ID,4,0,0,0,0,2024,20677,20678,29554; break;	// [Mavka] Costumes
+		case 2024: setarray .@ID,4,0,0,0,0,1884,20677,20678,29554; break;	// [Bradium Golem] Costumes
+		case 20677: setarray .@ID,4,0,0,0,0,2024,1884,20678,29554; break;	// [Aries] Costumes
+		case 20678: setarray .@ID,4,0,0,0,0,2024,20677,1884,29554; break;	// [Aries H] Costumes
+		case 29554: setarray .@ID,4,0,0,0,0,2024,20677,20678,1884; break;	// [Tombeth] Costumes
+
+		//=======================================================
+		//= Neutral/Random - Porcellio
+		//=======================================================
+		case 1619: setarray .@ID,1,1163,1023,8076,.@random[1],20602; break;	// [Porcellio -> Raydric / Orc Warrior]
+		case 20602: setarray .@ID,1,1163,1023,8076,.@random[1],1619; break;	// [Porcellio -> Raydric / Orc Warrior]
+		case 1163: setarray .@ID,2,2084,1584,8076,.@random[1],1276; break;	// [Raydric -> Two-Horn Scaraba / Tamruan]
+		case 1276: setarray .@ID,2,2084,1584,8076,.@random[1],1163; break;	// [Raydric Archer -> Two-Horn Scaraba / Tamruan]
+		case 1023: setarray .@ID,2,1584,1993,8076,.@random[1],1273; break;	// [Orc Warrior -> Tamruan / Naga]
+		case 1273: setarray .@ID,2,1584,1993,8076,.@random[1],1023; break;	// [Orc Lady -> Tamruan / Naga]
+		case 2084: setarray .@ID,3,20574,0,8077,0,2085; break;			// [Two-Horn Scaraba -> White Knight]
+		case 2085: setarray .@ID,3,20574,0,8077,0,2084; break;			// [Antler Scaraba -> White Knight]
+		case 1584: setarray .@ID,3,20574,0,8077,0; break;			// [Tamruan -> White Knight]
+		case 1993: setarray .@ID,3,20574,0,8077,0,29737; break;			// [Naga -> White Knight]
+		case 29737: setarray .@ID,3,20574,0,8077,0,1993; break;			// [Stone Naga -> White Knight]
+		case 20574: setarray .@ID,4,0,0,0,0,1087,20576,1686; break;		// [White Knight] Costumes
+		case 1087: setarray .@ID,4,0,0,0,0,20574,20576,1686; break;		// [Orc Hero] Costumes
+		case 20576: setarray .@ID,4,0,0,0,0,1087,20574,1686; break;		// [Holy Khalitzburg] Costumes
+		case 1686: setarray .@ID,4,0,0,0,0,1087,20576,20574; break;		// [Orc Baby] Costumes
+
+	}
+	if ( getarg(0) == 5 ) {
+		if(getpetinfo(PETINFO_ACCID)) {
+			dispbottom "Pet accessory has to be removed.";
+			end2;
+		}
+		if(!.@ID[1])||(getequiprandomoption(EQI_SHADOW_ARMOR,4,ROA_ID)) {
+			dispbottom "Maximum evolution level reached.";
+			end2;
+		}
+		if(.@ID[0] == 3)
+			cutin ""+.@ID[1]+".bmp",1;
+		else cutin ""+getpetinfo(PETINFO_CLASS)+".bmp",1;
+		if(getitemname(.@ID[4]) != "null" )
+			.@menu$[0] = ""+getitemname(.@ID[4])+"";
+		if(countitem("Miraculous_Seed"))
+			.@menu$[1] = "Miraculous Seed";
+
+		switch(select(""+getitemname(.@ID[3])+"",""+.@menu$[0]+"",""+.@menu$[1]+"")) {
+			case 1: .@i = 1; break;
+			case 2: .@i = 2; break;
+			case 3: 
+				.@stat = select("- STR:- VIT:- DEX:- AGI:- INT:- LUK:- Dark:- Undead:- Holy:- Fire:- Water:- Wind:- Earth:- Neutral");
+				break;
+		}
+
+		//Requirements here
+		if(!.@stat)&&.@ID[(2+(.@i))]&&(!countitem(.@ID[(2+(.@i))])) {
+			cutin ""+getpetinfo(PETINFO_CLASS)+".bmp",255;
+			dispbottom "You don't have any "+getitemname(.@ID[(2+(.@i))])+".";
+			end2;
+		}
+		if(countitem(8069) < 5*.@ID[0]) {
+			cutin ""+getpetinfo(PETINFO_CLASS)+".bmp",255;
+			dispbottom "Not enough Growth Jellopy.";
+			end2;
+		}
+		if(getpetinfo(PETINFO_INTIMATE) < 1000) {
+			cutin ""+getpetinfo(PETINFO_CLASS)+".bmp",255;
+			dispbottom "Your pet needs to have 100% Intimacy to evolve.";
+			end2;
+		}
+		switch(select("-Cancel:-Confirm")){
+			case 1: cutin ""+.@ID+".bmp",255; end2;
+			case 2: break;
+		}
+		if(.@ID[3] == 8077 && .@stat) {
+			if(countitem(8077) < 1) {
+				dispbottom "Special Seed required despite of using Miraculous Seed.";
+				end2;
+			}
+			delitem 8077,1;
+			.@i = 1;
+		} else if(.@ID[.@i] < 1000) {
+			dispbottom "An error has occured.";
+			end2;
+		}
+		cutin ""+getpetinfo(PETINFO_CLASS)+".bmp",255;
+
+		if(!.@stat)
+			delitem .@ID[(2+(.@i))],1;
+		else delitem "Miraculous_Seed",1;
+		delitem 8069,5*.@ID[0];
+
+debugmes "Pet Evolution start";
+		changepet .@ID[.@i];
+		setunitdata getpetinfo(PETINFO_BLOCKID),UPET_INTIMACY,1;
+		switch (.@ID[0]) {
+			case 1: callfunc "Achievements",124005,1; break;
+			case 2: callfunc "Achievements",124006,1; break;
+			case 3: callfunc "Achievements",124007,1; break;
+		}
+
+		// Chooses which stat bonus will be attributed depending on given seed
+		if(!.@stat) {
+			switch (.@ID[(2+(.@i))]) {
+			case 8070: .@stat = 1; break;
+			case 8071: .@stat = 2; break;
+			case 8072: .@stat = 3; break;
+			case 8073: .@stat = 4; break;
+			case 8074: .@stat = 5; break;
+			case 8075: .@stat = 6; break;
+			case 8076: 
+				switch (getequiprandomoption(EQI_SHADOW_ARMOR,0,ROA_ID)) {
+					case 1680: case 1681: case 1682: case 1683: case 1684: case 1685: case 1686: case 1687: .@stat = 7; break;
+					case 1700: case 1701: case 1702: case 1703: case 1704: case 1705: case 1706: case 1707: .@stat = 8; break;
+					case 1670: case 1671: case 1672: case 1673: case 1674: case 1675: case 1676: case 1677: .@stat = 9; break;
+					case 1640: case 1641: case 1642: case 1643: case 1644: case 1645: case 1646: case 1647: .@stat = 10; break;
+					case 1620: case 1621: case 1622: case 1623: case 1624: case 1625: case 1626: case 1627: .@stat = 11; break;
+					case 1650: case 1651: case 1652: case 1653: case 1654: case 1655: case 1656: case 1657: .@stat = 12; break;
+					case 1630: case 1631: case 1632: case 1633: case 1634: case 1635: case 1636: case 1637: .@stat = 13; break;
+					case 1710: case 1711: case 1712: case 1713: case 1714: case 1715: case 1716: case 1717: .@stat = 14; break;
+				}
+				break;
+			case 8077:
+				//Switch all opt ID et voir le ratio pour determiner quel chance il a d'obtenir le bonus
+				for( .@i = 0; .@i <= 3; .@i++ ) {
+					switch (getequiprandomoption(EQI_SHADOW_ARMOR,.@i,ROA_ID)) {
+						case RDMOPT_PET_STR1: case RDMOPT_PET_STR2: case RDMOPT_PET_STR3: case RDMOPT_PET_STR4: case RDMOPT_PET_STR5: case RDMOPT_PET_STR6: case RDMOPT_PET_STR7: case RDMOPT_PET_STR8: case RDMOPT_PET_STR9: case RDMOPT_PET_STR10: case RDMOPT_PET_STR: .@stat = 1; break;
+						case RDMOPT_PET_VIT1: case RDMOPT_PET_VIT2: case RDMOPT_PET_VIT3: case RDMOPT_PET_VIT4: case RDMOPT_PET_VIT5: case RDMOPT_PET_VIT6: case RDMOPT_PET_VIT7: case RDMOPT_PET_VIT8: case RDMOPT_PET_VIT9: case RDMOPT_PET_VIT10: case RDMOPT_PET_VIT11: case RDMOPT_PET_VIT: .@stat = 2; break;
+						case RDMOPT_PET_DEX1: case RDMOPT_PET_DEX2: case RDMOPT_PET_DEX3: case RDMOPT_PET_DEX4: case RDMOPT_PET_DEX5: case RDMOPT_PET_DEX6: case RDMOPT_PET_DEX7: case RDMOPT_PET_DEX8: case RDMOPT_PET_DEX9: case RDMOPT_PET_DEX: .@stat = 3; break;
+						case RDMOPT_PET_AGI1: case RDMOPT_PET_AGI2: case RDMOPT_PET_AGI3: case RDMOPT_PET_AGI4: case RDMOPT_PET_AGI5: case RDMOPT_PET_AGI6: case RDMOPT_PET_AGI7: case RDMOPT_PET_AGI8: case RDMOPT_PET_AGI9: case RDMOPT_PET_AGI10: case RDMOPT_PET_AGI: .@stat = 4; break;
+						case RDMOPT_PET_INT1: case RDMOPT_PET_INT2: case RDMOPT_PET_INT3: case RDMOPT_PET_INT4: case RDMOPT_PET_INT5: case RDMOPT_PET_INT6: case RDMOPT_PET_INT7: case RDMOPT_PET_INT8: case RDMOPT_PET_INT9: case RDMOPT_PET_INT10: case RDMOPT_PET_INT11: case RDMOPT_PET_INT12: case RDMOPT_PET_INT13: case RDMOPT_PET_INT: .@stat = 5; break;
+						case RDMOPT_PET_LUK1: case RDMOPT_PET_LUK2: case RDMOPT_PET_LUK3: case RDMOPT_PET_LUK4: case RDMOPT_PET_LUK5: case RDMOPT_PET_LUK6: case RDMOPT_PET_LUK7: case RDMOPT_PET_LUK8: case RDMOPT_PET_LUK9: case RDMOPT_PET_LUK10: case RDMOPT_PET_LUK: .@stat = 6; break;
+						case RDMOPT_PET_ELE6_1: case RDMOPT_PET_ELE6_2: case RDMOPT_PET_ELE6_3: case RDMOPT_PET_ELE6_4: case RDMOPT_PET_ELE6_5: case RDMOPT_PET_ELE6_6: case RDMOPT_PET_ELE6_7: case RDMOPT_PET_ELE6_8: .@stat = 7; break;
+						case RDMOPT_PET_ELE8_1: case RDMOPT_PET_ELE8_2: case RDMOPT_PET_ELE8_3: case RDMOPT_PET_ELE8_4: case RDMOPT_PET_ELE8_5: case RDMOPT_PET_ELE8_6: case RDMOPT_PET_ELE8_7: case RDMOPT_PET_ELE8_8: .@stat = 8; break;
+						case RDMOPT_PET_ELE5_1: case RDMOPT_PET_ELE5_2: case RDMOPT_PET_ELE5_3: case RDMOPT_PET_ELE5_4: case RDMOPT_PET_ELE5_5: case RDMOPT_PET_ELE5_6: case RDMOPT_PET_ELE5_7: case RDMOPT_PET_ELE5_8: .@stat = 9; break;
+						case RDMOPT_PET_ELE3_1: case RDMOPT_PET_ELE3_2: case RDMOPT_PET_ELE3_3: case RDMOPT_PET_ELE3_4: case RDMOPT_PET_ELE3_5: case RDMOPT_PET_ELE3_6: case RDMOPT_PET_ELE3_7: case RDMOPT_PET_ELE3_8: .@stat = 10; break;
+						case RDMOPT_PET_ELE1_1: case RDMOPT_PET_ELE1_2: case RDMOPT_PET_ELE1_3: case RDMOPT_PET_ELE1_4: case RDMOPT_PET_ELE1_5: case RDMOPT_PET_ELE1_6: case RDMOPT_PET_ELE1_7: case RDMOPT_PET_ELE1_8: .@stat = 11; break;
+						case RDMOPT_PET_ELE4_1: case RDMOPT_PET_ELE4_2: case RDMOPT_PET_ELE4_3: case RDMOPT_PET_ELE4_4: case RDMOPT_PET_ELE4_5: case RDMOPT_PET_ELE4_6: case RDMOPT_PET_ELE4_7: case RDMOPT_PET_ELE4_8: .@stat = 12; break;
+						case RDMOPT_PET_ELE2_1: case RDMOPT_PET_ELE2_2: case RDMOPT_PET_ELE2_3: case RDMOPT_PET_ELE2_4: case RDMOPT_PET_ELE2_5: case RDMOPT_PET_ELE2_6: case RDMOPT_PET_ELE2_7: case RDMOPT_PET_ELE2_8: .@stat = 13; break;
+						case RDMOPT_PET_ELE0_1: case RDMOPT_PET_ELE0_2: case RDMOPT_PET_ELE0_3: case RDMOPT_PET_ELE0_4: case RDMOPT_PET_ELE0_5: case RDMOPT_PET_ELE0_6: case RDMOPT_PET_ELE0_7: case RDMOPT_PET_ELE0_8: .@stat = 14; break;
+					}
+					.@Stat_Count[.@i] = .@stat;
+				}
+				if(.@Stat_Count[1] = .@Stat_Count[2]) .@stat = rand(.@Stat_Count[1],.@Stat_Count[2]);
+				if(.@Stat_Count[1] > .@Stat_Count[2]) .@stat = .@Stat_Count[1]; else .@stat = .@Stat_Count[2];
+			 break;
+			}
+		}
+		// Add one random opt bonus
+		callfunc "Pet_Get_Random",.@stat;
+debugmes "Pet Evolution end";
+		return;
+	}
+	if (getarg(0)) {
+		if (getarg(0) == .@id[5])||(getarg(0) == .@id[6])||(getarg(0) == .@id[7])||(getarg(0) == .@id[8]) {
+			changepet getarg(0);
+			return 1;
+		}
+		if (getarg(0) == .@id[0])&&(.@id[5]) {
+			//Return Pet
+			changepet .@id[5];
+			return 1;
+		}
+		dispbottom "Wrong item for the wrong pet.";
+		end2;
+	} else {
+		setunitdata getpetinfo(PETINFO_BLOCKID),UPET_CLASS,.@id[5];
+	}
+	return;
+}
+
+//getarg(0) = Costume Item ID
+function	script	Pet_Costume	{
+	if(getpet(getarg(0))) {
+		dispbottom "You already have that one in your collection !";
+		return;
+	}
+	if(addpet(getarg(0))) {
+		dispbottom getitemname(getarg(0))+" Successfully added to your collection ! Use @pet.";
+		delitem @item,1;
+	} else
+		dispbottom "Looks like your dressing room is full !";
+	return;
+}
+
+//============================================================
+// = When a pet dies
+//============================================================
+-	script	Pet_Broken	-1,{
+
+	.@gid = $@GID;
+	.@charid = convertpcinfo(.@gid,CPC_CHAR);
+	.@petid = getpetinfo(PETINFO_EGGID,.@charid);
+	// Set hunger to 100 so it can repop full life when resurrected
+	setunitdata getpetinfo(PETINFO_BLOCKID,.@charid),UPET_HUNGER,100;
+	returnpet2 .@gid;
+	setd("pet_on",0,.@charid);
+	specialeffect3 .@gid,340;
+
+	if(getequiprefinerycnt(EQI_SHADOW_ARMOR,.@charid)) {
+		downrefitem EQI_SHADOW_ARMOR,.@charid;
+		dispbottom "Your Pet has lost a precious life. (Remaining: "+getequiprefinerycnt(EQI_SHADOW_ARMOR)+")",0,.@charid;
+	} else {
+		breakequip EQI_SHADOW_ARMOR,.@charid;
+		dispbottom "Your Pet has died. Go to Midgard's Hospital to revive it.",0,.@charid;
+		if(getskilllv(1335,.@gid))
+			setd("PetDied",.@petid,.@charid);
+	}
+
+	// We set an addtimer because otherwise it has too much recalculestats (pccalcevent queue)
+	sc_end SC_PET,.@gid;
+	end2;
+}
+
+//============================================================
+// = Cash Item Auto-Food scripts.
+//============================================================
+-	script	Pet_Autofood	-1,{
+	if(pet_on) {
+		.@hunger = 100-getpetinfo(PETINFO_HUNGRY);
+		if ((countitem("Food"))<2) {dispbottom "Not enough Food. Please put away your pet until you get more food."; end2; }
+		if ((countitem("Food")*2)<.@hunger) .@hunger = countitem("Food")*2;
+		delitem "Food",.@hunger;
+		setunitdata getpetinfo(PETINFO_BLOCKID),UPET_HUNGER,getpetinfo(PETINFO_HUNGRY)+.@hunger;
+		end2;
+	}
+	clearnpc();
+	end2;
+}
+
+//============================================================
+// = Performances scripts.
+// 1 - Runs around the player
+// 2 - High Jump
+// 3 - Flip flip
+// 4 - Turn around on themselves and become small
+//============================================================
+// Walk to a specific name, then recall the player
+-	script	Pet_Performance	-1,{
+
+	.@petid = getpetinfo(PETINFO_BLOCKID);
+	getmapxy .@map$,.@x,.@y;
+
+	getunitdata .@petid,.@array;
+	.@x_pet = .@array[UPET_X];
+	.@y_pet = .@array[UPET_Y];
+	setunitdata .@petid,UPET_SPEED,100;
+	unitemote .@petid,ET_SMILE;
+
+	switch (rand(1,4)) {
+		case 1:
+			for( .@i = 0; .@i <= 5; .@i++ ) {
+				if(.@x_pet>.@x)&&(.@y_pet>.@y) unitwalk .@petid,.@x,.@y-2;
+				if(.@x_pet>.@x)&&(.@y_pet<.@y) unitwalk .@petid,.@x-2,.@y;
+				if(.@x_pet>.@x)&&(.@y_pet==.@y) unitwalk .@petid,.@x,.@y-2;
+				if(.@x_pet==.@x)&&(.@y_pet>.@y) unitwalk .@petid,.@x+2,.@y;
+				if(.@x_pet==.@x)&&(.@y_pet<.@y) unitwalk .@petid,.@x-2,.@y;
+				if(.@x_pet<.@x)&&(.@y_pet>.@y) unitwalk .@petid,.@x+2,.@y;
+				if(.@x_pet<.@x)&&(.@y_pet<.@y) unitwalk .@petid,.@x,.@y+2;
+				if(.@x_pet<.@x)&&(.@y_pet==.@y) unitwalk .@petid,.@x,.@y+2;
+				sleep2 500;
+				if(!unitexists(.@petid)) end2;
+				getunitdata .@petid,.@array;
+				.@x_pet = .@array[UPET_X];
+				.@y_pet = .@array[UPET_Y];
+				getmapxy .@map$,.@x,.@y;
+			}
+			unitemote .@petid,ET_SMILE;
+			break;
+		case 2:
+			unithighjump .@petid,3;
+			break;
+		case 3:
+			for( .@i = 0; .@i <= 8; .@i++ ) {
+				specialeffect3 .@petid,446;
+				switch (rand(1,7)) {
+					case 1: unitwalk .@petid,.@x,.@y-1; break;
+					case 2: unitwalk .@petid,.@x-1,.@y; break;
+					case 3: unitwalk .@petid,.@x-1,.@y-1; break;
+					case 5: unitwalk .@petid,.@x,.@y+1; break;
+					case 6: unitwalk .@petid,.@x+1,.@y+1; break;
+					case 7: unitwalk .@petid,.@x+1,.@y; break;
+				}
+				sleep2 350;
+				if(!unitexists(.@petid)) end2;
+			}
+			break;
+		case 4: 
+			specialeffect3 .@petid,501;
+			sleep2 1500;
+			if(!unitexists(.@petid)) end2;
+			specialeffect3 .@petid,EF_BABYBODY;
+			break;
+	}
+
+	clearnpc();
+	end2;
+}
+
+//============================================================
+// = Pet Status Intimacy shown scripts.
+//============================================================
+// Script that shows Pet Intimacy percentage while opening Pet Status Window
+-	script	Pet_Status	-1,{
+	dispbottom "Pet Intimacy : "+(getpetinfo(PETINFO_INTIMATE)*100)/1000+","+((getpetinfo(PETINFO_INTIMATE))-((getpetinfo(PETINFO_INTIMATE)*10)/100)*10)+"%";
+	clearnpc();
+	end2;
+}
+
+//============================================================
+// = Resurrection scripts.
+//============================================================
+function	script	ResurrectFam	{
+	deletearray @inventorylist_id[0],(getarraysize(@inventorylist_id));
+	getinventorylist;
+	copyarray @inventorylist_id[0],@inventorylist_id[0],@inventorylist_count;
+	for( .@i = 0; .@i<=@inventorylist_count; .@i++) {
+		if(getiteminfo(@inventorylist_id[.@i],5) == 65536)&&(@inventorylist_attribute[.@i]) {
+			.@ID3 = @inventorylist_id[.@i];
+			.@ID[.@ID2] = .@ID3;
+			.@repairID[.@ID2] = .@ID2+1;
+			.@ID2++;
+		}
+	}
+
+	if(!.@ID[0]) end2;
+
+	set .@menu$,"";
+	for( .@i = 0; .@i<getarraysize(.@ID); .@i++ )
+		.@menu$ = .@menu$+"^8fbc8f["+getitemname(.@ID[.@i])+"]^000000:";
+
+	.@itemid = .@ID[select(.@menu$)-1];
+
+	if(countitem(.@itemid)>1) {
+		dispbottom "You can't have more than 1 pet of the same kind if you want to resurrect. Use your storage.";
+		end2;
+	}
+
+	if(.@itemid) {
+		for( .@i = 0; .@i<=@inventorylist_count; .@i++)
+			if (.@itemid == .@ID[.@i]) {
+				repair .@repairID[.@i];
+				delitem 29913,1;
+			}
+	}
+
+	clearnpc();
+	end2;
+}
+
+//============================================================
+// = Seed of Oblivion scripts.
+//============================================================
+function	script	Pet_Retrieve_Stat	{
+	disable_items;
+	if(!getpetinfo(PETINFO_CLASS)) end2;
+	callfunc "Random_Opt_Name",getequiprandomoption(EQI_SHADOW_ARMOR,0,ROA_ID); .@rand1$ = ""+@rand$[0]+" +"+getequiprandomoption(EQI_SHADOW_ARMOR,0,ROA_VALUE)+""+@rand$[1]+"";
+	callfunc "Random_Opt_Name",getequiprandomoption(EQI_SHADOW_ARMOR,1,ROA_ID); .@rand2$ = ""+@rand$[0]+" +"+getequiprandomoption(EQI_SHADOW_ARMOR,1,ROA_VALUE)+""+@rand$[1]+"";
+	callfunc "Random_Opt_Name",getequiprandomoption(EQI_SHADOW_ARMOR,2,ROA_ID); if(@rand$[0] != "[ Empty ]") .@rand3$ = ""+@rand$[0]+" +"+getequiprandomoption(EQI_SHADOW_ARMOR,2,ROA_VALUE)+""+@rand$[1]+""; else .@rand3$ = @rand$[0];
+	callfunc "Random_Opt_Name",getequiprandomoption(EQI_SHADOW_ARMOR,3,ROA_ID); if(@rand$[0] != "[ Empty ]") .@rand4$ = ""+@rand$[0]+" +"+getequiprandomoption(EQI_SHADOW_ARMOR,3,ROA_VALUE)+""+@rand$[1]+""; else .@rand4$ = @rand$[0];
+	callfunc "Random_Opt_Name",getequiprandomoption(EQI_SHADOW_ARMOR,4,ROA_ID); if(@rand$[0] != "[ Empty ]") .@rand5$ = ""+@rand$[0]+" +"+getequiprandomoption(EQI_SHADOW_ARMOR,4,ROA_VALUE)+""+@rand$[1]+""; else .@rand5$ = @rand$[0];
+	@Pet_Rand_Opt = select(.@rand1$,.@rand2$,.@rand3$,.@rand4$,.@rand5$);
+	callfunc "Random_Opt_Name",getequiprandomoption(EQI_SHADOW_ARMOR,(@Pet_Rand_Opt-1),ROA_ID); .@rand$ = ""+@rand$[0]+" +"+getequiprandomoption(EQI_SHADOW_ARMOR,(@Pet_Rand_Opt-1),ROA_VALUE)+""+@rand$[1]+"";
+	dispbottom "Old Bonus: "+.@rand$+"";
+	switch (getequiprandomoption(EQI_SHADOW_ARMOR,(@Pet_Rand_Opt-1),ROA_ID)) {
+		case RDMOPT_PET_STR1: case RDMOPT_PET_STR2: case RDMOPT_PET_STR3: case RDMOPT_PET_STR4: case RDMOPT_PET_STR5: case RDMOPT_PET_STR6: case RDMOPT_PET_STR7: case RDMOPT_PET_STR8: case RDMOPT_PET_STR9: case RDMOPT_PET_STR10: case RDMOPT_PET_STR: .@stat = 1; break;
+		case RDMOPT_PET_VIT1: case RDMOPT_PET_VIT2: case RDMOPT_PET_VIT3: case RDMOPT_PET_VIT4: case RDMOPT_PET_VIT5: case RDMOPT_PET_VIT6: case RDMOPT_PET_VIT7: case RDMOPT_PET_VIT8: case RDMOPT_PET_VIT9: case RDMOPT_PET_VIT10: case RDMOPT_PET_VIT11: case RDMOPT_PET_VIT: .@stat = 2; break;
+		case RDMOPT_PET_DEX1: case RDMOPT_PET_DEX2: case RDMOPT_PET_DEX3: case RDMOPT_PET_DEX4: case RDMOPT_PET_DEX5: case RDMOPT_PET_DEX6: case RDMOPT_PET_DEX7: case RDMOPT_PET_DEX8: case RDMOPT_PET_DEX9: case RDMOPT_PET_DEX: .@stat = 3; break;
+		case RDMOPT_PET_AGI1: case RDMOPT_PET_AGI2: case RDMOPT_PET_AGI3: case RDMOPT_PET_AGI4: case RDMOPT_PET_AGI5: case RDMOPT_PET_AGI6: case RDMOPT_PET_AGI7: case RDMOPT_PET_AGI8: case RDMOPT_PET_AGI9: case RDMOPT_PET_AGI10: case RDMOPT_PET_AGI: .@stat = 4; break;
+		case RDMOPT_PET_INT1: case RDMOPT_PET_INT2: case RDMOPT_PET_INT3: case RDMOPT_PET_INT4: case RDMOPT_PET_INT5: case RDMOPT_PET_INT6: case RDMOPT_PET_INT7: case RDMOPT_PET_INT8: case RDMOPT_PET_INT9: case RDMOPT_PET_INT10: case RDMOPT_PET_INT11: case RDMOPT_PET_INT12: case RDMOPT_PET_INT13: case RDMOPT_PET_INT: .@stat = 5; break;
+		case RDMOPT_PET_LUK1: case RDMOPT_PET_LUK2: case RDMOPT_PET_LUK3: case RDMOPT_PET_LUK4: case RDMOPT_PET_LUK5: case RDMOPT_PET_LUK6: case RDMOPT_PET_LUK7: case RDMOPT_PET_LUK8: case RDMOPT_PET_LUK9: case RDMOPT_PET_LUK10: case RDMOPT_PET_LUK: .@stat = 6; break;
+		case RDMOPT_PET_ELE6_1: case RDMOPT_PET_ELE6_2: case RDMOPT_PET_ELE6_3: case RDMOPT_PET_ELE6_4: case RDMOPT_PET_ELE6_5: case RDMOPT_PET_ELE6_6: case RDMOPT_PET_ELE6_7: case RDMOPT_PET_ELE6_8: .@stat = 7; break;
+		case RDMOPT_PET_ELE8_1: case RDMOPT_PET_ELE8_2: case RDMOPT_PET_ELE8_3: case RDMOPT_PET_ELE8_4: case RDMOPT_PET_ELE8_5: case RDMOPT_PET_ELE8_6: case RDMOPT_PET_ELE8_7: case RDMOPT_PET_ELE8_8: .@stat = 8; break;
+		case RDMOPT_PET_ELE5_1: case RDMOPT_PET_ELE5_2: case RDMOPT_PET_ELE5_3: case RDMOPT_PET_ELE5_4: case RDMOPT_PET_ELE5_5: case RDMOPT_PET_ELE5_6: case RDMOPT_PET_ELE5_7: case RDMOPT_PET_ELE5_8: .@stat = 9; break;
+		case RDMOPT_PET_ELE3_1: case RDMOPT_PET_ELE3_2: case RDMOPT_PET_ELE3_3: case RDMOPT_PET_ELE3_4: case RDMOPT_PET_ELE3_5: case RDMOPT_PET_ELE3_6: case RDMOPT_PET_ELE3_7: case RDMOPT_PET_ELE3_8: .@stat = 10; break;
+		case RDMOPT_PET_ELE1_1: case RDMOPT_PET_ELE1_2: case RDMOPT_PET_ELE1_3: case RDMOPT_PET_ELE1_4: case RDMOPT_PET_ELE1_5: case RDMOPT_PET_ELE1_6: case RDMOPT_PET_ELE1_7: case RDMOPT_PET_ELE1_8: .@stat = 11; break;
+		case RDMOPT_PET_ELE4_1: case RDMOPT_PET_ELE4_2: case RDMOPT_PET_ELE4_3: case RDMOPT_PET_ELE4_4: case RDMOPT_PET_ELE4_5: case RDMOPT_PET_ELE4_6: case RDMOPT_PET_ELE4_7: case RDMOPT_PET_ELE4_8: .@stat = 12; break;
+		case RDMOPT_PET_ELE2_1: case RDMOPT_PET_ELE2_2: case RDMOPT_PET_ELE2_3: case RDMOPT_PET_ELE2_4: case RDMOPT_PET_ELE2_5: case RDMOPT_PET_ELE2_6: case RDMOPT_PET_ELE2_7: case RDMOPT_PET_ELE2_8: .@stat = 13; break;
+		case RDMOPT_PET_ELE0_1: case RDMOPT_PET_ELE0_2: case RDMOPT_PET_ELE0_3: case RDMOPT_PET_ELE0_4: case RDMOPT_PET_ELE0_5: case RDMOPT_PET_ELE0_6: case RDMOPT_PET_ELE0_7: case RDMOPT_PET_ELE0_8: .@stat = 14; break;
+	}
+	if(.@stat) {
+		delitem "Seed_Of_Oblivion",1;
+debugmes "Pet Evolution start";
+		callfunc "Pet_Get_Random",.@stat;
+debugmes "Pet Evolution end";
+	}
+	clearnpc();
+	end2;
+}
+
+//============================================================
+// = Life Elixir scripts.
+//============================================================
+function	script	ElixirVie	{
+	if(!getpetinfo(PETINFO_CLASS)) {
+		dispbottom "No pet found.";
+		end2;
+	}
+	if(getequiprefinerycnt(EQI_SHADOW_ARMOR) >= 10) {
+		dispbottom "Pet maximum lives reached.";
+		end2;
+	}
+	if(!Antidote_Pet)&&(getequiprefinerycnt(EQI_SHADOW_ARMOR)) {
+		dispbottom "The pet already has several lives to live.";
+		end2;
+	}
+	if(getequipcardid(EQI_SHADOW_ARMOR,1)) {
+		if(Antidote_Pet)&&(getequiprefinerycnt(EQI_SHADOW_ARMOR)) Antidote_Pet = 0;
+		.@rand = rand(0,3);
+		if(.@rand) {
+			@no_calc = 1;
+			successrefitem EQI_SHADOW_ARMOR,.@rand;
+			dispbottom "Pet's remaining lives : "+getequiprefinerycnt(EQI_SHADOW_ARMOR)+"";
+			@no_calc = 0;
+		} else {
+			dispbottom "Pet Elixir failed.";
+			specialeffect2 EF_PHARMACY_FAIL;
+		}
+		delitem 29914,1;
+	}
+	clearnpc();
+	end2;
+}
+
+//============================================================
+// = Antidote scripts allowing pet to drink another elixir.
+//============================================================
+function	script	AntidoteFam	{
+	if(getequiprefinerycnt(EQI_SHADOW_ARMOR) >= 10) {
+		dispbottom "Pet maximum lives reached.";
+		end2;
+	}
+	if(!Antidote_Pet) {
+		Antidote_Pet = 1;
+		delitem 29912,1;
+		dispbottom "Antidote used. Your equipped pet can now use another Life Elixir.";
+	}
+	clearnpc();
+	end2;
+}
+
+//============================================================
+// = Midgard's Hospital - Resurrection script. (48h wait)
+//============================================================
+mid_in04,286,226,3	script	Nurse Receptionist#mystic	10078,{
+	disable_items;
+	if(Pet_Revive[0] != 0) && (Pet_Revive_Timer > callfunc("getTime")) {
+		mes "[Nurse]";
+		mes "We are still taking care of your little sweetheart "+getitemname(Pet_Revive[0])+". I'll need "+(callfunc("getRemainingTime","Pet_Revive_Timer")/3600)+" hours.";
+		next;
+		switch(select("- Good.:- Give me my pet now please!")) {
+			case 1:
+				mes "[Nurse]";
+				mes "We will be as fast as we could.";
+				next;
+				mes "[Nurse]";
+				mes "Thank you for your patience.";
+				close;
+			case 2:
+				mes "[Nurse]";
+				mes "Are you sure ?! Your pet is not healed yet.";
+				next;
+				switch(select("- Totally sure.:- I'm joking !")) {
+					case 1:
+						mes "[Nurse]";
+						mes "Alright then...";
+						close2;
+						Pet_Revive_Timer = 0;
+						setarray .@OptID[0],Pet_Revive[7],Pet_Revive[10],Pet_Revive[13],Pet_Revive[16],Pet_Revive[19];
+						setarray .@OptVal[0],Pet_Revive[8],Pet_Revive[11],Pet_Revive[14],Pet_Revive[17],Pet_Revive[20];
+						setarray .@OptParam[0],Pet_Revive[9],Pet_Revive[12],Pet_Revive[15],Pet_Revive[18],Pet_Revive[21];
+						copyarray .@test, Pet_Revive[0], getarraysize(Pet_Revive);
+  						deletearray Pet_Revive[0],getarraysize(Pet_Revive);
+						getitem3 .@test[0],1,1,.@test[1],1,.@test[3],.@test[4],.@test[5],.@test[6],.@OptID,.@OptVal,.@OptParam;
+						end;
+					case 2:
+						mes "[Nurse]";
+						mes "Ha HAA ! *awkward*";
+						close;
+				}
+		}
+	}
+	if(Pet_Revive[0] != 0) {
+		setarray .@OptID[0],Pet_Revive[7],Pet_Revive[10],Pet_Revive[13],Pet_Revive[16],Pet_Revive[19];
+		setarray .@OptVal[0],Pet_Revive[8],Pet_Revive[11],Pet_Revive[14],Pet_Revive[17],Pet_Revive[20];
+		setarray .@OptParam[0],Pet_Revive[9],Pet_Revive[12],Pet_Revive[15],Pet_Revive[18],Pet_Revive[21];
+		getitem3 Pet_Revive[0],1,1,Pet_Revive[1],0,Pet_Revive[3],Pet_Revive[4],Pet_Revive[5],Pet_Revive[6],.@OptID,.@OptVal,.@OptParam;
+		Pet_Revive_Timer = 0;
+		mes "[Nurse]";
+		mes "Here is your "+getitemname(Pet_Revive[0])+" !";
+  		deletearray Pet_Revive[0],getarraysize(Pet_Revive);
+		next;
+		mes "[Nurse]";
+		mes "You guys have a wonderful day ^_^";
+		close;
+	}
+	if(getpetinfo(PETINFO_CLASS)) {
+		mes "[Nurse]";
+		mes "Please put your pet away.";
+		close;
+	}
+	mes "[Nurse]";
+	mes "Hello,";
+	mes "Welcome to the Midgard's Hospital.";
+	next;
+	mes "[Nurse]";
+	mes "How can I help you ?";
+	next;
+	switch(select("- Heal a pet:- Information:- Leave")) {
+		case 1:
+			//Check pet dead, if not bye
+			deletearray @inventorylist_id[0],(getarraysize(@inventorylist_id));
+			getinventorylist;
+			copyarray @inventorylist_id[0],@inventorylist_id[0],@inventorylist_count;
+			for( .@i = 0; .@i<=@inventorylist_count; .@i++) {
+				if(getiteminfo(@inventorylist_id[.@i],5) == 65536)&&(@inventorylist_attribute[.@i]) {
+					.@ID3 = @inventorylist_id[.@i];
+					.@ID[.@ID2] = .@ID3;
+					.@nameid[.@ID3] = .@ID3;
+					.@refine[.@ID3] = @inventorylist_refine[.@i];
+					.@attribute[.@ID3] = @inventorylist_attribute[.@i];
+					.@card1[.@ID3] = @inventorylist_card1[.@i];
+					.@card2[.@ID3] = @inventorylist_card2[.@i];
+					.@card3[.@ID3] = @inventorylist_card3[.@i];
+					.@card4[.@ID3] = @inventorylist_card4[.@i];
+					.@OptID1[.@ID3] = @inventorylist_option_id1[.@i];
+					.@OptID2[.@ID3] = @inventorylist_option_id2[.@i];
+					.@OptID3[.@ID3] = @inventorylist_option_id3[.@i];
+					.@OptID4[.@ID3] = @inventorylist_option_id4[.@i];
+					.@OptID5[.@ID3] = @inventorylist_option_id5[.@i];
+					.@OptVal1[.@ID3] = @inventorylist_option_value1[.@i];
+					.@OptVal2[.@ID3] = @inventorylist_option_value2[.@i];
+					.@OptVal3[.@ID3] = @inventorylist_option_value3[.@i];
+					.@OptVal4[.@ID3] = @inventorylist_option_value4[.@i];
+					.@OptVal5[.@ID3] = @inventorylist_option_value5[.@i];
+					.@OptParam1[.@ID3] = @inventorylist_option_parameter1[.@i];
+					.@OptParam2[.@ID3] = @inventorylist_option_parameter2[.@i];
+					.@OptParam3[.@ID3] = @inventorylist_option_parameter3[.@i];
+					.@OptParam4[.@ID3] = @inventorylist_option_parameter4[.@i];
+					.@OptParam5[.@ID3] = @inventorylist_option_parameter5[.@i];
+					.@ID2++;
+				}
+			}
+			if(!.@ID[0]) {
+				mes "[Nurse]";
+				mes "Mmmm... You don't have any sick pet.";
+				close;
+			}
+
+			set .@menu$,"";
+			for( .@i = 0; .@i<getarraysize(.@ID); .@i++ ) {
+				if(.@card1[.@ID[.@i]])||(.@card4[.@ID[.@i]])||(.@card3[.@ID[.@i]]) {
+					if(.@refine[.@ID[.@i]])
+						.@menu$ = .@menu$+"^8fbc8f["+getitemname(.@ID[.@i])+" +"+.@refine[.@ID[.@i]]+"]^000000:";
+					else
+						.@menu$ = .@menu$+"^8fbc8f["+getitemname(.@ID[.@i])+"]^000000:";
+				}
+			}
+
+			mes "[Nurse]";
+			mes "Sure ! We are very busy at the moment but I can surely take care of your pet.";
+			next;
+			mes "[Nurse]";
+			mes "Which Pet would you like me to take care ? It's only one at the time.";
+			next;
+			.@itemid = .@ID[select(.@menu$)-1];
+			mes "[Nurse]";
+			if(countitem(.@itemid) == 1) {
+				mes "Alright, we are going to take a good care of your "+getitemname(.@itemid)+", I promise.";
+				next;
+				specialeffect2 4;
+				specialeffect2 16;
+				setarray Pet_Revive[0],.@nameid[.@itemid],.@refine[.@itemid],.@attribute[.@itemid],.@card1[.@itemid],.@card2[.@itemid],.@card3[.@itemid],.@card4[.@itemid],.@OptID1[.@itemid],.@OptVal1[.@itemid],.@OptParam1[.@itemid],.@OptID2[.@itemid],.@OptVal2[.@itemid],.@OptParam2[.@itemid],.@OptID3[.@itemid],.@OptVal3[.@itemid],.@OptParam3[.@itemid],.@OptID4[.@itemid],.@OptVal4[.@itemid],.@OptParam4[.@itemid],.@OptID5[.@itemid],.@OptVal5[.@itemid],.@OptParam5[.@itemid];
+				delitem .@itemid,1,getcharid(3),1;
+				.@time = 60*60*12;
+				if(#VIP_Status > callfunc("getTime")) .@time = .@time * 3 / 4;
+				if(getkuganlv(1335) && PetDied == .@itemid)
+					.@time -= .@time * (5 + 15 * getkuganlv(1335)) / 100;
+				callfunc("setTime",.@time,"Pet_Revive_Timer");
+				mes "[Nurse]";
+				mes "Please come back in about "+(callfunc("getRemainingTime","Pet_Revive_Timer")/3600)+" hours.";
+				close2;
+				end;
+			} else {
+				mes "You have too many of them. Bring me only one.";
+				close;
+			}
+		case 2:
+			mes "[Nurse]";
+			mes "I'm in charge of taking every new registration to get admit at the hospital.";
+			next;
+			mes "[Nurse]";
+			mes "We are specialized to restore pets that have been injured.";
+			next;
+			mes "[Nurse]";
+			mes "If you appear to have an egg written in red in your inventory, that means you have an injured one !";
+			next;
+			mes "[Nurse]";
+			mes "Don't forget to feed your pet if you don't want your pet to passed away ! Midgard's Pet Breeder is the best one, he can help you better than I.";
+			close;
+		case 3:
+			mes "Alright then !";
+			mes "I see you later, alligator.";
+			close;
+	}
+}
+
+//============================================================
+// = Pet Breeder scripts.
+//============================================================
+midgard,140,160,5	script	Pet Breeder#mystic::petscript	125,{
+	callfunc "Npc_LookDir",getnpcid(0);
+	disable_items;
+	// Checking if it's an egg
+	switch (getpetinfo(PETINFO_CLASS)) {
+		case 1047: case 1048: case 1097: case 1218: case 1232: case 2090: case 3805: case 3806:
+			if (getpetinfo(PETINFO_INTIMATE) >= 1000 ) {
+				mes "[Pet Breeder]";
+				mes "Hi "+strcharinfo(0)+",";
+				mes "It looks like your egg is ready to hatch !";
+				next;
+				switch(select("- Hold on a second.:- Please, hatch it.")) {
+				case 1:
+					mes "[Pet Breeder]";
+					mes "Alright, come back when you're ready to hatch your egg.";
+					close;
+				case 2:
+					mes "[Pet Breeder]";
+					mes "Alright ! Let me see...";
+					close2;
+debugmes "Pet Evolution start";
+					if (getpetinfo(PETINFO_CLASS))
+						.@mob_id = callfunc("Pet_Get_Random",0);
+debugmes "Pet Evolution end";
+					npctalk "Pet Breeder : Congrats "+strcharinfo(0)+" ! You've got a "+getmonsterinfo(.@mob_id,MOB_NAME)+" !","petscript",bc_self;
+					sleep2 2000;
+					npctalk "Pet Breeder : I hope you and "+getmonsterinfo(.@mob_id,MOB_NAME)+" will get closer and be good friends !","petscript",bc_self;
+					callfunc "Achievements_Check_100",124001;
+					end;
+				}
+			}
+			mes "[Pet Breeder]";
+			mes "Nice to see you "+strcharinfo(0)+", I see you are having an egg ! Bring it to me when this egg will have 100% intimacy !";
+			next;
+	}
+	mes "[Pet Breeder]";
+	mes "I'm by far the best Pet breeder of Rune-Midgarts. Come to see me if you need any help or if you find an egg !";
+	mes "We can make pets great companion for life !";
+	next;
+	switch(select("- Create Food.:- Identify an egg.:- Exchange Eggs.:- Pet Shop.:- Information.:- Leave.")) {
+		case 1:
+			mes "[Pet Breeder]";
+			mes "Alright, let's see what you've got. I'll give you pet food for each misc items found on monsters you give me.";
+			close2;
+			petmarket;
+			end;
+		case 2:
+			callfunc "locked_content","Qpet System",$episode_babel,"Babel's Call to Arms";
+			//found an egg (identify it rand(8695,8699))
+			mes "[Pet Breeder]";
+			mes "Interesting! Let me see...";
+			next;
+			if(!countitem("Unknown_Egg")) {
+				mes "[Pet Breeder]";
+				mes "You don't have any unknown egg... Maybe you will find one after killing a monster !";
+				close;
+			}
+			mes "[Pet Breeder]";
+			if (checkweight(1201,1) == 0) {
+				mes "^3355FFUnfortunately, it";
+				mes "looks like you don't";
+				mes "have enough inventory";
+				mes "space to carry any more items...^000000";
+				close;
+			}
+debugmes "Pet Eclosion start";
+			delitem "Unknown_Egg",1;
+			.@drop = rand(3400,3407);
+			makepet2 .@drop;
+debugmes "Pet Eclosion end";
+			mes "Oh ! Congratulations! It is a "+getitemname(.@drop)+" !";
+			next;
+			mes "[Pet Breeder]";
+			mes "Come back when it will reach 100% intimacy, it should be ready to hatch by then !";
+			close;
+		case 3:
+			callfunc "locked_content","Qpet System",$episode_babel,"Babel's Call to Arms";
+			mes "[Pet Breeder]";
+			if(countitem(29902)>9) {
+				mes "I see that you've got 10 eggs ! Great.";
+				next;
+				mes "[Pet Breeder]";
+				mes "Do you want to exchange them for a pet ?";
+				next;
+				switch(select("- No:- Yes please !")) {
+					case 1:
+						mes "[Pet Breeder]";
+						mes "It's up to you !";
+						close;
+					case 2:
+						mes "[Pet Breeder]";
+						if (checkweight(1201,1) == 0) {
+							mes "^3355FFUnfortunately, it";
+							mes "looks like you don't";
+							mes "have enough inventory";
+							mes "space to carry any more items...^000000";
+							close;
+						}
+						mes "Thank you, here is your pet !";
+						close2;
+						delitem "Unknown_Egg",10;
+						//Give random egg
+						.@drop = rand(3400,3407);
+debugmes "Pet Evolution2 start";
+						makepet2 .@drop;
+						sleep2 100;
+						equip .@drop;
+						sleep2 100;
+						callfunc "Pet_Get_Random",0;
+						callfunc "Achievements_Check_100",124001;
+debugmes "Pet Evolution2 end";
+						end;
+				}
+			} else {
+				mes "If you give me 10 eggs, I'll give you a pet !";
+			}
+			close;
+		case 4:
+			mes "[Pet Breeder]";
+			mes "Alright.";
+			close2;
+			callshop "PetFood",1;
+			end;
+		case 5:
+			mes "[Pet Breeder]";
+			mes "Yes ! First you need to find an egg, then it hatches into a pet if you give enough food or if you keep it near you.";
+			next;
+			mes "[Pet Breeder]";
+			mes "See the skill you have in your skill tree ?";
+			cutin "pet1",4;
+			next;
+			mes "[Pet Breeder]";
+			mes "This is used to summon your pet ! It needs to be equipped in your window equipment.";
+			next;
+			mes "[Pet Breeder]";
+			mes "Your pet can evolve into different classes, isn't amaaaazing ? :D";
+			cutin "pet3",4;
+			next;
+			mes "[Pet Breeder]";
+			mes "Each evolution requires a specific item and your pet intimacy has to be at its maximum !";
+			next;
+			mes "[Pet Breeder]";
+			mes "Once it's maximum, you will notice that it has the ability to evolve.";
+			next;
+			mes "[Pet Breeder]";
+			mes "If you want him to evolve into something else, come to see me !";
+			next;
+			mes "[Pet Breeder]";
+			mes "Each evolution gives a random bonus option.";
+			cutin "pet2",4;
+			next;
+			mes "[Pet Breeder]";
+			mes "You can get up to 5 bonuses at its last evolution if you get lucky ! Or you should just go to the market, I'm sure others trade them all the time !";
+			close2;
+			cutin "",255;
+			end;
+		case 6:
+			mes "[Pet Breeder]";
+			mes "Alright ! Have a good day comrade.";
+			close;
+	}
+}
+
+brasilis,201,309,3	duplicate(petscript)	Pet Breeder#01	125
+geffen,193,152,4	duplicate(petscript)	Pet Breeder#02	125
+yuno,197,114,4	duplicate(petscript)	Pet Breeder#03	125
+lighthalzen,222,191,4	duplicate(petscript)	Pet Breeder#04	125
+payon,177,131,4	duplicate(petscript)	Pet Breeder#05	125
+prontera,218,211,4	duplicate(petscript)	Pet Breeder#06	125
+izlude_in,72,98,3	duplicate(petscript)	Pet Breeder#07	125
+moc_ruins,118,170,4	duplicate(petscript)	Pet Breeder#08	125
+morocc,203,87,4	duplicate(petscript)	Pet Breeder#09	125
+izlude,130,170,4	duplicate(petscript)	Pet Breeder#10	125
+market,103,92,1	duplicate(petscript)	Pet Breeder#11	125

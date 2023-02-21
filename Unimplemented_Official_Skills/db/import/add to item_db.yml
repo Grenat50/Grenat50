@@ -1,0 +1,93 @@
+Header:
+  Type: ITEM_DB
+  Version: 2
+
+Body:
+  - Id: 8624
+    AegisName: Super_Potion
+    Name: Super Potion
+    Type: Healing
+    Buy: 50
+    Weight: 50
+    Classes:
+      Normal: true
+      Upper: true
+      Baby: true
+    Script: |
+      set @potlife,1; callfunc("potlife");
+  - Id: 8625
+    AegisName: Hyper_Potion
+    Name: Hyper Potion
+    Type: Healing
+    Buy: 50
+    Weight: 50
+    Classes:
+      Normal: true
+      Upper: true
+      Baby: true
+    Script: |
+      set @potlife,3; callfunc("potlife");
+  - Id: 8626
+    AegisName: Elixir
+    Name: Elixir
+    Type: Healing
+    Buy: 50
+    Weight: 200
+    Classes:
+      Normal: true
+      Upper: true
+      Baby: true
+    Script: |
+      set @potlife,6; callfunc("potlife");
+  - Id: 8627
+    AegisName: ATK_Potion
+    Name: ATK Potion
+    Type: Healing
+    Buy: 10
+    Weight: 10
+    Classes:
+      Normal: true
+      Upper: true
+      Baby: true
+    Script: |
+      sc_start SC_INCATKRATE,300000,30;
+      specialeffect2 220;
+  - Id: 8628
+    AegisName: MATK_Potion
+    Name: MATK Potion
+    Type: Healing
+    Buy: 10
+    Weight: 10
+    Classes:
+      Normal: true
+      Upper: true
+      Baby: true
+    Script: |
+      sc_start SC_INCMATKRATE,300000,30;
+      specialeffect2 220;
+  - Id: 8629
+    AegisName: HIT_Potion
+    Name: HIT Potion
+    Type: Usable
+    Buy: 2
+    Weight: 70
+    Classes:
+      Normal: true
+      Upper: true
+      Baby: true
+    Script: |
+      sc_start SC_INCHIT,600000,33;
+      specialeffect2 220;
+  - Id: 8630
+    AegisName: FLEE_Potion
+    Name: FLEE Potion
+    Type: Usable
+    Buy: 2
+    Weight: 70
+    Classes:
+      Normal: true
+      Upper: true
+      Baby: true
+    Script: |
+      sc_start SC_INCFLEE,600000,33;
+      specialeffect2 220;

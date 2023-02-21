@@ -1,0 +1,58 @@
+
+StateIconList[EFST_IDs.EFST_FURY2] = {
+	haveTimeLimit = 1,
+	posTimeLimitStr = 2,
+	descript = {
+		{ "Fury", COLOR_TITLE_BUFF },
+		{ "%s", COLOR_TIME },
+		{ "Damage received decreased," },
+		{ "DEF2 increased, Damage increased" },
+		{ "Absorb some damage," }
+	}
+}
+StateIconList[EFST_IDs.EFST_HALLUCINATIONWALK2] = {
+	haveTimeLimit = 1,
+	posTimeLimitStr = 2,
+	descript = {
+		{ "Hallucination Walk", COLOR_TITLE_BUFF },
+		{ "%s", COLOR_TIME },
+		{ "Less visible, chance to avoid all damage" }
+	}
+}
+StateIconList[EFST_IDs.EFST_SYNTHESISPOTION] = {
+	haveTimeLimit = 1,
+	posTimeLimitStr = 2,
+	descript = {
+		{ "Synthesis Potion", COLOR_TITLE_BUFF },
+		{ "%s", COLOR_TIME },
+		{ "Ephemeral potions have been created" }
+	}
+}
+StateIconList[EFST_IDs.EFST_BUFF_ATK] = {
+	haveTimeLimit = 1, posTimeLimitStr = 2, descript = {
+		{"Buff ATK", COLOR_TITLE_BUFF},
+		{"%s", COLOR_TIME},
+		{"ATK increased"},
+	}
+}
+StateIconList[EFST_IDs.EFST_BUFF_MATK] = {
+	haveTimeLimit = 1, posTimeLimitStr = 2, descript = {
+		{"Buff MATK", COLOR_TITLE_BUFF},
+		{"%s", COLOR_TIME},
+		{"MATK increased"},
+	}
+}
+StateIconList[EFST_IDs.EFST_BUFF_HIT] = {
+	haveTimeLimit = 1, posTimeLimitStr = 2, descript = {
+		{"Buff HIT", COLOR_TITLE_BUFF},
+		{"%s", COLOR_TIME},
+		{"HIT increased"},
+	}
+}
+StateIconList[EFST_IDs.EFST_BUFF_FLEE] = {
+	haveTimeLimit = 1, posTimeLimitStr = 2, descript = {
+		{"Buff Flee", COLOR_TITLE_BUFF},
+		{"%s", COLOR_TIME},
+		{"Flee increased"},
+	}
+}

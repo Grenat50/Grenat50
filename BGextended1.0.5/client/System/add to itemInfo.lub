@@ -1,0 +1,163 @@
+	[8965] = {
+		unidentifiedDisplayName = "Blue Skull",
+		unidentifiedResourceName = "blueskull",
+		unidentifiedDescriptionName = {
+		},
+		identifiedDisplayName = "Blue Skull",
+		identifiedResourceName = "blueskull",
+		identifiedDescriptionName = {
+			"A skull of a killed Guillaume Warrior.",
+			"________________________",
+			"^0000CCType:^000000 Collectible",
+			"^0000CCWeight:^000000 0",
+		},
+		slotCount = 0,
+		ClassNum = 0
+	},
+	[8966] = {
+		unidentifiedDisplayName = "Red Skull",
+		unidentifiedResourceName = "redskull",
+		unidentifiedDescriptionName = {
+		},
+		identifiedDisplayName = "Red Skull",
+		identifiedResourceName = "redskull",
+		identifiedDescriptionName = {
+			"A skull of a killed Croix Warrior.",
+			"________________________",
+			"^0000CCType:^000000 Collectible",
+			"^0000CCWeight:^000000 0",
+		},
+		slotCount = 0,
+		ClassNum = 0
+	},
+	[8967] = {
+		unidentifiedDisplayName = "Green Skull",
+		unidentifiedResourceName = "greenskull",
+		unidentifiedDescriptionName = {
+		},
+		identifiedDisplayName = "Green Skull",
+		identifiedResourceName = "greenskull",
+		identifiedDescriptionName = {
+			"A skull of a killed Traitor Warrior.",
+			"________________________",
+			"^0000CCType:^000000 Collectible",
+			"^0000CCWeight:^000000 0",
+		},
+		slotCount = 0,
+		ClassNum = 0
+	},
+	[8968] = {
+		unidentifiedDisplayName = "Bombring Capsule",
+		unidentifiedResourceName = "ÆøÅº¸µ»óÀÚ",
+		unidentifiedDescriptionName = {
+		},
+		identifiedDisplayName = "Bombring Capsule",
+		identifiedResourceName = "ÆøÅº¸µ»óÀÚ",
+		identifiedDescriptionName = {
+			"A box with a bomb capsule. When you use a bomb poring is summoned. Flammable!.",
+			"________________________",
+			"^0000CCWeight:^000000 1"
+		},
+		slotCount = 0,
+		ClassNum = 0
+	},
+	[8969] = {
+		unidentifiedDisplayName = "Bomb Kick",
+		unidentifiedResourceName = "bomb_kick",
+		unidentifiedDescriptionName = {
+		},
+		identifiedDisplayName = "Bomb Kick",
+		identifiedResourceName = "bomb_kick",
+		identifiedDescriptionName = {
+			"Allows to push bomb.",
+			"________________________",
+			"^0000CCType:^000000 Collectible",
+			"^0000CCWeight:^000000 0",
+		},
+		slotCount = 0,
+		ClassNum = 0
+	},
+	[8970] = {
+		unidentifiedDisplayName = "Fire Up",
+		unidentifiedResourceName = "fire_up",
+		unidentifiedDescriptionName = {
+		},
+		identifiedDisplayName = "Fire Up",
+		identifiedResourceName = "fire_up",
+		identifiedDescriptionName = {
+			"Each Fire UP increases fire explosion.",
+			"________________________",
+			"^0000CCType:^000000 Collectible",
+			"^0000CCWeight:^000000 0",
+		},
+		slotCount = 0,
+		ClassNum = 0
+	},
+	[8971] = {
+		unidentifiedDisplayName = "Bomb Up",
+		unidentifiedResourceName = "bomb_up",
+		unidentifiedDescriptionName = {
+		},
+		identifiedDisplayName = "Bomb Up",
+		identifiedResourceName = "bomb_up",
+		identifiedDescriptionName = {
+			"Each bomb increases amount of bomb that can be released.",
+			"________________________",
+			"^0000CCType:^000000 Collectible",
+			"^0000CCWeight:^000000 0",
+		},
+		slotCount = 0,
+		ClassNum = 0
+	},
+	[8972] = {
+		unidentifiedDisplayName = "Speed Up",
+		unidentifiedResourceName = "speed_up",
+		unidentifiedDescriptionName = {
+		},
+		identifiedDisplayName = "Speed Up",
+		identifiedResourceName = "speed_up",
+		identifiedDescriptionName = {
+			"Each Speed UP increases walking speed.",
+			"________________________",
+			"^0000CCType:^000000 Collectible",
+			"^0000CCWeight:^000000 0",
+		},
+		slotCount = 0,
+		ClassNum = 0
+	},
+	[8973] = {
+		unidentifiedDisplayName = "Shoot",
+		unidentifiedResourceName = "gn_slingitem",
+		unidentifiedDescriptionName = {
+		},
+		identifiedDisplayName = "Shoot",
+		identifiedResourceName = "gn_slingitem",
+		identifiedDescriptionName = {
+			"Targets a specific clicked cell to throw the Poring Ball !",
+			"When the skill item Shoot is used, you have 3 sec to decide where to throw the ball if the ball is still at 2 cells distance minimum.",
+			"________________________",
+			"^0000CCType:^000000 Usable Skill Item",
+			"^0000CCCooldown:^000000 6 sec",
+			"^0000CCWeight:^000000 0",
+		},
+		slotCount = 0,
+		ClassNum = 0
+	},
+	[8974] = {
+		unidentifiedDisplayName = "Push",
+		unidentifiedResourceName = "gn_changematerial",
+		unidentifiedDescriptionName = {
+		},
+		identifiedDisplayName = "Push",
+		identifiedResourceName = "gn_changematerial",
+		identifiedDescriptionName = {
+			"Pushes opponent during a Poring Ball.",
+			"When an opponent is pushed, there is a chance to fall (Sit) and not moving for a second.",
+			"________________________",
+			"^0000CCType:^000000 Usable Skill Item",
+			"^0000CCCooldown:^000000 6 sec",
+			"^0000CCWeight:^000000 0",
+		},
+		slotCount = 0,
+		ClassNum = 0
+	},

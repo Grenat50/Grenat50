@@ -1,0 +1,3 @@
+	-- Make sure AM_TWILIGHT4 is not present twice since it's an official skill
+	AM_TWILIGHT4 = 576,
+	WZ_EARTHWALL = 1831,

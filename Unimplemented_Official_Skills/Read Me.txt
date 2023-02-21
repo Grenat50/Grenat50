@@ -1,0 +1,20 @@
+//==============================================================
+//= Unimplemented Official Skills
+//==============================================================
+
+//==============================================================
+//= Changelog
+//==============================================================
+1.0.0 First Release
+
+//==============================================================
+//= Installation
+//==============================================================
+1. cmd -> cd rathena folder -> git apply Unimplemented_Official_Skills.diff
+2. db -> add what's inside each files and fit them in yours (item_db, skill_db, skill_tree)
+3. client -> system -> add item to your description item file
+4. client -> data -> add texture and sprite of the skills
+5. client -> data -> luafiles carefully add missing skills descriptions / status descriptions. The Skill Tree can be replaced entirely by ours.
+6. server -> add what's inside script_athena into yours
+7. Run your server
+8. Enjoy !

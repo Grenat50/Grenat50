@@ -1,0 +1,97 @@
+//==============================================================
+//= Battleground Extended
+//==============================================================
+
+//==============================================================
+//= Changelog
+//==============================================================
+1.0.0 First Release
+1.0.1 Updates:
+- added some missing data files. (alpha map texture and models)
+- add caps for Poring Ball (distance and speed max)
+- Fix palette feature (now works with custom pal values)
+- No more diff warnings with the last rAthena version.
+1.0.2 Updates:
+- Capture the Flag respawn blue team fixed (diff line 216)
+- Actually leaving the clan/guild when leaving a BG (it was only a few BG doing that)
+- being kicked out remove necessary items, put normal size back (for bomberman) (diff line 1561)
+- bomberman/poring ball data missing files fixed
+- clan emblems bmp files red/blue team
+- Add Read Me.txt
+1.0.3 Updates:
+- Guild invite fix
+- Work on emblem (still disappearing upon attack/on self)
+- Add extra guild skills (emergency move, chargeshout flag/beating)
+- Guild skills works on all guild members
+- Guild skills appear in guild skill tree (atl + g)
+- Battle Orders and Regeneration Skills have now a status icon on the right
+- Leadership goes to next member if leader leaves
+- Players actually leave the fake guild/clan (needs to disconnect/reconnect if player has no guild)
+- fix stone control variable red score
+- fix rush variable conflict
+- add @bginfo giving remaining time, amount of players, both score for each active BG.
+- Bomberman ends automatically after 3 rounds or if no one is present
+- Emergency Move changed to 60sec cooldown and 15sec duration for a better gameplay
+1.0.4 Updates:
+- Fix crash when someone is afk
+- Ranking system
+- @bginfo upgraded
+- Announce for the whole server upon battleground's start (only when "join" is possible)
+- Healer upgraded
+- Rewards small fix
+1.0.5 Updates:
+- Fix sometimes cursor wasn't attacking ennemies
+- Fix battleground flag above players
+- Improvement guild emblem
+- Rotation system every hour
+- Happy hours changed
+- GM command @startbg to launch a BG
+- @joinbg which teleport directly in the current running battleground
+
+//==============================================================
+//= Installation
+//==============================================================
+1. Place diff file in your rathena directory
+2. cmd prompt window -> cd rathena folder -> git apply BattlegroundExtended1.0.5.diff
+3. db/import -> add what's inside each files in your matching files (item_db, mob_avail, mob_db)
+4. Replace db/battleground.yml with this one
+5. sql-files/ contains Item and Monster SQL version if you use SQL
+6. client -> add bgm
+7. client -> system -> add what's inside iteminfo in yours
+8. client -> data -> add what's inside each txt files in yours.
+9. client -> data -> add the rest of the data files in your grf
+10. recompile your map_cache with the BG maps
+11. Run your server
+12. Enjoy !
+
+//==============================================================
+//= Tips
+//==============================================================
+
+Battleground Extended used to be a rotation of battleground and anyone could join with @joinbg.
+Now, it is possible to run many battlegrounds at the same time, no more waiting for your favorite battleground.
+Through player's menu, there is the battleground queue system window. When enough participants (configurable in battleground.yml),
+the battleground starts.
+Edit: Rotation and @joinbg have been added as well, so both systems are here
+
+battleground.yml -> ActiveEvent, It reads a script which warp to the selected battleground through the menu.
+
+A deserter is someone who left a current BG. (@leavebg)
+When leaving or being kicked out, there is a delay before applying to another BG.
+I did put 1 min delay before entering a BG (it is set to 10 min by default).
+If you want to change deserter time , go to db/battleground.yml to change this:
+    Deserter: 60 (Time in sec)
+
+For test purposes:
+The delay is set through un SC_start, you can click on this npc below to remove the waiting time.
+
+prontera,150,150,4	script	Battleground Test	48,{
+	sc_end sc_SC_ENTRY_QUEUE_APPLY_DELAY;
+	sc_end SC_ENTRY_QUEUE_NOTIFY_ADMISSION_TIME_OUT;
+	end;
+}
+
+There are 3 shops that you can configurate for desired rewards in npc/battleground/bg_common.txt
+
+Don't forget to configurate your Poring Ball !!! If you chose the free map from this package,
+you have to comment Olrox map setting and uncomment mine.

@@ -1,0 +1,127 @@
+	[8624] = {
+		unidentifiedDisplayName = "Super Potion",
+		unidentifiedResourceName  = "용병용빨간포션",
+		unidentifiedDescriptionName = {
+			"...",
+		},
+		identifiedDisplayName = "Super Potion",
+		identifiedResourceName = "용병용빨간포션",
+		identifiedDescriptionName = {
+			"An Elixir that ^000088Gives 100 HP^000000 over 10 seconds, made with Orange Potion.",
+			"Using this potion replaces the effect of another potion in progress.",
+			"________________________",
+			"^0000CCWeight:^000000 13^000000",
+		},
+		slotCount = 0,
+		ClassNum = 0
+	},
+	[8625] = {
+		unidentifiedDisplayName = "Hyper Potion",
+		unidentifiedResourceName  = "용병용빨간포션",
+		unidentifiedDescriptionName = {
+			"...",
+		},
+		identifiedDisplayName = "Hyper Potion",
+		identifiedResourceName = "용병용빨간포션",
+		identifiedDescriptionName = {
+			"An Elixir that ^000088Gives 400 HP^000000 over 10 seconds, made with White Potion.",
+			"Using this potion replaces the effect of another potion in progress.",
+			"________________________",
+			"^0000CCWeight:^000000 20^000000",
+		},
+		slotCount = 0,
+		ClassNum = 0
+	},
+	[8626] = {
+		unidentifiedDisplayName = "Elixir",
+		unidentifiedResourceName  = "상급포션-파랑",
+		unidentifiedDescriptionName = {
+			"...",
+		},
+		identifiedDisplayName = "Elixir",
+		identifiedResourceName = "상급포션-파랑",
+		identifiedDescriptionName = {
+			"An Elixir that ^000088Gives 2000 HP and 100 SP^000000 over 10 seconds, made with Yggdrasil.",
+			"Using this potion replaces the effect of another potion in progress.",
+			"________________________",
+			"^0000CCWeight:^000000 60^000000",
+		},
+		slotCount = 0,
+		ClassNum = 0
+	},
+	[8627] = {
+		unidentifiedDisplayName = "ATK Potion",
+		unidentifiedResourceName  = "add_atk_potion",
+		unidentifiedDescriptionName = {
+			"...",
+		},
+		identifiedDisplayName = "ATK Potion",
+		identifiedResourceName = "add_atk_potion",
+		identifiedDescriptionName = {
+			"Potion made by the process of synthetisation.",
+			"________________________",
+			"Effect: ATK +30% for 5 minutes.",
+			"________________________",
+			"^0000CCType:^000000 Potion ^000000",
+			"^0000CCWeight:^000000  1 ^000000",
+		},
+		slotCount = 0,
+		ClassNum = 0
+	},
+	[8628] = {
+		unidentifiedDisplayName = "MATK Potion",
+		unidentifiedResourceName  = "add_matk_potion",
+		unidentifiedDescriptionName = {
+			"...",
+		},
+		identifiedDisplayName = "MATK Potion",
+		identifiedResourceName = "add_matk_potion",
+		identifiedDescriptionName = {
+			"Potion made by the process of synthetisation.",
+			"________________________",
+			"Effect: MATK +30% for 5 minutes.",
+			"________________________",
+			"^0000CCType:^000000 Potion ^000000",
+			"^0000CCWeight:^000000  1 ^000000",
+		},
+		slotCount = 0,
+		ClassNum = 0
+	},
+	[8629] = {
+		unidentifiedDisplayName = "HIT Potion",
+		unidentifiedResourceName  = "g_aspd_potion",
+		unidentifiedDescriptionName = {
+			"...",
+		},
+		identifiedDisplayName = "HIT Potion",
+		identifiedResourceName = "g_aspd_potion",
+		identifiedDescriptionName = {
+			"Potion made by the process of synthetisation.",
+			"________________________",
+			"Effect: HIT +33 for 10 minutes.",
+			"________________________",
+			"^0000CCType:^000000 Potion ^000000",
+			"^0000CCWeight:^000000  1 ^000000",
+		},
+		slotCount = 0,
+		ClassNum = 0
+	},
+	[8630] = {
+		unidentifiedDisplayName = "FLEE Potion",
+		unidentifiedResourceName  = "g_mental_potion",
+		unidentifiedDescriptionName = {
+			"...",
+		},
+		identifiedDisplayName = "FLEE Potion",
+		identifiedResourceName = "g_mental_potion",
+		identifiedDescriptionName = {
+			"Potion made by the process of synthetisation.",
+			"________________________",
+			"Effect: FLEE +33 for 10 minutes.",
+			"________________________",
+			"^0000CCType:^000000 Potion ^000000",
+			"^0000CCWeight:^000000  1 ^000000",
+		},
+		slotCount = 0,
+		ClassNum = 0
+	},

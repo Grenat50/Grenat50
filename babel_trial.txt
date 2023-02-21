@@ -1,0 +1,1078 @@
+//===== Mystic Project Script ================================
+//= Trial of Babel
+//===== By: ==================================================
+//= Grenat
+//===== Current Version: =====================================
+//= 2.0
+//===== Description: ========================================= 
+//= Babel script.
+//===== Additional Comments: =================================
+//= 2.0- Babel V2 script released. [Grenat] 11/29/20
+//============================================================
+//101eme etage Boss Babel (5pts si killed)
+//On peut passer le boss, 1pt si 25% des HP, 2pts si 50% etc...
+/*
+DROP TABLE IF EXISTS `ranking_babel`;
+CREATE TABLE IF NOT EXISTS `ranking_babel` (
+`Char_ID` int(11) unsigned NOT NULL DEFAULT '0',
+`PlayerName` varchar(255) NULL DEFAULT '',
+`Floor` varchar(255) NULL DEFAULT '',
+`Type` varchar(255) NULL DEFAULT '',
+`Mode` varchar(255) NULL DEFAULT '',
+`Difficulty` varchar(255) NULL DEFAULT '',
+`Time` varchar(255) NULL DEFAULT '',
+PRIMARY KEY (`Char_ID`)
+) ENGINE=MyISAM;
+*/
+
+//=======================================================
+//= Map Flags
+//=======================================================
+babel	mapflag	partylock
+babel	mapflag	noteleport
+babel	mapflag	nomemo
+babel	mapflag	nowarp
+babel	mapflag	nowarpto
+babel	mapflag	nobranch
+babel	mapflag	nosave
+
+//=======================================================
+//= CONFIGURATION
+//=======================================================
+-	script	babel_conf	139,{
+OnInit:
+	//= General
+	.bab_mob_level = 50;					// Mob Level Number the trial starts (Default: Lv 50).
+	.bab_mob_amount = 12;					// Mob Amount the trial starts (Default: 15).
+	.bab_boss_pop = 5;					// Floor number a boss will pop. (Default: Floor 10th).
+	.bab_reward = 5;					// Amount of floors needed done to get a reward (Boost) (Default: 5).
+	.bab_cooldown = 48;					// Number of hours cooldown before attempting babel again. (Default: 48hours).
+	.bab_config = 1|2|4|8|16;				// Main Trial Configurations (1 = Race Mode activated, 2 = Team Mode activated, 4 = Time limit per floor activated, 8 = "Zapper" Floor activated, 16 = Descension mode activated)
+	.bab_time_limit_regen = 120;				// Time Limit per floor (Default: 120 seconds).
+	.bab_time_limit = 300;					// Time Limit per floor (Default: 300 seconds).
+	.bab_time_repop = 2500;					// Time to go to the next floor (Default: 3500 milliseconds).
+	.bab_time_repop_reward = 30000;				// Time to go to the next floor when being granted of a reward (Default: 10000 milliseconds).
+	.bab_race_reroll = 2;					// Number of times a player can reroll the "race" theme monsters will be (Default: 2 times).
+	.bab_race_config = 1;					// Race Mode configuration (1 = Player chooses 2 races (Pick only 2 monsters race), 2 = Player chooses 1 race (All monsters))
+	.bab_difficulty = 0;					// Number of additional pourcentage of Monsters level and Babel Pts according to difficulty. (Default: +10% per difficulty)
+	.bab_difficulty_pts = 15;				// Number of additional Babel Pts according to difficulty. (Default: +10% per difficulty)
+
+	//= Team Mode
+	.bab_team_min = 2;					// Minimum Players required for Team Mode. (Default: 2).
+	.bab_team_max = 5;					// Maximum Players required for Team Mode. (Default: 5).
+	.bab_team_mob_count = 5;				// Number of mob increases per team member. (Default: 5).
+	.bab_team_mob_lv = 0;					// Number of mob level increases per team member. (Default: 5).
+	//setarray .bab_team_reduc[2],25,34,50,60,65,70,75;	// Pts % gained according to team members count (Default: 75/66/50/40/35/30/25).
+	setarray .bab_team_reduc[2],10,15,20,25,30,35,40;	// Pts % gained according to team members count (Default: 75/66/50/40/35/30/25).
+
+	//= Descente Mode
+	.bab_floor_50_penalty = 120;				// Floor number limit that will start decreasing Pts by 50%. (1 every 2 floors). (Default: Floor 120th).
+	.bab_floor_66_penalty = 200;				// Floor number limit that will start decreasing Pts by 66%. (1 every 3 floors). (Default: Floor 200th).
+	.bab_floor_75_penalty = 250;				// Floor number limit that will start decreasing Pts by 75%. (1 every 4 floors). (Default: Floor 250th).
+	.bab_floor_90_penalty = 300;				// Floor number limit that will start decreasing Pts by 90%. (1 every 10 floors). (Default: Floor 300th).
+
+	end;
+}
+
+//=======================================================
+//= Babel's Warp scripts.
+//=======================================================
+// @babel = 1 (Ascension) 2 (Descension)
+// @mode = 1 (Solo) 2 (Team)
+// @difficulty = 1 (Normal) 2 (Difficult) 3 (Very Difficult) 4 (Legendary)
+bab_scene02,49,63,3	script	Ascension_Bab	45,2,2,{ callfunc "Start_Trial",1; end; }
+bab_scene02,41,63,3	script	Ascension_Bab2	45,2,2,{ callfunc "Start_Trial",2; end; }
+
+function	script	Start_Trial	{
+	if(#Babel_Timer < callfunc("getTime") || getgmlevel() >= 99) {
+		if(@babel == getarg(0)) && (@mode) && (@difficulty) {
+			switch(Select("- Hold on.:- Start Babel's Trial")) {
+				case 1: end;
+				case 2: break;
+			}
+			if(@mode == 2) {
+				if(getcharid(1)==0) {
+					dispbottom "No party found.";
+					end;
+				}
+				if (is_party_leader() == false) {
+					dispbottom "Only the party leader can start the trial.";
+					end;
+				}
+				@onlinemembers = 0;
+				getpartymember(getcharid(1));
+				set .@partymembercount,$@partymembercount;
+				copyarray .@partymembername$[0],$@partymembername$[0],.@partymembercount;
+				for(.@i = 0; .@i < .@partymembercount; .@i++) {
+					if (isloggedin(getcharid(3,.@partymembername$[.@i]))) {
+						set @onlinemembers,@onlinemembers + 1;
+						if(getvar(#Babel_Timer,getcharid(0,.@partymembername$[.@i])) > callfunc("getTime")) {
+							dispbottom .@partymembername$[.@i]+" is on cooldown. Can't start Babel.";
+							.@cd++;
+						}
+					}
+				}
+				if(.@cd)
+					end;
+				if(@onlinemembers < (getvariableofnpc(.bab_team_min,"babel_conf"))) || (@onlinemembers > (getvariableofnpc(.bab_team_max,"babel_conf"))) {
+					dispbottom "Too many players in the party. (Minimum: "+getvariableofnpc(.bab_team_min,"babel_conf")+", Maximum: "+getvariableofnpc(.bab_team_max,"babel_conf")+")";
+					end;
+				}
+			}
+			if(!getcharid(1)) {
+				if(party_create("Babel"+rand(10,100000)+"") < 0) {
+					dispbottom "Something went wrong. Please disconnect and try again.";
+					end;
+				}
+			}
+			sleep2 200;
+			if(@mode == 1) {
+				instance_create("Babel Tower",IM_CHAR);
+				warp instance_mapname("babel",instance_id(IM_CHAR)),50,28;
+				addtimer 100,""+instance_npcname("Babel_Start",instance_id(IM_CHAR))+"::OnStart";
+			} else {
+				instance_create("Babel Tower",IM_PARTY);
+				warpparty instance_mapname("babel",instance_id(IM_PARTY)),50,28,getcharid(1);
+				addtimer 100,""+instance_npcname("Babel_Start",instance_id(IM_PARTY))+"::OnStart";
+			}
+			Announce "[ Trial of Babel ] : Kill the Poring to start the trial.",bc_self;
+		}
+	}
+	end;
+}
+
+babel,1,1,0	script	Babel_Start	-1,{
+OnStart:
+	'map$ = instance_mapname("babel");
+	'leader = getcharid(3);
+	'partyid = getcharid(1);
+	'members = @onlinemembers;
+	'difficulty = @difficulty;
+	switch ('difficulty) {
+		case 1: 'mobelite = 0; break;
+		case 2: 'mobelite = 1; break;
+		case 3: 'mobelite = 3; break;
+		case 4: 'mobelite = 7; break;
+	}
+	'trial = @babel;
+	'mode = @mode;
+	'race1 = Babel_Monster_Race[0];
+	'race2 = Babel_Monster_Race[1];
+	monster 'map$,66,50,"Poring",1002,1,""+instance_npcname("Babel_Trial")+"::OnStart";
+	end;
+OnInstanceDestroy:
+	addrid(2,0,'partyid);
+	getmapxy .@map$,.@x,.@y;
+//	if(.@map$ != 'map$) end;
+	sc_end SC_TIMERDOWN;
+	nochecknear 0;
+	cutin "",255;
+	.@babel_pts = ('Babel_Pts - (('Babel_Pts * getvariableofnpc(.bab_team_reduc['members],"babel_conf"))/100));
+	.@babel_pts += (.@babel_pts*((5*@boost9[2])+(2+2*@boost9[4])))/100;
+	#reputbabel += .@babel_pts/100;
+	#reputbabeltotal += .@babel_pts/100;
+	//cancel all bonuses variables
+	deletearray @boost1[0],6; deletearray @boost2[0],6; deletearray @boost3[0],6; deletearray @boost4[0],6; deletearray @boost5[0],6; deletearray @boost6[0],6; deletearray @boost7[0],6;
+	deletearray @boost8[0],6; deletearray @boost9[0],6; deletearray @boost10[0],6; deletearray @boost11[0],6; deletearray @boost12[0],6; deletearray @boost13[0],6; deletearray @boost14[0],6;
+	if('Babel_Killed && ('difficulty-1) == #babel_difficult) {
+		#babel_difficult++;
+		announce "Congratulations !! You've unlock the next difficulty mode.",bc_self;
+	}
+	//We are verifying if anyone is entering into the top 3
+	.@second = (7200-('time-callfunc("getTime")));
+	query_sql("SELECT Floor,Time,Difficulty FROM ranking_babel WHERE Char_ID = '"+ getcharid(3) +"' AND Mode = '"+'mode+"';", .@floor,.@time,.@difficulty);
+	if('difficulty >= .@difficulty && ('Babel_Floor > .@floor || ('Babel_Floor == .@floor && .@second <= .@time)))
+		query_sql "INSERT INTO `ranking_babel` ( `Char_ID`, `PlayerName`,`Floor`,`Type`,`Mode`,`Difficulty`,`Time` ) VALUES ( "+ getcharid(0) +", '"+ escape_sql( strcharinfo(0) ) +"', "+'Babel_Floor+", "+'trial+", "+'mode+", "+'difficulty+", "+.@second+" ) ON DUPLICATE KEY UPDATE `Floor` = "+'Babel_Floor+", `Type` = "+'trial+", `Mode` = "+'mode+", `Difficulty` = "+'difficulty+", `Time` = "+.@second+";";
+	if ('mode == 1) .@m$ = "S"; else .@m$ = "T";
+	if ('trial == 1 && 'Babel_Killed >= 100) {
+		if(.@second > getd("$babel_"+.@m$+"_A_1_Sec")) {
+			setd("$babel_"+.@m$+"_A_1_Sec"),.@second;
+			setd("$babel_"+.@m$+"_A_1_Name$"),strcharinfo(0);
+			announce "Congratulations !!! You have reached a new record for this trial !! Time : "+(.@second/60)+" min",bc_self;
+		} else
+		if(.@second > getd("$babel_"+.@m$+"_A_2_Sec")) {
+			setd("$babel_"+.@m$+"_A_2_Sec"),.@second;
+			setd("$babel_"+.@m$+"_A_2_Name$"),strcharinfo(0);
+			announce "Congratulations !!! You have reached a new record for this trial !! Time : "+(.@second/60)+" min",bc_self;
+		} else
+		if(.@second > getd("$babel_"+.@m$+"_A_3_Sec")) {
+			setd("$babel_"+.@m$+"_A_3_Sec"),.@second;
+			setd("$babel_"+.@m$+"_A_3_Name$"),strcharinfo(0);
+			announce "Congratulations !!! You have reached a new record for this trial !! Time : "+(.@second/60)+" min",bc_self;
+		}
+	}
+	if('trial == 2) {
+		if('Babel_Floor > getd("$babel_"+.@m$+"_D_1_Floor")) {
+			setd("$babel_"+.@m$+"_D_1_Floor"),'Babel_Floor;
+			setd("$babel_"+.@m$+"_D_1_Name$"),strcharinfo(0);
+			announce "Congratulations !!! You have reached a new record for this trial !! Floor : "+'Babel_Floor+"",bc_self;
+		} else
+		if('Babel_Floor > getd("$babel_"+.@m$+"_D_2_Floor")) {
+			setd("$babel_"+.@m$+"_D_2_Floor"),'Babel_Floor;
+			setd("$babel_"+.@m$+"_D_2_Name$"),strcharinfo(0);
+			announce "Congratulations !!! You have reached a new record for this trial !! Floor : "+'Babel_Floor+"",bc_self;
+		} else
+		if('Babel_Floor > getd("$babel_"+.@m$+"_D_3_Floor")) {
+			setd("$babel_"+.@m$+"_D_3_Floor"),'Babel_Floor;
+			setd("$babel_"+.@m$+"_D_3_Name$"),strcharinfo(0);
+			announce "Congratulations !!! You have reached a new record for this trial !! Floor : "+'Babel_Floor+"",bc_self;
+		}
+	}
+	end;
+}
+
+//=======================================================
+//= Babel's Trial 
+//=======================================================
+//= Script read each floor by everyone
+babel,50,28,1	script	Babel_Trial	139,1,1,{
+	if(!instance_id())
+		end;
+	nochecknear 1;
+
+	if(!countitem(8521)) {
+		getitem 8521,1;
+		dispbottom "[Obtained]: Babel Crystal x1";
+		dispbottom "Use Babel Crystal to skip a floor, get full heal, check your benedictions or abandon !";
+		dispbottom "Remember, you can skip a floor by using the crystal if half of the enemies are defeated !";
+		end;
+	}
+	if('Babel_Floor != @mapcount) {
+		@babstop = 0;
+		@friggbonus = 1;
+		sc_start SC_TIMERDOWN,301000,300;
+		if(@bab_noregen) {
+			@bab_noregen = 0;
+			recalculatestat2;
+		}
+		if('Babel_Floor == 1) {
+			if(#Babel_Timer > callfunc("getTime")) {
+				warp "bab_scene02",49,55;
+				announce "[Trial of Babel]: You are still on Cooldown. You are disqualified.",bc_self;
+				end;
+			}
+			if(#VIP_Status > callfunc("getTime"))
+				.@vip = 16;
+			callfunc("setTime",(60*60*(getvariableofnpc(.bab_cooldown,"babel_conf")-.@vip)),"#Babel_Timer");
+		}
+	}
+
+	@mapcount = 'Babel_Floor;
+
+	// Frigg bonus effect: Heal each floor
+	if(@boost3[4])&&(@friggbonus) {
+		dispbottom "[Frigg Benediction] : You received the blessing of the goddess Frigg.";
+		specialeffect2 14;
+		percentheal ((10+7*@boost3[4])+(4+4*@boost9[4])),((10+7*@boost3[4])+(4+4*@boost9[4]));
+		@friggbonus = 0;
+	}
+
+	end;
+
+//=======================================================
+//= Core - Each floor is launch here
+//=======================================================
+// 'Babel_Floor = Floor number (Max 0~101 Ascension, ~ Descension)
+// 'MobCount = monsters left on the map
+// 'MaxMobCount = Total monsters (Default: 15 + 5 per party member)
+// 'mode = Mode (1: Solo, 2: Team)
+// 'members = Number of members in the map
+// 'trial = Trial (1: Ascension +) (2: Descension -)
+// 'difficulty = Difficulty (1: Normal, 2: Difficult, 3: Legendary)
+OnStart:
+	mapwarp 'map$,'map$,50,28;
+//	instance_warpall 'map$,50,28;
+	if('Babel_Floor==0) {
+		announce "The counter in order to get to the Top 3 is now on !",bc_map|bc_npc;
+		announce "You only need to defeat 66% of the monsters present in the map !",bc_map|bc_npc;
+		'time = ((GetTime(7)-2000)*12*31*24*60*60+GetTime(6)*31*24*60*60+GetTime(5)*24*60*60+GetTime(3)*60*60+GetTime(2)*60+GetTime(1))+7200;
+	}
+	'Babel_Floor++;
+	.@race = 'race1;
+	if('race2 && rand(0,1) == 1) .@race = 'race2;
+
+	if('race1 == 10) .@query = query_sql("SELECT mobId FROM mystic_mob_level WHERE no_quest = '0' AND ilevel < '85' and type = '0';", .@array);
+	else .@query = query_sql("SELECT mobId FROM mystic_mob_level WHERE race = '" + .@race + "' AND no_quest = '0' AND ilevel < '85' and type = '0';", .@array);
+
+	.@monster_id = .@array[rand(0,getarraysize(.@array)-1)];
+	if (!.@monster_id) .@monster_id = 1002;
+	if ('members) .@ratio = ('members-1);
+	.@mob_lv = ((getvariableofnpc(.bab_mob_level,"babel_conf") + 'Babel_Floor) + (getvariableofnpc(.bab_team_mob_lv,"babel_conf")*.@ratio));
+	.@difficult = (('difficulty-1)*getvariableofnpc(.bab_difficulty,"babel_conf"));
+	.@mob_lv = (.@mob_lv + (((.@mob_lv * .@difficult)/100) * .@difficult));
+	.@mob_amount = (getvariableofnpc(.bab_mob_amount,"babel_conf") + (getvariableofnpc(.bab_team_mob_count,"babel_conf")*.@ratio));
+	if('mob_amount) .@bonus_mob_amt = ((.@mob_amount*(15+(7*'mob_amount)))/100);
+	.@mob_amount = (.@mob_amount - .@bonus_mob_amt);
+	if('Babel_Floor%getvariableofnpc(.bab_boss_pop,"babel_conf") == 0) { .@mob_amount = 1; .@size = 2; .@typem$ = "BOSS"; } else { .@typem$ = "Monsters"; }
+	if('Babel_Floor == 100) { .@monster_id = 1681; .@typem$ = "Special BOSS"; }
+	if('Babel_Floor == 101) { .@monster_id = 3936; .@mob_amount = 1;  .@typem$ = "Archangel"; donpcevent instance_npcname("Babel_Event")+"::OnStart"; }
+	'MobCount = 'MaxMobCount = 1+(.@mob_amount * 66) / 100;
+	if('trial == 1) .@par$ = ""; else .@par$ = "-";
+
+	announce "[Trial of Babel] : "+.@typem$+" - "+getmonsterinfo(.@monster_id,0)+" !",bc_map|bc_npc;
+	callfunc("summon_level_monster",.@monster_id,.@mob_lv,.@mob_amount,'map$,.@size);
+	announce "[Trial of Babel] : Floor "+.@par$+""+'Babel_Floor+" ( x "+.@mob_amount+" "+getmonsterinfo(.@monster_id,0)+" ) ~~~~~ GO.",bc_map|bc_npc;
+	end;
+
+OnTimer30000:
+	clearskillunit('map$);
+	sleep 100;
+	donpcevent ""+instance_npcname("Babel_Trial")+"::OnStart";
+	stopnpctimer;
+	end;
+
+//=======================================================
+OnMobDead:
+//=======================================================
+	'MobCount -= 1;
+	if('MobCount >= 0) {
+		getunitdata $@killedgid,.@array;
+		if(rand(100) < 5)
+			makeitem 8271,1,'map$,.@array[UMOB_X],.@array[UMOB_Y],getcharid(0);
+		ShowScript 'MobCount+"/"+'MaxMobCount;
+	}
+	if('MobCount == 0) {
+		killmonsterall instance_mapname("babel"),2;
+		'Floor_Done++;
+		if('Babel_Floor%getvariableofnpc(.bab_boss_pop,"babel_conf") == 0) 'Babel_Pts += 400;
+		.@bab_floor_penalty = 1;
+		if('Babel_Floor>getvariableofnpc(.bab_floor_50_penalty,"babel_conf")) .@bab_floor_penalty = 2;
+		if('Babel_Floor>getvariableofnpc(.bab_floor_66_penalty,"babel_conf")) .@bab_floor_penalty = 3;
+		if('Babel_Floor>getvariableofnpc(.bab_floor_75_penalty,"babel_conf")) .@bab_floor_penalty = 4;
+		if('Babel_Floor>getvariableofnpc(.bab_floor_90_penalty,"babel_conf")) .@bab_floor_penalty = 10;
+		'Babel_Pts += ((100/.@bab_floor_penalty) + (('difficulty-1)*getvariableofnpc(.bab_difficulty_pts,"babel_conf")));
+		if(playerattached() && 'Floor_Done%getvariableofnpc(.bab_reward,"babel_conf") == 0) {
+			initnpctimer;
+			'BabelChoose = 0;
+			'BabelChoose2 = 0;
+			sleep 700; // Sleep 0.7s because otherwise it removes the npc conversation sometimes
+			addrid(1);
+			sc_end SC_TIMERDOWN;
+			@babstop = 1;
+			getmapxy .@map$,.@x,.@y;
+			if(.@map$ != 'map$) end;
+			'BabelChoose++;
+			//Announce "[Trial of Babel] : Babel grants you a benediction.",bc_self,0xFF9999;
+			Announce "[Trial of Babel] : Babel grants you a benediction. You have "+getvariableofnpc(.bab_time_repop_reward,"babel_conf")/1000+" seconds to choose.",bc_self,0xFF9999;
+		do {
+			mes "Please use a bonus.";
+			mes "^ff0000Only the leader can take 'Skip a Floor'";
+			mes "Buff are permanent until the end of the trial (lost if disconnected)^000000";
+			.@bonus = prompt("- Skip a floor:- Full Heal:- Boost");
+			if(.@bonus == 3) {
+				callfunc "Display_Babel_Bonus";
+				.@godnumber = (4+@boost9[4]);
+				.@menu$[4] = ""; .@menu$[5] = ""; .@menu$[6] = "";
+
+				for( .@i = 0; .@i < .@godnumber; .@i++ ) {
+					.@rand = rand(1,14);
+					if(countinarray(.@god,.@rand) > 0)
+						.@i -= 1;
+					else
+						.@god[.@i] = .@rand;
+				}
+
+				for( .@i = 0; .@i < .@godnumber; .@i++ ) {
+					switch (.@god[.@i]) {
+						case 1: .@menu$[.@i] = "- Thor (Attack)"; break;
+						case 2: .@menu$[.@i] = "- Odin (Defense)"; break;
+						case 3: .@menu$[.@i] = "- Frigg (Heal)"; break;
+						case 4: .@menu$[.@i] = "- Hermod (Speed)"; break;
+						case 5: .@menu$[.@i] = "- Loki (Inflict Status)"; break;
+						case 6: .@menu$[.@i] = "- Heimdall (Resist Status)"; break;
+						case 7: .@menu$[.@i] = "- Tyr (Phy Autocast)"; break;
+						case 8: .@menu$[.@i] = "- Freyja (Mag Autocast)"; break;
+						case 9: .@menu$[.@i] = "- Bragi (XP,pts,Z)"; break;
+						case 10: .@menu$[.@i] = "- Baldr (Autocast Def)"; break;
+						case 11: .@menu$[.@i] = "- Freyr (Ressources)"; break;
+						case 12: .@menu$[.@i] = "- Njord (Crit/hit)"; break;
+						case 13: .@menu$[.@i] = "- Vali (Thief)"; break;
+						case 14: .@menu$[.@i] = "- Vidar (Summon)"; break;
+					}
+				}
+				.@pickgod = prompt(.@menu$[0],.@menu$[1],.@menu$[2],.@menu$[3],.@menu$[4],.@menu$[5],.@menu$[6])-1;
+				dispbottom "Rang I: Grants 10% bonus";
+				dispbottom "Rang II: Grants 15% bonus";
+				dispbottom "Rang III (max): Grants 20% bonus";
+				switch (.@god[.@pickgod]) {
+					case 1: .@menu$[0] = "Physical Attack +"; .@menu$[1] = "Magic Attack +"; .@menu$[2] = "Misc Attack +"; .@menu$[3] = "Ignore Def/Mdef"; .@menu$[4] = "Critical ATK +"; .@menu$[5] = ""; break;
+					case 2: .@menu$[0] = "Physical Resistance +"; .@menu$[1] = "Magical Resistance +"; .@menu$[2] = "Misc Resistance +"; .@menu$[3] = "DEF/MDEF +"; .@menu$[4] = "Critical Resistance +"; .@menu$[5] = ""; break;
+					case 3: .@menu$[0] = "Heal items/received +"; .@menu$[1] = "Heal Effect +"; .@menu$[2] = "Drain Life +"; .@menu$[3] = "Drain SP +"; .@menu$[4] = "Heal each floor +"; .@menu$[5] = ""; break;
+					case 4: .@menu$[0] = "ASPD +"; .@menu$[1] = "Cast -"; .@menu$[2] = "Delay -"; .@menu$[3] = "Walk Speed +"; .@menu$[4] = "After Skill Recovery +"; .@menu$[5] = ""; break;
+					case 5: .@menu$[0] = "Status (inflict) +"; .@menu$[1] = "Status Chance +"; .@menu$[2] = "Status Duration +"; .@menu$[3] = "Damage Status +"; .@menu$[4] = "Status AOE +"; .@menu$[5] = ""; break;
+					case 6: .@menu$[0] = "Status Resist"; .@menu$[1] = "Status Chance -"; .@menu$[2] = "Status Duration -"; .@menu$[3] = "Status Reflect +"; .@menu$[4] = "Status when attacked +"; .@menu$[5] = ""; break;
+					case 7: .@menu$[0] = "Mono Phy Autocast +"; .@menu$[1] = "AOEs Phy Autocast +"; .@menu$[2] = "PBAEs Phy Autocast +"; .@menu$[3] = "Defensive Phy Autocast +"; .@menu$[4] = "Operation  Phy Autocast +"; .@menu$[5] = ""; break;
+					case 8: .@menu$[0] = "Bolt Autocast +"; .@menu$[1] = "AOEs Mag Autocast +"; .@menu$[2] = "PBAEs Mag Autocast +"; .@menu$[3] = "Defensive Mag Autocast +"; .@menu$[4] = "Operation  Mag Autocast +"; .@menu$[5] = ""; break;
+					case 9: .@menu$[0] = "EXP +"; .@menu$[1] = "Zeny +"; .@menu$[2] = "Babel Pts +"; .@menu$[3] = "Drop Rate +"; .@menu$[4] = "Benediction Choice +"; .@menu$[5] = "Mobs Count per Floor -"; break;
+					case 10: .@menu$[0] = "Mono Def Autocast +"; .@menu$[1] = "AOEs Def Autocast +"; .@menu$[2] = "PBAEs Def Autocast +"; .@menu$[3] = "Defensif Autocast +"; .@menu$[4] = "Operation Autocast +"; .@menu$[5] = ""; break;
+					case 11: .@menu$[0] = "MaxHP +"; .@menu$[1] = "MaxSP +"; .@menu$[2] = "MaxLP +"; .@menu$[3] = "Renegeration HP/SP +"; .@menu$[4] = "Cost (SP/Items) -"; .@menu$[5] = ""; break;
+					case 12: .@menu$[0] = "Front Damage Received -"; .@menu$[1] = "Damage reduced if HP low +"; .@menu$[2] = "HIT/PHIT +"; .@menu$[3] = "Critical +"; .@menu$[4] = "Damage on target high HP +"; .@menu$[5] = ""; break;
+					case 13: .@menu$[0] = "Back Damage +"; .@menu$[1] = "Coma on weaks +"; .@menu$[2] = "Flee/Pflee +"; .@menu$[3] = "Damage DOT +"; .@menu$[4] = "Damage if HP low +"; .@menu$[5] = "Damage on target low HP +"; break;
+					case 14: .@menu$[0] = "Summon Offensif +"; .@menu$[1] = "Summon Tank +"; .@menu$[2] = "Summon Healer +"; .@menu$[3] = "Summon AOE +"; .@menu$[4] = "Summon Status +"; .@menu$[5] = ""; break;
+				}
+				.@pickboost = prompt(.@menu$[0],.@menu$[1],.@menu$[2],.@menu$[3],.@menu$[4],.@menu$[5])-1;
+				if((.@god[.@pickgod] == 5) && ((.@pickboost == 0) || (.@pickboost == 4))) || ((.@god[.@pickgod] == 6) && (.@pickboost == 4))
+					.@pickeff = prompt("- Freeze:- Stun:- Curse:- Silence")+10;
+				if(getd("@boost"+.@god[.@pickgod]+"["+(.@pickboost+.@pickeff)+"]") < 3) {
+					if(.@god[.@pickgod] == 9) && (.@pickboost == 5) 'mob_amount++;
+					.@chosen = 1;
+					'BabelChoose2++;
+					setd("@boost"+.@god[.@pickgod]+"["+(.@pickboost+.@pickeff)+"]"),getd("@boost"+.@god[.@pickgod]+"["+(.@pickboost+.@pickeff)+"]")+1;
+					.@pickeff = 0;
+					recalculatestat2;
+					if('mob_amount > 3) {
+						'mob_amount -= 1;
+						.@chosen = 0;
+						dispbottom "Maximum monster reduced reward reached. Please choose another one.";
+					}
+				} else {
+					dispbottom "This bonus is already Rang III. Choose another reward.";
+				}
+			}
+			if(.@bonus == 2) { @bonus2++; 'BabelChoose2++; .@chosen = 1; }
+			if(.@bonus == 1) { if(getcharid(3) == 'leader) { @bonus1++; 'BabelChoose2++; .@chosen = 1; } else dispbottom "Only the leader can choose this bonus."; }
+			} while (.@chosen == 0);
+			if('BabelChoose != 'BabelChoose2)	
+				end;
+			stopnpctimer;
+		}
+		sleep getvariableofnpc(.bab_time_repop,"babel_conf");
+		clearskillunit('map$);
+		sleep 100;
+		donpcevent instance_npcname("Babel_Trial")+"::OnStart";
+	}
+	end;
+
+OnTimer180000:
+	getmapxy .map$,.x,.y;
+	addrid(2,0,getcharid(1));
+	getmapxy .@map$,.@x,.@y;
+	if(.@map$ != 'map$) end;
+	@bab_noregen = 1;
+	recalculatestat2;
+	end;
+}
+
+//=======================================================
+//= Summon Babel
+//=======================================================
+babel,1,1,1	script	Babel_Event	139,{
+OnStart:
+	sleep 1000;
+	mapwarp 'map$,'map$,50,28;
+	// Calculate level
+	if ('members) .@ratio = ('members-1);
+	.@lv = ((getvariableofnpc(.bab_mob_level,"babel_conf") + 'Babel_Floor) + (getvariableofnpc(.bab_team_mob_count,"babel_conf")*.@ratio));
+	// Get leveled stats for that level (as a MVP)
+	for( .@i = 0; .@i < 3; .@i++ ) {
+		.@babel = callfunc("summon_level_babel", .@lv, 'map$);
+		specialeffect3 .@babel,689;
+		specialeffect3 .@babel,688;
+		specialeffect3 .@babel,687;
+		setunitdata .@babel,UMOB_LOOKDIR,4;
+		sleep 800;
+		mapwarp 'map$,'map$,50,28;
+		unitremove .@babel;
+		sleep 800;
+		mapwarp 'map$,'map$,50,28;
+	}	
+	.@babel = callfunc("summon_level_babel", .@lv, 'map$);
+	sleep 200;
+	fixeffect2 .@babel,689,1;
+	fixeffect2 .@babel,688,2;
+	fixeffect2 .@babel,687,3;
+	setunitdata .@babel,UMOB_LOOKDIR,4;
+	.@drops = rand(0,2);
+	switch (.@drops) {
+		case 0: unittalk .@babel,"Babel : You've come a long way. Now is the Last Judgment !"; break;
+		case 1: unittalk .@babel,"Babel : Show me what you got !"; break;
+		case 2: unittalk .@babel,"Babel : The Last Judgment will be depending on me."; break;
+	}
+	end;
+
+OnBabelDead:
+	'Babel_Pts += 1000;
+	'Babel_Killed++;
+	announce "Congratulations !! You've successfully achieved the Trial of Babel !",bc_self;
+	callfunc "BigTreasureChest",15+'difficulty,100,1;
+	attachrid('leader);
+	doevent instance_npcname("Babel_Event")+"::OnTreasureBabel";
+	addrid(2,0,getcharid(1));
+	getmapxy .@map$,.@x,.@y;
+	if(.@map$ != 'map$) end;
+	callfunc "Achievements",112003,1;
+	end;
+
+OnTreasureBabel:
+	sleep2 5000;
+	if('trial == 2) { addtimer 100,""+instance_npcname("Babel_Trial")+"::OnStart"; end; }
+	sleep2 15000;
+	instance_destroy;
+	end;
+}
+
+function	script	TreasureBoxB	{
+	for( .@i = 0; .@i < 100; .@i++ ) {
+		set .@rand,rand(0,10000);
+		if(.@rand<(100+(100*(getarg(4)*33))/100))&&(!getarg(3)) makeitem 8089,1,getarg(0),rand(getarg(1)-10,getarg(1)+10),rand(getarg(2)-10,getarg(2)+10);
+		if(.@rand<(100+(100*(getarg(4)*33))/100)) makeitem 607,1,getarg(0),rand(getarg(1)-10,getarg(1)+10),rand(getarg(2)-10,getarg(2)+10);
+		if(.@rand<(100+(100*(getarg(4)*33))/100)) makeitem 12210,1,getarg(0),rand(getarg(1)-10,getarg(1)+10),rand(getarg(2)-10,getarg(2)+10);
+		if(.@rand<(100+(100*(getarg(4)*33))/100)) makeitem 12208,1,getarg(0),rand(getarg(1)-10,getarg(1)+10),rand(getarg(2)-10,getarg(2)+10);
+		if(.@rand<(200+(200*(getarg(4)*33))/100)) makeitem 608,1,getarg(0),rand(getarg(1)-10,getarg(1)+10),rand(getarg(2)-10,getarg(2)+10);
+		if(.@rand<(500+(500*(getarg(4)*33))/100)) makeitem 522,1,getarg(0),rand(getarg(1)-10,getarg(1)+10),rand(getarg(2)-10,getarg(2)+10);
+		if(.@rand<(1000+(1000*(getarg(4)*33))/100)) makeitem 505,1,getarg(0),rand(getarg(1)-10,getarg(1)+10),rand(getarg(2)-10,getarg(2)+10);
+		if(.@rand<=(2000+(2000*(getarg(4)*33))/100)) makeitem 504,1,getarg(0),rand(getarg(1)-10,getarg(1)+10),rand(getarg(2)-10,getarg(2)+10);
+		sleep2 150;
+	}
+	return;
+}
+
+//=======================================================
+//= Summon a monster with special stats
+//=======================================================
+// getarg(0) = mob_id
+// getarg(1) = mob_lv (50+floor)
+// getarg(2) = quantity
+// getarg(3) = Map Name
+// getarg(4) = Size (0 = Monsters, 2 = Boss)
+function	script	summon_level_monster	{
+	if('Babel_Floor == 100) {
+		callfunc("leveled_monster_stats", getarg(0), getarg(1), 1);
+		.@hp = $@MOBS_STATS[0]/3;
+		.@atk1 = $@MOBS_STATS[1] * (75 + 'difficulty*25) / 100;
+		.@atk2 = $@MOBS_STATS[2] * (75 + 'difficulty*25) / 100;
+		.@def = $@MOBS_STATS[3];
+		.@mdef = $@MOBS_STATS[4];
+		.@str = $@MOBS_STATS[5];
+		.@int = $@MOBS_STATS[8];
+		.@max = 70;
+		.@dex = ($@MOBS_STATS[9]) > .@max ? (.@max + ($@MOBS_STATS[9]-.@max)/2) : $@MOBS_STATS[9];
+		.@agi = ($@MOBS_STATS[6]) > .@max ? (.@max + ($@MOBS_STATS[6]-.@max)/2) : $@MOBS_STATS[6];
+		.@vit = ($@MOBS_STATS[7]) > .@max ? (.@max + ($@MOBS_STATS[7]-.@max)/2) : $@MOBS_STATS[7];
+		.@luk = ($@MOBS_STATS[10]) > .@max ? (.@max + ($@MOBS_STATS[10]-.@max)/2) : $@MOBS_STATS[10];
+		.@matk1 = $@MOBS_STATS[17] * (75 + 'difficulty*25) / 100;
+		.@matk2 = $@MOBS_STATS[18] * (75 + 'difficulty*25) / 100;
+		.@hit = .@dex + getarg(1);
+		.@flee = .@agi + getarg(1);
+		.@cri = $@MOBS_STATS[13];
+		.@flee2 = $@MOBS_STATS[14];
+		.@speed = $@MOBS_STATS[15];
+		.@adelay = $@MOBS_STATS[16];
+		.@amotion = $@MOBS_STATS[19];
+		.@dmotion = $@MOBS_STATS[20];
+		getfreecell(strnpcinfo(4),.@x,.@y);
+		.@gemini = monster2(getarg(3),.@x,.@y,getmonsterinfo(getarg(0),0),getarg(0),1,0,""+instance_npcname("Babel_Trial")+"::OnMobDead",getarg(4),AI_NONE,0,.@hp,.@atk1,.@atk2,.@def,.@mdef,.@str,.@agi,.@vit,.@int,.@dex,.@luk,.@matk1,.@matk2,.@hit,.@flee,.@cri,.@flee2,.@speed,.@adelay,.@amotion,.@dmotion,100,0,0,0,'mobelite);
+		setunitdata .@gemini,UMOB_RACE,'race1;
+		.@gemini = monster2(getarg(3),.@x,.@y,getmonsterinfo(getarg(0),0),getarg(0),1,0,""+instance_npcname("Babel_Trial")+"::OnMobDead",getarg(4),AI_NONE,0,.@hp,.@atk1,.@atk2,.@def,.@mdef,.@str,.@agi,.@vit,.@int,.@dex,.@luk,.@matk1,.@matk2,.@hit,.@flee,.@cri,.@flee2,.@speed,.@adelay,.@amotion,.@dmotion,100,0,0,0,'mobelite);
+		setunitdata .@gemini,UMOB_RACE,'race2;
+		'MobCount++;
+		'MaxMobCount++;
+		announce "[Trial of Babel] : "+.@hp/2+" HP, "+.@atk1+" ATK, "+.@matk1+" MATK, "+.@def+" DEF, "+.@mdef+" MDEF, "+.@str+" STR, "+.@agi+" AGI, "+.@vit+" VIT, "+.@int+" INT, "+.@dex+" DEX, "+.@luk+" LUK, "+.@hit+" HIT, "+.@flee+" FLEE, "+.@flee2/10+" PFLEE, "+.@cri/10+" CRIT",bc_map|bc_npc;
+	} else {
+		callfunc("leveled_monster_stats", getarg(0), getarg(1), 0);
+		if(getarg(4))
+		 .@hp = $@MOBS_STATS[0] * 5 / 3;
+		else .@hp = $@MOBS_STATS[0] / 3;
+		.@atk1 = $@MOBS_STATS[1] * (75 + 'difficulty*25) / 100;
+		.@atk2 = $@MOBS_STATS[2] * (75 + 'difficulty*25) / 100;
+		.@def = $@MOBS_STATS[3];
+		.@mdef = $@MOBS_STATS[4];
+		.@str = $@MOBS_STATS[5];
+		.@max = 70;
+		.@dex = ($@MOBS_STATS[9]) > .@max ? (.@max + ($@MOBS_STATS[9]-.@max)/2) : $@MOBS_STATS[9];
+		.@agi = ($@MOBS_STATS[6]) > .@max ? (.@max + ($@MOBS_STATS[6]-.@max)/2) : $@MOBS_STATS[6];
+		.@vit = ($@MOBS_STATS[7]) > .@max ? (.@max + ($@MOBS_STATS[7]-.@max)/2) : $@MOBS_STATS[7];
+		.@luk = ($@MOBS_STATS[10]) > .@max ? (.@max + ($@MOBS_STATS[10]-.@max)/2) : $@MOBS_STATS[10];
+		.@int = $@MOBS_STATS[8];
+		.@matk1 = $@MOBS_STATS[17] * (75 + 'difficulty*25) / 100;
+		.@matk2 = $@MOBS_STATS[18] * (75 + 'difficulty*25) / 100;
+		.@hit = .@dex + getarg(1);
+		.@flee = .@agi + getarg(1);
+		.@cri = $@MOBS_STATS[13];
+		.@flee2 = $@MOBS_STATS[14];
+		.@speed = $@MOBS_STATS[15];
+		.@adelay = $@MOBS_STATS[16];
+		.@amotion = $@MOBS_STATS[19];
+		.@dmotion = $@MOBS_STATS[20];
+		if('Babel_Floor != 101) {
+			for(.@i = 0; .@i < getarg(2); .@i++) {
+				getfreecell(strnpcinfo(4),.@x,.@y,0,0,0,0,5);
+				.@monster = monster2(getarg(3),.@x,.@y,getmonsterinfo(getarg(0),0),getarg(0),1,0,""+instance_npcname("Babel_Trial")+"::OnMobDead",getarg(4),AI_NONE,0,.@hp,.@atk1,.@atk2,.@def,.@mdef,.@str,.@agi,.@vit,.@int,.@dex,.@luk,.@matk1,.@matk2,.@hit,.@flee,.@cri,.@flee2,.@speed,.@adelay,.@amotion,.@dmotion,getarg(1),0,0,0,'mobelite);
+			}
+			announce "[Trial of Babel] : "+.@hp+" HP, "+.@atk1+" ATK, "+.@matk1+" MATK, "+.@def+" DEF, "+.@mdef+" MDEF, "+.@str+" STR, "+.@agi+" AGI, "+.@vit+" VIT, "+.@int+" INT, "+.@dex+" DEX, "+.@luk+" LUK, "+.@hit+" HIT, "+.@flee+" FLEE, "+.@flee2/10+" PFLEE, "+.@cri/10+" CRIT",bc_map|bc_npc;
+		}
+	}
+	return;
+}
+
+//=======================================================
+//= Summon a monster with special stats
+//=======================================================
+// getarg(0) = mob_lv (50+floor)
+// getarg(1) = Map Name
+function	script	summon_level_babel	{
+	callfunc("leveled_monster_stats", 3936, getarg(0), 2);
+	.@hp = $@MOBS_STATS[0];
+	.@atk1 = $@MOBS_STATS[1];
+	.@atk2 = $@MOBS_STATS[2];
+	.@def = $@MOBS_STATS[3];
+	.@mdef = $@MOBS_STATS[4];
+	.@str = $@MOBS_STATS[5];
+	.@max = 70;
+	.@dex = ($@MOBS_STATS[9]) > .@max ? (.@max + ($@MOBS_STATS[9]-.@max)/2) : $@MOBS_STATS[9];
+	.@agi = ($@MOBS_STATS[6]) > .@max ? (.@max + ($@MOBS_STATS[6]-.@max)/2) : $@MOBS_STATS[6];
+	.@vit = ($@MOBS_STATS[7]) > .@max ? (.@max + ($@MOBS_STATS[7]-.@max)/2) : $@MOBS_STATS[7];
+	.@luk = ($@MOBS_STATS[10]) > .@max ? (.@max + ($@MOBS_STATS[10]-.@max)/2) : $@MOBS_STATS[10];
+	.@int = $@MOBS_STATS[8];
+	.@matk1 = $@MOBS_STATS[17];
+	.@matk2 = $@MOBS_STATS[18];
+	.@hit = .@dex + getarg(0);
+	.@flee = .@agi + getarg(0);
+	.@cri = $@MOBS_STATS[13];
+	.@flee2 = $@MOBS_STATS[14];
+	.@speed = $@MOBS_STATS[15];
+	.@adelay = $@MOBS_STATS[16];
+	.@amotion = $@MOBS_STATS[19];
+	.@dmotion = $@MOBS_STATS[20];
+	.@matk1 = $@MOBS_STATS[17];
+	.@matk2 = $@MOBS_STATS[18];
+	.@babel = monster2(getarg(1),50,40,getmonsterinfo(3936,0),3936,1,0,""+instance_npcname("Babel_Event")+"::OnBabelDead",0,AI_NONE,0,.@hp,.@atk1,.@atk2,.@def,.@mdef,.@str,.@agi,.@vit,.@int,.@dex,.@luk,.@matk1,.@matk2,.@hit,.@flee,.@cri,.@flee2,.@speed,.@adelay,.@amotion,.@dmotion,151,0,0,0,'mobelite);
+	setunitdata .@babel,UMOB_HP,$@MOBS_STATS[0]/3;
+	setunitdata .@babel,UMOB_MAXHP,$@MOBS_STATS[0]/3;
+	setunitdata .@babel,UMOB_ATKMIN,.@atk1 * (75 + 'difficulty*25) / 100;
+	setunitdata .@babel,UMOB_ATKMAX,.@atk2 * (75 + 'difficulty*25) / 100;
+	setunitdata .@babel,UMOB_MATKMIN,.@matk1 * (75 + 'difficulty*25) / 100;
+	setunitdata .@babel,UMOB_MATKMAX,.@matk2 * (75 + 'difficulty*25) / 100;
+	unitrefresh .@babel;
+	return .@babel;
+}
+
+//=======================================================
+//= Display babel bonuses
+//=======================================================
+function	script	Display_Babel_Bonus	{
+	if(@boost1) mes "[Thor :]"; if(@boost1[0]) mes "- Dmg Phy +"+((5+5*@boost1[0])+(2+2*@boost9[4]))+"% [Rang "+@boost1[0]+"]"; if(@boost1[1]) mes "- Dmg Mag +"+((5+5*@boost1[1])+(2+2*@boost9[4]))+"% [Rang "+@boost1[1]+"]"; if(@boost1[2]) mes "- Dmg Misc +"+((5+5*@boost1[2])+(2+2*@boost9[4]))+"% [Rang "+@boost1[2]+"]"; if(@boost1[3]) { mes "- Ignore def/mdef +"+((5+5*@boost1[3])+(2+2*@boost9[4]))+"% [Rang "+@boost1[3]+"]"; mes "- Crit dmg +"+((5+5*@boost1[4])+(2+2*@boost9[4]))+"% [Rang "+@boost1[4]+"]"; }
+	if(@boost2) mes "[Odin :]"; if(@boost2[0]) mes "- Res Phy +"+((5+5*@boost2[0])+(2+2*@boost9[4]))+"% [Rang "+@boost2[0]+"]"; if(@boost2[1]) mes "- Res Mag +"+((5+5*@boost2[1])+(2+2*@boost9[4]))+"% [Rang "+@boost2[1]+"]"; if(@boost2[2]) mes "- Res Misc +"+((5+5*@boost2[2])+(2+2*@boost9[4]))+"% [Rang "+@boost2[2]+"]"; if(@boost2[3]) mes"- DEF/MDEF +"+((5+5*@boost2[3])+(2+2*@boost9[4]))+"% [Rang "+@boost2[3]+"]"; if(@boost2[4]) mes "- Res Crit +"+((5+5*@boost2[4])+(2+2*@boost9[4]))+"% [Rang "+@boost2[4]+"]"; if(@boost2[5]) mes "- Res DOT +"+((5+5*@boost2[5])+(2+2*@boost9[4]))+"% [Rang "+@boost2[5]+"]";
+	if(@boost3) mes "[Frigg :]"; if(@boost3[0]) mes "- Heal items +"+((5+5*@boost3[0])+(2+2*@boost9[4]))+"% [Rang "+@boost3[0]+"]"; if(@boost3[1]) mes "- Heal +"+((5+5*@boost3[1])+(2+2*@boost9[4]))+"% [Rang "+@boost3[1]+"]"; if(@boost3[2]) mes "- Drain HP +"+((5+5*@boost3[2])+(2+2*@boost9[4]))+"% [Rang "+@boost3[2]+"]"; if(@boost3[3]) mes "- Drain SP +"+((5+5*@boost3[3])+(2+2*@boost9[4]))+"% [Rang "+@boost3[3]+"]"; if(@boost3[4]) mes "- "+((10+7*@boost3[4])+(4+4*@boost9[4]))+"% Heal each floor [Rang "+@boost3[4]+"]";
+	if(@boost4) mes "[Hermod :]"; if(@boost4[0]) mes "- ASPD +"+((5+5*@boost4[0])+(2+2*@boost9[4]))+"% [Rang "+@boost4[0]+"]"; if(@boost4[1]) mes "- Cast -"+((5+5*@boost4[1])+(2+2*@boost9[4]))+"% [Rang "+@boost4[1]+"]"; if(@boost4[2]) mes "- Delay -"+((5+5*@boost4[2])+(2+2*@boost9[4]))+"% [Rang "+@boost4[2]+"]"; if(@boost4[3]) mes "- Speed Walk +"+((5+5*@boost4[3])+(2+2*@boost9[4]))+"% [Rang "+@boost4[3]+"]"; if(@boost4[4]) mes "After Hit Recovery +"+((5+5*@boost4[4])+(2+2*@boost9[4]))+"% [Rang "+@boost4[4]+"]"; if(@boost4[5]) mes "Cooldown -"+((5+5*@boost4[5])+(2+2*@boost9[4]))+"% [Rang "+@boost4[5]+"]";
+	if(@boost5) mes "[Loki :]"; if(@boost5[14]) mes "- Inflict Freeze Status +"+((5+5*@boost5[14])+(2+2*@boost9[4]))+"% [Rang "+@boost5[14]+"]"; if(@boost5[15]) mes "- Inflict Stun Status +"+((5+5*@boost5[15])+(2+2*@boost9[4]))+"% [Rang "+@boost5[15]+"]";if(@boost5[16]) mes "- Inflict Curse Status +"+((5+5*@boost5[16])+(2+2*@boost9[4]))+"% [Rang "+@boost5[16]+"]"; if(@boost5[17]) mes "- Inflict Silence Status +"+((5+5*@boost5[17])+(2+2*@boost9[4]))+"% [Rang "+@boost5[17]+"]"; if(@boost5[1]) mes "- Status Chance +"+((5+5*@boost5[1])+(2+2*@boost9[4]))+"% [Rang "+@boost5[1]+"]"; if(@boost5[2]) mes "- Status Duration +"+((5+5*@boost5[2])+(2+2*@boost9[4]))+"% [Rang "+@boost5[2]+"]"; if(@boost5[3]) mes "- Damage Status +"+((5+5*@boost5[3])+(2+2*@boost9[4]))+"% [Rang "+@boost5[3]+"]";
+	if(@boost5[14]) mes "- Freeze Status AOE +"+((1+1*@boost5[14])+(1+1*@boost9[4]))+"% [Rang "+@boost5[14]+"]"; if(@boost5[15]) mes "- Stun Status AOE +"+((1+1*@boost5[15])+(1+1*@boost9[4]))+"% [Rang "+@boost5[15]+"]"; if(@boost5[16]) mes "- Curse Status AOE +"+((1+1*@boost5[16])+(1+1*@boost9[4]))+"% [Rang "+@boost5[16]+"]"; if(@boost5[17]) mes "- Silence Status AOE +"+((1+1*@boost5[17])+(1+1*@boost9[4]))+"% [Rang "+@boost5[17]+"]";
+	if(@boost6) mes "[Heimdall :]"; if(@boost6[0]) mes "- Status Resist +"+((5+5*@boost6[0])+(2+2*@boost9[4]))+"% [Rang "+@boost6[0]+"]"; if(@boost6[1]) mes "- Status Chance -"+((5+5*@boost6[1])-(2+2*@boost9[4]))+"% [Rang "+@boost6[1]+"]"; if(@boost6[2]) mes "- Status Duration -"+((5+5*@boost6[2])+(2+2*@boost9[4]))+"% [Rang "+@boost6[2]+"]"; if(@boost6[3]) mes "- Reflect Status +"+((5+5*@boost6[3])+(2+2*@boost9[4]))+"% [Rang "+@boost6[3]+"]"; if(@boost6[14]) mes "- Freeze Status AOE when attacked +"+((1+1*@boost6[14])+(1+1*@boost9[4]))+"% [Rang "+@boost6[14]+"]"; if(@boost6[15]) mes "- Stun Status AOE +"+((1+1*@boost6[15])+(1+1*@boost9[4]))+"% [Rang "+@boost6[15]+"]"; if(@boost6[16]) mes "- Curse Status AOE +"+((1+1*@boost6[16])+(1+1*@boost9[4]))+"% [Rang "+@boost6[16]+"]"; if(@boost6[17]) mes "- Silence Status AOE +"+((1+1*@boost6[17])+(1+1*@boost9[4]))+"% [Rang "+@boost6[17]+"]";
+	if(@boost7) mes "[Tyr :]"; if(@boost7[0]) mes "- Mono +"+((5+5*@boost7[0])+(2+2*@boost9[4]))+"% [Rang "+@boost7[0]+"]"; if(@boost7[1]) mes "- AOEs +"+((5+5*@boost7[1])+(2+2*@boost9[4]))+"% [Rang "+@boost7[1]+"]"; if(@boost7[2]) mes "- PBAEs +"+((5+5*@boost7[2])+(2+2*@boost9[4]))+"% [Rang "+@boost7[2]+"], Defensive +"+((5+5*@boost7[3])+(2+2*@boost9[4]))+"% [Rang "+@boost7[3]+"]"; if(@boost7[4]) mes "- Operation +"+((5+5*@boost7[4])+(2+2*@boost9[4]))+"%  [Rang "+@boost7[4]+"]";
+	if(@boost8) mes "[Freyja :]"; if(@boost8[0]) mes "- Bolts +"+((5+5*@boost8[0])+(2+2*@boost9[4]))+"% [Rang "+@boost8[0]+"]"; if(@boost8[1]) mes "- AOEs +"+((5+5*@boost8[1])+(2+2*@boost9[4]))+"% [Rang "+@boost8[1]+"]"; if(@boost8[2]) mes "- PBAEs +"+((5+5*@boost8[2])+(2+2*@boost9[4]))+"% [Rang "+@boost8[2]+"], Defensive +"+((5+5*@boost8[3])+(2+2*@boost9[4]))+"% [Rang "+@boost8[3]+"]"; if(@boost8[4]) mes "- Operation +"+((5+5*@boost8[4])+(2+2*@boost9[4]))+"%  [Rang "+@boost8[4]+"]";
+	if(@boost9) mes "[Bragi :]"; if(@boost9[0]) mes "- XP +"+((5+5*@boost9[0])+(2+2*@boost9[4]))+"% [Rang "+@boost9[0]+"]"; if(@boost9[1]) mes "- Zeny +"+((5+5*@boost9[1])+(2+2*@boost9[4]))+"% [Rang "+@boost9[1]+"]"; if(@boost9[2]) mes "- Babel Pts +"+((5+5*@boost9[2])+(2+2*@boost9[4]))+"% [Rang "+@boost9[2]+"], Drops +"+((5+5*@boost9[3])+(2+2*@boost9[4]))+"% [Rang "+@boost9[3]+"]"; if(@boost9[4]) mes "- Boon +"+((5+5*@boost9[4])+(2+2*@boost9[4]))+"% [Rang "+@boost9[4]+"]"; if(@boost13[5]) mes "- Amount Mobs -"+((5+5*@boost9[5])+(2+2*@boost9[4]))+"% [Rang "+@boost9[5]+"]";
+	if(@boost10) mes "[Baldr :]"; if(@boost10[0]) mes "- Mono +"+((5+5*@boost10[0])+(2+2*@boost9[4]))+"% [Rang "+@boost10[0]+"]"; if(@boost10[1]) mes "- AOEs +"+((5+5*@boost10[1])+(2+2*@boost9[4]))+"% [Rang "+@boost10[1]+"]"; if(@boost10[2]) mes "- PBAEs +"+((5+5*@boost10[2])+(2+2*@boost9[4]))+"% [Rang "+@boost10[2]+"], Defensive +"+((5+5*@boost10[3])+(2+2*@boost9[4]))+"% [Rang "+@boost10[3]+"]"; if(@boost10[4]) mes "- Operation +"+((5+5*@boost10[4])+(2+2*@boost9[4]))+"% [Rang "+@boost10[4]+"]";
+	if(@boost11) mes "[Freyr :]"; if(@boost11[0]) mes "- MaxHP +"+((5+5*@boost11[0])+(2+2*@boost9[4]))+"% [Rang "+@boost11[0]+"]"; if(@boost11[1]) mes "- MaxSP +"+((5+5*@boost11[1])+(2+2*@boost9[4]))+"% [Rang "+@boost11[1]+"]"; if(@boost11[2]) mes "- MaxLP +"+((5+5*@boost11[2])+(2+2*@boost9[4]))+"% [Rang "+@boost11[2]+"], Regen HP/SP +"+((5+5*@boost11[3])+(2+2*@boost9[4]))+"% [Rang "+@boost11[3]+"]"; if(@boost11[4]) mes "- Cost -"+((5+5*@boost11[4])+(2+2*@boost9[4]))+"% [Rang "+@boost11[4]+"]";
+	if(@boost12) mes "[Njord :]"; if(@boost12[0]) mes "- Resist Front Dmg +"+((5+5*@boost12[0])+(2+2*@boost9[4]))+"% [Rang "+@boost12[0]+"]"; if(@boost12[1]) mes "- Dmg reduc if HP low +"+((5+5*@boost12[1])+(2+2*@boost9[4]))+"% [Rang "+@boost12[1]+"]"; if(@boost12[2]) mes "- HIT/PHIT +"+((5+5*@boost12[2])+(2+2*@boost9[4]))+"% [Rang "+@boost12[2]+"]"; if(@boost12[3]) mes "- CRIT +"+((5+5*@boost12[3])+(2+2*@boost9[4]))+"% [Rang "+@boost12[3]+"]"; if(@boost12[4]) mes "- Dmg Target high HP +"+((5+5*@boost12[4])+(2+2*@boost9[4]))+"% [Rang "+@boost12[4]+"]";
+	if(@boost13) mes "[Vali :]"; if(@boost13[0]) mes "- Back Dmg +"+((5+5*@boost13[0])+(2+2*@boost9[4]))+"% [Rang "+@boost13[0]+"]"; if(@boost13[1]) mes "- Coma on weaks +"+((5+5*@boost13[1])+(2+2*@boost9[4]))+"% [Rang "+@boost13[1]+"]"; if(@boost13[2]) mes"- Flee/Pflee +"+((5+5*@boost13[2])+(2+2*@boost9[4]))+"% [Rang "+@boost13[2]+"]"; if(@boost13[3]) mes "- Dmg DOT +"+((5+5*@boost13[3])+(2+2*@boost9[4]))+"% [Rang "+@boost13[3]+"]"; if(@boost13[4]) mes "- Dmg up if HP low +"+((5+5*@boost13[4])+(2+2*@boost9[4]))+"% [Rang "+@boost13[4]+"]"; if(@boost13[5]) mes "- Dmg target low HP +"+((5+5*@boost13[4])+(2+2*@boost9[4]))+"% [Rang "+@boost13[5]+"]";
+	if(@boost14) mes "[Vidar :]"; if(@boost14[0]) mes "- Summon Offensive +"+((5+5*@boost14[0])+(2+2*@boost9[4]))+"% [Rang "+@boost14[0]+"]"; if(@boost14[1]) mes "- Summon Tank +"+((5+5*@boost14[1])+(2+2*@boost9[4]))+"% [Rang "+@boost14[1]+"]"; if(@boost14[2]) mes"- Summon Heals +"+((5+5*@boost14[2])+(2+2*@boost9[4]))+"% [Rang "+@boost14[2]+"]"; if(@boost14[3]) { mes "- Summon AOE +"+((5+5*@boost14[3])+(2+2*@boost9[4]))+"% [Rang "+@boost14[3]+"]"; mes "- Summon Status +"+((5+5*@boost14[4])+(2+2*@boost9[4]))+"% [Rang "+@boost14[4]+"]"; }
+	return;
+}
+
+//=======================================================
+//= Babel Crystal item scripts.
+//=======================================================
+//= 1. Skip floors
+//= 2. Full heals
+//= 3. Boosts (Benedictions)
+//= 4. Terminate Trial
+//= {5. Restart the floor} (Only appears when the map is empty)
+function	script	babel_tools	{
+	getmapxy .@map$,.@x,.@y;
+	if(instance_id(IM_PARTY))
+		.@instanceid = instance_id(IM_PARTY);
+	else if(instance_id(IM_CHAR))
+		.@instanceid = instance_id(IM_CHAR);
+	if(.@instanceid) {
+		if(.@map$ != instance_mapname("babel",.@instanceid)) { dispbottom "This item can be used only during Babel's Trial."; end; }
+		addtimer 100,""+instance_npcname("Bab_Tools",.@instanceid)+"::OnStart";
+	}
+	end;
+}
+
+babel,1,1,1	script	Bab_Tools	-1,{
+OnStart:
+	if(@babstop) { dispbottom "Wait until the next floor to use it."; end; }
+	if(@bonus1) dispbottom "Skip floors: "+@bonus1+"";
+	if(@bonus2) dispbottom "Full Heals: "+@bonus2+"";
+	.@num = getareaunits(BL_MOB,instance_mapname("babel"),18,22,80,77,.@array[0]);
+	if(!.@num) .@menu$ = "- Restart this floor"; else .@menu$ = "";
+	switch(select("- Skip a Floor (if half mobs killed or bonus)","- Uses Full Heal","- Check Boosts","- Terminate Trial",""+.@menu$+"")) {
+		case 1:
+			if('Babel_Floor == 100 || 'Babel_Floor == 101) {
+				dispbottom "[Trial of Babel]: Cannot be skipped.";
+				end;
+			}
+			if('MobCount <= 'MaxMobCount/2) {
+				dispbottom "[Trial of Babel]: Skipping a floor doesn't count in terms of pts/benedictions.";
+				switch(select("- Stay:- Skip floor")) {
+					case 1: end;
+					case 2:
+						if('Floor_Done%getvariableofnpc(.bab_reward,"babel_conf") != 0)
+							'Floor_Done -= 1;
+						'MobCount = 1;
+						killmonsterall instance_mapname("babel"),2;
+						addtimer 1000,instance_npcname("Babel_Trial")+"::OnMobDead";
+						break;
+				}
+				break;
+			}
+			if(@bonus1) {
+				dispbottom "[Trial of Babel]: Skipping a floor doesn't count in terms of pts/benedictions.";
+				switch(select("- Use a bonus to skip the floor")) {
+					case 1:
+						@bonus1 -= 1;
+						if('Floor_Done%getvariableofnpc(.bab_reward,"babel_conf") != 0)
+							'Floor_Done -= 1;
+						'MobCount = 1;
+						killmonsterall instance_mapname("babel"),2;
+						addtimer 1000,instance_npcname("Babel_Trial")+"::OnMobDead";
+						dispbottom "[Trial of Babel]: Benediction granted. (Remaining: "+@bonus1+")";
+						break;
+				}
+				break;
+			}
+			dispbottom "You can't skip the floor. At least 50% of monsters have to be defeated.";
+			end;
+		case 2:
+			if(@bonus2) {
+				skilleffect 28,99999;
+				sc_start SC_BLESSING,60000,10;
+				sc_start SC_INCREASEAGI,60000,10;
+				skilleffect 34,0;
+				skilleffect 29,0;
+				repairall;
+				percentheal 100,100;
+				@bonus2 -= 1;
+				dispbottom "[Trial of Babel]: Benediction granted. (Remaining: "+@bonus2+")";
+			} else {
+				dispbottom "You don't have any Full Heals.";
+			}
+			break;
+		case 3:
+			callfunc "Display_Babel_Bonus";
+			end;
+		case 4:
+			switch(select("-Stay:-Confirm cancellation")) {
+				case 1: break;
+				case 2:
+					instance_destroy;
+					break;
+			}
+			break;
+		case 5:
+			if('Babel_Floor == 101)
+				end;
+			sleep2 3000;
+			.@num = getareaunits(BL_MOB,instance_mapname("babel"),18,22,80,77,.@array[0]);
+			if(.@num)
+				end;
+			sc_end SC_TIMERDOWN;
+			cutin "",255;
+			'Babel_Floor -= 1;
+//			addtimer 100,""+instance_npcname("Babel_Trial")+"::OnStart";
+			donpcevent ""+instance_npcname("Babel_Trial")+"::OnStart";
+			end;
+	}
+	end;
+}
+
+//=======================================================
+//= Babel's NPCs
+//=======================================================
+bab_scene02,56,58,3	script	Uriel	936,{
+	if(BaseLevel<70) {
+		mes "[Uriel]";
+		mes "Well, well... A lost soul.";
+		next;
+		mes "[Uriel]";
+		mes "I already know you won't be helpful. I suggest you to go somewhere else.";
+		next;
+		mes "[Uriel]";
+		mes "The Trial of Babel is accessible to only brave warriors that are Level 70 and above.";
+		close;
+	}
+	mes "[Uriel]";
+	mes "Welcome to the Tower of lord Babel, human.";
+	next;
+	mes "[Uriel]";
+	mes "I'm Uriel, the right-hand of Lord Babel.";
+	mes "What are you here for, human ?";
+	next;
+	switch(select("- Trial of Babel.:- Monster Races Orientation.:- Informations.:- Leave.")) {
+		case 1:
+			callfunc "locked_content","Trial of Babel",$episode_babel,"Babel's Call to Arms";
+			if(#Babel_Timer < callfunc("getTime") || getgmlevel() >= 99) {
+				mes "[Uriel]";
+				mes "Which trial are you ready to participate ?";
+				next;
+				switch(Select("- Ascension:- Descension")) {
+					case 1:
+						mes "[Ascension mode]";
+						mes "- 101 Floors";
+						@babel = 1;
+						next;
+						break;
+					case 2:
+						if (getvariableofnpc(.bab_config,"babel_conf") & 16) {
+						mes "[Descension Mode]";
+						mes "- Infinite Floors";
+						@babel = 2;
+						next;
+						break;
+						}
+						mes "[Uriel]";
+						mes "I'm sorry, this mode is not available.";
+						close;
+				}
+				mes "[Uriel]";
+				mes "Which mode ?";
+				next;
+				@mode = select("- Solo Mode:- Team Mode");
+				if (#babel_difficult == 1)
+					setarray .@difficulty$[1],"Hard";
+				else
+					.@difficulty$[1] = "";
+				if (#babel_difficult == 2)
+					setarray .@difficulty$[1],"Hard","Very Hard";
+				else
+					.@difficulty$[2] = "";
+				if (#babel_difficult >= 3)
+					setarray .@difficulty$[1],"Hard","Very Hard","Legendary";
+				else
+					.@difficulty$[3] = "";
+				mes "[Uriel]";
+				mes "Which difficulty ?";
+				next;
+				//@difficulty = select("Normal",.@difficulty$[1],.@difficulty$[2],.@difficulty$[3]);
+				@difficulty = select("Normal",.@difficulty$[1]);
+				mes "[Uriel]";
+				mes "Alright. Proceed at the warp when you will be ready.";
+				close2;
+				specialeffect2 40;
+				dispbottom "[Uriel]: Proceed at the warp when you will be ready.";
+				end;
+			}
+			mes "[Uriel]";
+			mes "I see... You've done the trial not long ago.";
+			mes "Please come back in about "+(#Babel_Timer-((GetTime(7)-2000)*12*31*24*60*60+GetTime(6)*31*24*60*60+GetTime(5)*24*60*60+GetTime(3)*60*60+GetTime(2)*60+GetTime(1)))/(60*60)+" hours to participate to the trial again.";
+			close;
+		case 2:
+			if (getvariableofnpc(.bab_config,"babel_conf") & 1) {
+				mes "[Uriel]";
+				mes "The Trial's monsters races are:";
+				callfunc "get_Monster_Race",0;
+				mes "- "+@BabelMonster$[0]+"";
+				if (getvariableofnpc(.bab_race_config,"babel_conf") & 1)&&(Babel_Monster_Race[0] != 10) {
+					callfunc "get_Monster_Race",1;
+					mes "- "+@BabelMonster$[1]+"";
+				}
+				next;
+				switch(select("- Reroll Monster Orientation:- I don't want any specific races")) {
+				case 1:
+					if(#Babel_Reroll_Timer < callfunc("getTime")) {
+						Babel_Monster_Race[0] = rand(0,9);
+						if (getvariableofnpc(.bab_race_config,"babel_conf") & 1) Babel_Monster_Race[1] = rand(0,9);
+						#Babel_Reroll_Timer = ((GetTime(7)-2000)*12*31*24*60*60+GetTime(6)*31*24*60*60+GetTime(5)*24*60*60+GetTime(3)*60*60+GetTime(2)*60+GetTime(1)+39600);	//11h cooldown
+						callfunc "get_Monster_Race",0;
+						dispbottom "[1st Race]: "+@BabelMonster$[0]+"";
+						if (getvariableofnpc(.bab_race_config,"babel_conf") & 1) {
+							callfunc "get_Monster_Race",1;
+							dispbottom "[2nd Race]: "+@BabelMonster$[1]+"";
+						}
+						close;
+					}
+					mes "[Uriel]";
+					mes "I'm sorry but you have to wait "+(#Babel_Reroll_Timer-((GetTime(7)-2000)*12*31*24*60*60+GetTime(6)*31*24*60*60+GetTime(5)*24*60*60+GetTime(3)*60*60+GetTime(2)*60+GetTime(1)))/(60*60)+" hours to reroll the race orientation.";
+					close;
+				case 2:
+					mes "[Uriel]";
+					mes "Alright. You will fight all kind of monsters then.";
+					Babel_Monster_Race[0] = 10;
+					close;
+				}
+			}
+			mes "[Uriel]";
+			mes "Babel has the power to change the race of any monsters ! It used to be a time where you could choose your orientation, but that's not the case here.";
+			close;
+		case 3:
+			mes "[Uriel]";
+			mes "I represent the will of Archangel Babel on Earth.";
+			mes "The Lord decided long ago to organize a great challenge during which the judges should be chosen.";
+			mes "This challenge still exists, although a new Judge is not yet necessary.";
+			next;
+			mes "[Uriel]";
+			mes "I therefore allow anyone who wants to take the test to participate in this Challenge.";
+			mes "Of course, this takes place under the conditions originally intended for a Judge.";
+			mes "It is therefore a very difficult test.";
+			next;
+			mes "[Uriel]";
+			mes "Obviously, Archangel Babel does not allow himself to see regular Humans.";
+			mes "You will need to proove your strength in order to meet him.";
+			next;
+			mes "[Uriel]";
+			mes "I wrote the rules on your dashboard so you won't forget it.";
+			dispbottom "[Trial of Babel]:";
+			if (getvariableofnpc(.bab_config,"babel_conf") & 16) {
+				dispbottom "- 2 types : Ascension (101 floors) / Descension (No Limit)";
+			}
+			if (getvariableofnpc(.bab_config,"babel_conf") & 2) {
+				dispbottom "- 2 modes : Solo Mode / Team Mode ("+getvariableofnpc(.bab_team_min,"babel_conf")+"~"+getvariableofnpc(.bab_team_max,"babel_conf")+" team-mates)";
+			}
+			if (getvariableofnpc(.bab_config,"babel_conf") & 1) {
+				dispbottom "- Before starting the trial, make sure you chose the race all monsters will have with the crystal besides me. You can reroll the choice of races twice a day. (Not mandatory)";
+			}
+			if (getvariableofnpc(.bab_config,"babel_conf") & 4) {
+				dispbottom "- There are "+getvariableofnpc(.bab_time_limit,"babel_conf")+" seconds time limit per floor, and "+getvariableofnpc(.bab_time_limit_boss,"babel_conf")+" seconds per boss.";
+			}
+			if (getvariableofnpc(.bab_config,"babel_conf") & 8) {
+				dispbottom "- You can skip a floor only if you defeat at least 50% of monsters but you won't get a reward for this floor.";
+			}
+			dispbottom "- Each floor will give you a reward, it can be a boost, heal, or a pass which allows you to skip a floor entirely.";
+			dispbottom "- A boss will appear every "+getvariableofnpc(.bab_boss_pop,"babel_conf")+" floors.";
+			dispbottom "";
+			next;
+			mes "[Uriel]";
+			mes "If you want to participate, that's no problem.";
+			mes "Be aware that the creatures you will face on the test are not real.";
+			mes "They come from the divine magic of Archangel Babel.";
+			close;
+		case 4:
+			mes "[Uriel]";
+			mes "Another time then.";
+			close;
+	}
+}
+
+function	script	get_Monster_Race	{
+	switch (Babel_Monster_Race[getarg(0)]) {
+		case 0: @BabelMonster$[getarg(0)] = "Formless"; break;
+		case 1: @BabelMonster$[getarg(0)] = "Undead"; break;
+		case 2: @BabelMonster$[getarg(0)] = "Brute"; break;
+		case 3: @BabelMonster$[getarg(0)] = "Plant"; break;
+		case 4: @BabelMonster$[getarg(0)] = "Insect"; break;
+		case 5: @BabelMonster$[getarg(0)] = "Fish"; break;
+		case 6: @BabelMonster$[getarg(0)] = "Demon"; break;
+		case 7: @BabelMonster$[getarg(0)] = "Demi-Human"; break;
+		case 8: @BabelMonster$[getarg(0)] = "Angel"; break;
+		case 9: @BabelMonster$[getarg(0)] = "Dragon"; break;
+		case 10: @BabelMonster$[getarg(0)] = "All races"; break;
+	}
+	return;
+}
+
+bab_scene02,41,44,8	script	Alexiel#bab1	930,{
+	npctalk "Alexiel : The Great Uriel lost her angel wings a long time ago ...";
+	end;
+}
+
+bab_scene02,51,40,8	script	Samuel#bab1	931,{
+	npctalk "Samuel : Uriel is representing Lord Babel in this lower world. Talk to her if you want to prove your worth.";
+}
+
+bab_scene02,37,55,5	script	Kafra Employee::kaf_bab	112,{
+	cutin "kafra_06",2;
+	callfunc "F_KafSet";
+	mes "[Kafra Employee]";
+	mes "Welcome to the";
+	mes "Kafra Corporation~";
+	mes "The Kafra Services are";
+	mes "always here to support";
+	mes "you. So how can I be";
+	mes "of service today?";
+	callfunc "F_Kafra",5,0,0,40,800;
+	savepoint "bab_scene02",39,53,1,1;
+	callfunc "F_KafEnd",0,1,"in the tower of Babel";
+}
+
+bab_scene01,194,205,4	script	Altar of Babel#bab1	722,{
+	if(#reputbabel>(150+50*#lvlReputBabel)) {
+		Announce "Lord Babel is rewarding you for your efforts.",19;
+		misceffect 313;
+		misceffect 314;
+		#lvlReputBabel++;
+	}
+	mes "[Altar of Babel]";
+	mes "Babel Reputation : "+#reputbabel+" (Lv "+#lvlReputBabel+").";
+	close;
+}
+
+bab_scene01,199,202,3	script	Top 3#bab1	722,{ callfunc "trial_babel_rank"; }
+
+function	script	trial_babel_rank	{
+	mes "[Solo Mode - Ascension]";
+	if($babel_S_A_1_Sec) mes "1st: ^ff0000"+$babel_S_A_1_Name$+", has reached Floor ^0000ff100^000000 within ^008800"+($babel_S_A_1_Sec/60)+" minutes and "+($babel_S_A_1_Sec-(($babel_S_A_1_Sec/60)*60))+" seconds.^000000"; else mes "1st: Empty";
+	if($babel_S_A_2_Sec) mes "2nd: ^ff0000"+$babel_S_A_2_Name$+", has reached Floor ^0000ff100^000000 within ^008800"+($babel_S_A_2_Sec/60)+" minutes and "+($babel_S_A_2_Sec-(($babel_S_A_2_Sec/60)*60))+" seconds.^000000"; else mes "2nd: Empty";
+	if($babel_S_A_3_Sec) mes "3rd: ^ff0000"+$babel_S_A_3_Name$+", has reached Floor ^0000ff100^000000 within ^008800"+($babel_S_A_3_Sec/60)+" minutes and "+($babel_S_A_3_Sec-(($babel_S_A_3_Sec/60)*60))+" seconds.^000000"; else mes "3rd: Empty";
+	mes " ";
+	mes "[Team Mode - Ascension]";
+	if($babel_T_A_1_Sec) mes "1st: ^ff0000"+$babel_T_A_1_Name$+", has reached Floor ^0000ff100^000000 within ^008800"+($babel_T_A_1_Sec/60)+" minutes and "+($babel_T_A_1_Sec-(($babel_T_A_1_Sec/60)*60))+" seconds.^000000"; else mes "1st: Empty";
+	if($babel_T_A_2_Sec) mes "2nd: ^ff0000"+$babel_T_A_2_Name$+", has reached Floor ^0000ff100^000000 within ^008800"+($babel_T_A_2_Sec/60)+" minutes and "+($babel_T_A_2_Sec-(($babel_T_A_2_Sec/60)*60))+" seconds.^000000"; else mes "2nd: Empty";
+	if($babel_T_A_3_Sec) mes "3rd: ^ff0000"+$babel_T_A_3_Name$+", has reached Floor ^0000ff100^000000 within ^008800"+($babel_T_A_3_Sec/60)+" minutes and "+($babel_T_A_3_Sec-(($babel_T_A_3_Sec/60)*60))+" seconds.^000000"; else mes "3rd: Empty";
+	mes " ";
+	mes "[Solo Mode - Descension]";
+	if($babel_S_D_1_Floor) mes "1st: ^ff0000"+$babel_S_D_1_Name$+", has reached Floor ^0000ff"+$babel_S_D_1_Floor+"^000000"; else mes "1st: Empty";
+	if($babel_S_D_2_Floor) mes "2nd: ^ff0000"+$babel_S_D_2_Name$+", has reached Floor ^0000ff"+$babel_S_D_2_Floor+"^000000"; else mes "2nd: Empty";
+	if($babel_S_D_3_Floor) mes "3rd: ^ff0000"+$babel_S_D_3_Name$+", has reached Floor ^0000ff"+$babel_S_D_3_Floor+"^000000"; else mes "3rd: Empty";
+	mes " ";
+	mes "[Team Mode - Descension]";
+	if($babel_T_D_1_Floor) mes "1st: ^ff0000"+$babel_T_D_1_Name$+", has reached Floor ^0000ff"+$babel_T_D_1_Floor+"^000000"; else mes "1st: Empty";
+	if($babel_T_D_2_Floor) mes "2nd: ^ff0000"+$babel_T_D_2_Name$+", has reached Floor ^0000ff"+$babel_T_D_2_Floor+"^000000"; else mes "2nd: Empty";
+	if($babel_T_D_3_Floor) mes "3rd: ^ff0000"+$babel_T_D_3_Name$+", has reached Floor ^0000ff"+$babel_T_D_3_Floor+"^000000"; else mes "3rd: Empty";
+	close;
+}
+
+bab_scene02,60,41,1	script	Stardust Collector	502,{
+	disable_items;
+	mes "[Stardust Collector]";
+	mes "Babel has always been so in touch with the sky and the universe.";
+	mes "I've studied it for quite some time now and I can't still find an explanation of its existence, neither ours.";
+	mes "Hmm... Do you have something to say ?";
+	next;
+	switch(select("- Sell Stardusts:- Informations:- Leave")) {
+		case 1:
+			mes "[Stardust Collector]";
+			mes "How many Stardusts do you want to exchange ?";
+			next;
+			input .@n;
+			mes "[Stardust Collector]";
+			.@c = countitem(8271);
+			if(.@c <= 0) {
+				mes "You need at least 1 <ITEM>^0000FFStardust^000000<INFO>8271</INFO></ITEM>.";
+				break;
+			}
+			mes "Would you like to exchange ^0000ff"+.@c+"^000000 Stardusts ? I can give you ^0000ff"+.@c+"^000000 Babel points.";
+			next;
+			switch(select("- Yes, please:- Cancel.")) {
+				case 1:
+					delitem 8271,.@c;
+					#reputbabel += .@c;
+					#reputbabeltotal += .@c;
+					dispbottom "Babel Points: "+#reputbabel+"";
+					mes "[Stardust Collector]";
+					mes "Thank you very much ! See you next time.";
+					break;
+				case 2:
+					mes "[Stardust Collector]";
+					mes "Good day !";
+					break;
+			}
+			break;
+		case 2:
+			mes "[Stardust Collector]";
+			mes "Well, I was always fascinated by the universe.";
+			mes "My theory is that we are a result of existential matters,";
+			mes "We come from particles and we evolve years after years.";
+			mes "So do the stars. Our universe is still expanding as we speak !!";
+			next;
+			mes "[Stardust Collector]";
+			mes "I'm collecting stardust in order to study and experiment that matter.";
+			mes "If you find any during your trial, come to see me, I shall reward you !";
+			break;
+		case 3:
+			mes "[Stardust Collector]";
+			mes "Bye now.";
+			break;
+	}
+	close;
+}

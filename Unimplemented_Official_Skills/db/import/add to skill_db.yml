@@ -1,0 +1,510 @@
+# This file is a part of rAthena.
+#   Copyright(C) 2021 rAthena Development Team
+#   https://rathena.org - https://github.com/rathena
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program. If not, see <http://www.gnu.org/licenses/>.
+#
+###########################################################################
+# Skill Database
+###########################################################################
+#
+# Skill Settings
+#
+###########################################################################
+# - Id                        Unique skill ID.
+#   Name                      Skill Aegis name.
+#   Description               Skill description.
+#   MaxLevel                  Max skill level.
+#   Type                      Skill type. (Default: None)
+#   TargetType                Skill target type. (Default: Passive)
+#   DamageFlags:              Skill damage properties.
+#   Flags:                    Skill information flags.
+#   Range:                    Skill range. (Default: 0)
+#     - Level                 Skill level.
+#       Size                  Range at specific skill level.
+#   Hit                       Skill hit type. (Default: Normal)
+#   HitCount:                 Skill hit count. (Default: 0)
+#     - Level                 Skill level.
+#       Count                 Number of hits at specific skill level.
+#   Element:                  Skill element. (Default: Neutral)
+#     - Level                 Skill level.
+#       Element               Element at specific skill level.
+#   SplashArea:               Skill splash area of effect. (Default: 0)
+#     - Level                 Skill level.
+#       Area                  Splash area at specific skill level.
+#   ActiveInstance:           Maximum amount of active skill instances that can be on the ground. (Default: 0)
+#     - Level                 Skill level.
+#       Max                   Active instances at specific skill level.
+#   Knockback:                Amount of tiles the skill knockbacks. (Default: 0)
+#     - Level                 Skill level.
+#       Amount                Knockback count at specific skill level.
+#   GiveAp:                   Gives AP on successful skill cast. (Default: 0)
+#     - Level                 Skill level.
+#       Amount                AP gained at specific skill level.
+#   CopyFlags:                Determines if the skill is copyable. (Optional)
+#     Skill:                  Type of skill that can copy.
+#     RemoveRequirement:      Remove a requirement type. (Optional)
+#   NoNearNPC:                Determines if the skill can be used near a NPC. (Optional)
+#     AdditionalRange         Number of cells from an NPC where the skill can be cast. (Optional)
+#     Type:                   Type of NPC.
+#   CastCancel                Cancel cast when hit. (Default: false)
+#   CastDefenseReduction      Defense reduction rate during skill cast. (Default: 0)
+#   CastTime:                 Time to cast the skill in milliseconds. (Default: 0)
+#     - Level                 Skill level.
+#       Time                  Cast time at specific skill level in milliseconds.
+#   AfterCastActDelay:        Time the character cannot use skills in milliseconds. (Default: 0)
+#     - Level                 Skill level.
+#       Time                  After cast action delay at specific skill level in milliseconds.
+#   AfterCastWalkDelay:       Time before the character can move again in milliseconds. (Default: 0)
+#     - Level                 Skill level.
+#       Time                  After cast walk delay at specific skill level in milliseconds.
+#   Duration1:                Duration of the skill in milliseconds. (Default: 0)
+#     - Level                 Skill level.
+#       Time                  Skill duration at specific skill level in milliseconds.
+#   Duration2:                Duration of the skill in milliseconds. (Default: 0)
+#     - Level                 Skill level.
+#       Time                  Skill duration at specific skill level in milliseconds.
+#   Cooldown:                 Time before the character can use the same skill again in milliseconds. (Default: 0)
+#     - Level                 Skill level.
+#       Time                  Cooldown at specific skill level in milliseconds.
+#   FixedCastTime:            Time that is fixed during cast of the skill in milliseconds. (Default: 0)
+#     - Level                 Skill level.
+#       Time                  After cast action delay at specific skill level in milliseconds.
+#   CastTimeFlags:            Effects of the skill's cast time. (Optional)
+#   CastDelayFlags:           Effects of the skill's delay. (Optional)
+#   Requires:                 List of requirements to cast the skill. (Optional)
+#     HpCost:                 HP required to cast. (Default: 0)
+#       - Level               Skill level.
+#         Amount              HP required at specific skill level.
+#     SpCost:                 SP required to cast. (Default: 0)
+#       - Level               Skill level.
+#         Amount              SP required at specific skill level.
+#     ApCost:                 AP required to cast. (Default: 0)
+#       - Level               Skill level.
+#         Amount              AP required at specific skill level.
+#     HpRateCost:             HP rate required to cast. If positive, uses current HP, else uses Max HP. (Default: 0)
+#       - Level               Skill level.
+#         Amount              HP rate required at specific skill level.
+#     SpRateCost:             SP rate required to cast. If positive, uses current SP, else uses Max SP. (Default: 0)
+#       - Level               Skill level.
+#         Amount              SP rate required at specific skill level.
+#     ApRateCost:             AP rate required to cast. If positive, uses current AP, else uses Max AP. (Default: 0)
+#       - Level               Skill level.
+#         Amount              AP rate required at specific skill level.
+#     MaxHpTrigger:           Maximum amount of HP to cast the skill. (Default: 0)
+#       - Level               Skill level.
+#         Amount              Maximum HP trigger required at specific skill level.
+#     ZenyCost:               Zeny required to cast. (Default: 0)
+#       - Level               Skill level.
+#         Amount              Zeny required at specific skill level.
+#     Weapon:                 Weapon required to cast. (Default: All)
+#     Ammo:                   Ammo required to cast. (Default: None)
+#     AmmoAmount:             Ammo amount required to cast. (Default: 0)
+#       - Level               Skill level.
+#         Amount              Ammo amount required at specific skill level.
+#     State                   Special state required to cast. (Default: None)
+#     Status:                 Status change required to cast. (Default: nullptr)
+#     SphereCost:             Spirit sphere required to cast. (Default: 0)
+#       - Level               Skill level.
+#         Amount              Spirit sphere required at specific skill level.
+#     ItemCost:               Item required to cast. (Default: 0)
+#       - Item                Item name.
+#         Amount              Item amount.
+#         Level               Skill level. Makes the skill item check become level dependent if supplied. (Default: applies to all levels)
+#     Equipment:              Equipped item required to cast. (Default: nullptr)
+#   Unit:                     Skill unit values. (Optional)
+#     Id                      Skill unit ID.
+#     AlternateId:            Alternate skill unit ID. (Default: 0)
+#     Layout:                 Skill unit layout. (Default: 0)
+#       - Level               Skill level.
+#         Size                Unit layout at specific skill level.
+#     Range:                  Skill unit range. (Default: 0)
+#       - Level               Skill level.
+#         Size                Unit range at specific skill level.
+#     Interval                Skill unit interval in milliseconds. (Default: 0)
+#     Target                  Skill unit target type. (Default: All)
+#     Flag:                   Skill unit flags. (Default: None)
+###########################################################################
+
+Header:
+  Type: SKILL_DB
+  Version: 3
+
+Body:
+  - Id: 82
+    Name: WZ_FIREIVY
+    Description: Wind Ivy
+    MaxLevel: 5
+    Type: Magic
+    TargetType: Ground
+    Flags:
+      IsAutoShadowSpell: true
+      TargetHidden: true
+    Range: 9
+    Hit: Single
+    HitCount: 1
+    Element: Wind
+    ActiveInstance:
+      - Level: 1
+        Max: 1
+      - Level: 2
+        Max: 2
+      - Level: 3
+        Max: 3
+      - Level: 4
+        Max: 4
+      - Level: 5
+        Max: 5
+    CastCancel: true
+    CastTime: 5000
+    AfterCastActDelay: 1000
+    Duration1: 15000
+    Duration2: 2000
+    Requires:
+      SpCost: 50
+    Unit:
+      Id: Dummyskill
+      Layout: 1
+      Interval: 1000
+      Target: Enemy
+      Flag:
+        PathCheck: true
+  - Id: 360
+    Name: LK_FURY
+    Description: Fury
+    MaxLevel: 5
+    Type: Weapon
+    TargetType: Self
+    DamageFlags:
+      NoDamage: true
+    Hit: Single
+    HitCount: 1
+    Duration1: 60000
+    CastTime:
+      - Level: 1
+        Time: 1000
+      - Level: 2
+        Time: 750
+      - Level: 3
+        Time: 500
+      - Level: 4
+        Time: 250
+    AfterCastActDelay: 1000
+    Requires:
+      SpCost: 100
+  - Id: 377
+    Name: ASC_HALLUCINATION
+    Description: Hallucination Walk
+    MaxLevel: 5
+    Type: Weapon
+    TargetType: Self
+    DamageFlags:
+      Splash: true
+    Hit: Single
+    HitCount: 1
+    Duration1: 10000
+    Duration2: 5000
+    Cooldown: 10000
+    SplashArea: 7
+    CastTime:
+      - Level: 1
+        Time: 1000
+      - Level: 2
+        Time: 750
+      - Level: 3
+        Time: 500
+      - Level: 4
+        Time: 250
+    AfterCastActDelay: 1000
+    Requires:
+      SpCost: 50
+  - Id: 314
+    Name: BD_RAGNAROK
+    Description: Ragnarok
+    MaxLevel: 5
+    Type: Misc
+    TargetType: Self
+    DamageFlags:
+      NoDamage: true
+    Flags:
+      IsEnsemble: true
+    Hit: Single
+    HitCount: 1
+    Duration1: 60000
+    Duration2: 15000
+    Requires:
+      SpCost: 40
+      Weapon:
+        Musical: true
+        Whip: true
+    Unit:
+      Id: Ragnarok
+      Layout: 4
+      Interval: 2000
+      Flag:
+        Ensemble: true
+  - Id: 391
+    Name: ST_STEALBACKPACK
+    Description: Steal Backpack
+    MaxLevel: 5
+    Type: Weapon
+    TargetType: Attack
+    DamageFlags:
+      NoDamage: true
+    Duration1: 300000
+    Cooldown: 10000
+    CastTime:
+      - Level: 1
+        Time: 1000
+      - Level: 2
+        Time: 750
+      - Level: 3
+        Time: 500
+      - Level: 4
+        Time: 250
+    AfterCastActDelay: 1000
+    SplashArea:
+      - Level: 1
+        Area: 3
+      - Level: 2
+        Area: 3
+      - Level: 3
+        Area: 5
+      - Level: 4
+        Area: 5
+      - Level: 5
+        Area: 7
+    Requires:
+      SpCost: 50
+  - Id: 393
+    Name: CR_SYNTHESISPOTION
+    Description: Synthesis Potion
+    MaxLevel: 1
+    TargetType: Self
+    DamageFlags:
+      NoDamage: true
+    CastCancel: true
+    Hit: Single
+    SplashArea: 3
+    Duration1: 300000
+    Requires:
+      SpCost: 5
+  - Id: 245
+    Name: AM_DRILLMASTER
+    Description: Drill Master
+    MaxLevel: 10
+    Type: Weapon
+  - Id: 239
+    Name: AM_BIOTECHNOLOGY
+    Description: Biotechnology
+    MaxLevel: 10
+    Type: Weapon
+  - Id: 242
+    Name: AM_FLAMECONTROL
+    Description: Flame Control
+    MaxLevel: 1
+    Type: Weapon
+    TargetType: Attack
+    DamageFlags:
+      NoDamage: true
+    Hit: Single
+    HitCount: 1
+    SplashArea: 1
+    AfterCastActDelay: 1000
+  - Id: 246
+    Name: AM_HEALHOMUN
+    Description: Heal Homunculus
+    MaxLevel: 5
+    TargetType: Self
+    DamageFlags:
+      NoDamage: true
+    Hit: Single
+    HitCount: 1
+    AfterCastActDelay: 1000
+    Requires:
+      SpCost: 1
+      ItemCost:
+        - Item: White_Potion
+          Amount: 1
+        - Item: White_Potion
+          Amount: 1
+        - Item: White_Potion
+          Amount: 1
+        - Item: White_Potion
+          Amount: 1
+        - Item: White_Potion
+          Amount: 1
+  - Id: 653
+    Name: NPC_EARTHQUAKE
+    Description: Earthquake
+    MaxLevel: 10
+    Type: Magic
+    TargetType: Self
+    DamageFlags:
+      Splash: true
+      SplashSplit: false
+    Flags:
+      TargetTrap: true
+    CopyFlags:
+      Skill:
+        Plagiarism: true
+        Reproduce: true
+    Hit: Multi_Hit
+    HitCount: -3
+    Element: Earth
+    CastCancel: true
+    SplashArea:
+      - Level: 1
+        Area: 5
+      - Level: 2
+        Area: 5
+      - Level: 3
+        Area: 7
+      - Level: 4
+        Area: 7
+      - Level: 5
+        Area: 9
+      - Level: 6
+        Area: 9
+      - Level: 7
+        Area: 11
+      - Level: 8
+        Area: 11
+      - Level: 9
+        Area: 11
+      - Level: 10
+        Area: 11
+    Duration1: 2700
+    CastTime: 12000
+    AfterCastActDelay: 4000
+    AfterCastWalkDelay: 2500
+    Requires:
+      SpCost:
+        - Level: 1
+          Amount: 60
+        - Level: 2
+          Amount: 64
+        - Level: 3
+          Amount: 68
+        - Level: 4
+          Amount: 72
+        - Level: 5
+          Amount: 76
+        - Level: 6
+          Amount: 80
+        - Level: 7
+          Amount: 84
+        - Level: 8
+          Amount: 88
+        - Level: 9
+          Amount: 92
+        - Level: 10
+          Amount: 96
+    Unit:
+      Id: Earthquake
+      Range:
+        - Level: 1
+          Size: 5
+        - Level: 2
+          Size: 7
+        - Level: 3
+          Size: 9
+        - Level: 4
+          Size: 11
+        - Level: 5
+          Size: 13
+        - Level: 6
+          Size: 5
+        - Level: 7
+          Size: 7
+        - Level: 8
+          Size: 9
+        - Level: 9
+          Size: 11
+        - Level: 10
+          Size: 13
+      Interval: 900
+      Target: Enemy
+      Flag:
+        PathCheck: true
+  - Id: 1831
+    Name: WZ_EARTHWALL
+    Description: Earth Wall
+    MaxLevel: 5
+    Type: Magic
+    TargetType: Ground
+    DamageFlags:
+      NoDamage: true
+    Range: 9
+    Hit: Single
+    HitCount: 1
+    CastTime: 500
+    Element: Earth
+    ActiveInstance:
+      - Level: 1
+        Max: 1
+      - Level: 2
+        Max: 2
+      - Level: 3
+        Max: 3
+      - Level: 4
+        Max: 4
+      - Level: 5
+        Max: 5
+    CastCancel: true
+    Requires:
+      SpCost: 30
+    Unit:
+      Id: Earthwall
+      Layout: 0
+      Interval: 1000
+      Flag:
+        PathCheck: true
+        NoKnockback: true
+  - Id: 388
+    Name: WS_SYSTEMCREATE
+    Description: System Creation
+    MaxLevel: 5
+    Type: Weapon
+    TargetType: Ground
+    Range: 9
+    DamageFlags:
+      NoDamage: true
+    CastTime: 5000
+    AfterCastActDelay: 1000
+    Duration1: 20000
+    Requires:
+      SpCost: 50
+      ItemCost:
+        - Item: Iron
+          Amount: 1
+  - Id: 576
+    Name: AM_TWILIGHT4
+    Description: Twilight Alchemy 4
+    MaxLevel: 1
+    TargetType: Self
+    DamageFlags:
+      NoDamage: true
+    Flags:
+      IsSpirit: true
+    Hit: Single
+    CastTime: 3000
+    AfterCastActDelay: 10000
+    CastTimeFlags:
+      IgnoreDex: true
+    Requires:
+      SpCost: 200
+      ItemCost:
+        - Item: Medicine_Bowl
+          Amount: 200

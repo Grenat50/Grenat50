@@ -1,0 +1,4 @@
+
+		[EFST_IDs.EFST_MAGICROD] = "i_counter.tga",
+		[EFST_IDs.EFST_GDSKILL_BATTLEORDER] = "efst_powerful_faith.tga",
+		[EFST_IDs.EFST_GDSKILL_REGENERATION] = "all_odins_power.tga",

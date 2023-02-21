@@ -1,0 +1,28 @@
+
+StateIconList[EFST_IDs.EFST_GDSKILL_REGENERATION] = {
+	haveTimeLimit = 1,
+	posTimeLimitStr = 2,
+	descript = {
+		{ "Regeneration", COLOR_TITLE_BUFF },
+		{ "%s", COLOR_TIME },
+		{ "Regeneration increased by the guild master" }
+	}
+}
+StateIconList[EFST_IDs.EFST_GDSKILL_BATTLEORDER] = {
+	haveTimeLimit = 1,
+	posTimeLimitStr = 2,
+	descript = {
+		{ "Battle Order", COLOR_TITLE_BUFF },
+		{ "%s", COLOR_TIME },
+		{ "STR, DEX, INT increased by the guild master" }
+	}
+}
+StateIconList[EFST_IDs.EFST_MAGICROD] = {
+	haveTimeLimit = 1,
+	posTimeLimitStr = 2,
+	descript = {
+		{ "Magic Rod", COLOR_TITLE_BUFF },
+		{ "%s", COLOR_TIME },
+		{ "Absorb SP instead of receiving damage" }
+	}
+}

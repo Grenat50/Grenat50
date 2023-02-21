@@ -1,0 +1,545 @@
+# This file is a part of rAthena.
+#   Copyright(C) 2021 rAthena Development Team
+#   https://rathena.org - https://github.com/rathena
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program. If not, see <http://www.gnu.org/licenses/>.
+#
+###########################################################################
+# Monster Database
+###########################################################################
+#
+# Monster Settings
+#
+###########################################################################
+# - Id                      Monster ID.
+#   AegisName               Server name to reference the monster in scripts and lookups, should use no spaces.
+#   Name                    Name in English.
+#   JapaneseName            Name in Japanese. (Default: 'Name' value)
+#   Level                   Level. (Default: 1)
+#   Hp                      Total HP. (Default: 1)
+#   Sp                      Total SP. (Default: 1)
+#   BaseExp                 Base experience gained. (Default: 0)
+#   JobExp                  Job experience gained. (Default: 0)
+#   MvpExp                  MVP experience gained. (Default: 0)
+#   Attack                  Minimum attack in pre-renewal and base attack in renewal. (Default: 0)
+#   Attack2                 Maximum attack in pre-renewal and base magic attack in renewal. (Default: 0)
+#   Defense                 Physical defense of the monster, reduces melee and ranged physical attack/skill damage. (Default: 0)
+#   MagicDefense            Magic defense of the monster, reduces magical skill damage. (Default: 0)
+#   Str                     Strength which affects attack. (Default: 1)
+#   Agi                     Agility which affects flee. (Default: 1)
+#   Vit                     Vitality which affects defense. (Default: 1)
+#   Int                     Intelligence which affects magic attack. (Default: 1)
+#   Dex                     Dexterity which affects hit rate. (Default: 1)
+#   Luk                     Luck which affects perfect dodge/lucky flee/lerfect flee/lucky dodge rate. (Default: 1)
+#   AttackRange             Attack range. (Default: 0)
+#   SkillRange              Skill cast range. (Default: 0)
+#   ChaseRange              Chase range. (Default: 0)
+#   Size                    Size. (Default: Small)
+#   Race                    Race. (Default: Formless)
+#   RaceGroups:             List of secondary groups the monster may be part of. (Optional)
+#     <group>: <value>      Group to toggle.
+#   Element                 Element. (Default: Neutral)
+#   ElementLevel            Level of element. (Default: 1)
+#   WalkSpeed               Walk speed. (Default: DEFAULT_WALK_SPEED)
+#   AttackDelay             Attack speed. (Default: 0)
+#   AttackMotion            Attack animation speed. (Default: 0)
+#   DamageMotion            Damage animation speed. (Default: 0)
+#   DamageTaken             Rate at which the monster will receive incoming damage. (Default: 100)
+#   Ai                      Aegis monster type AI behavior. (Default: 06)
+#   Class                   Aegis monster class. (Default: Normal)
+#   Modes:                  List of unique behavior not defined by AI, Class, or Attribute. (Optional)
+#     <mode>: <value>       Mode to toggle.
+#   MvpDrops:               List of possible MVP prize items. Max of MAX_MVP_DROP. (Optional)
+#     - Item                Item name.
+#       Rate                Drop rate of item.
+#       RandomOptionGroup   Random Option Group applied to item on drop. (Default: None)
+#       Index               Index used for overwriting item. (Optional)
+#   Drops:                  List of possible normal item drops. Max of MAX_MOB_DROP. (Optional)
+#     - Item                Item name.
+#       Rate                Drop rate of item.
+#       StealProtected      If the item is shielded from TF_STEAL. (Default: false)
+#       RandomOptionGroup   Random Option Group applied to item on drop. (Default: None)
+#       Index               Index used for overwriting item. (Optional)
+###########################################################################
+
+Header:
+  Type: MOB_DB
+  Version: 3
+
+Body:
+  - Id: 2100
+    AegisName: BG_ARCHER_GUARDIAN
+    Name: Archer Guardian
+    Level: 74
+    Hp: 128634
+    BaseExp: 1
+    JobExp: 1
+    Attack: 1120
+    Attack2: 1600
+    Defense: 35
+    MagicDefense: 60
+    Str: 95
+    Agi: 80
+    Vit: 80
+    Int: 90
+    Dex: 165
+    Luk: 55
+    AttackRange: 12
+    SkillRange: 14
+    ChaseRange: 16
+    Size: Large
+    Race: Demihuman
+    Element: Neutral
+    ElementLevel: 4
+    WalkSpeed: 265
+    AttackDelay: 1200
+    AttackMotion: 1200
+    DamageMotion: 384
+    Ai: 10
+    Class: Boss
+    Modes:
+      CanMove: true
+      CastSensorChase: true
+      Angry: true
+      ChangeChase: true
+      ChangeTargetMelee: true
+      Mvp: true
+  - Id: 2101
+    AegisName: BG_KNIGHT_GUARDIAN
+    Name: Knight Guardian
+    Level: 86
+    Hp: 130214
+    BaseExp: 1
+    JobExp: 1
+    Attack: 1280
+    Attack2: 1560
+    Defense: 55
+    MagicDefense: 30
+    Str: 110
+    Agi: 40
+    Vit: 140
+    Int: 65
+    Dex: 125
+    Luk: 65
+    AttackRange: 2
+    SkillRange: 14
+    ChaseRange: 16
+    Size: Large
+    Race: Demihuman
+    Element: Neutral
+    ElementLevel: 4
+    WalkSpeed: 275
+    AttackDelay: 1200
+    AttackMotion: 1200
+    DamageMotion: 384
+    Ai: 10
+    Class: Boss
+    Modes:
+      CanMove: true
+      CastSensorChase: true
+      Angry: true
+      ChangeChase: true
+      ChangeTargetMelee: true
+      Mvp: true
+  - Id: 2102
+    AegisName: BG_SOLDIER_GUARDIAN
+    Name: Soldier Guardian
+    Level: 56
+    Hp: 115670
+    BaseExp: 1
+    JobExp: 1
+    Attack: 873
+    Attack2: 1036
+    Defense: 35
+    Str: 85
+    Agi: 56
+    Vit: 100
+    Int: 45
+    Dex: 103
+    Luk: 43
+    AttackRange: 1
+    SkillRange: 10
+    ChaseRange: 12
+    Size: Small
+    Race: Insect
+    Element: Earth
+    ElementLevel: 1
+    WalkSpeed: 265
+    AttackDelay: 1288
+    AttackMotion: 288
+    DamageMotion: 384
+    Ai: 05
+    Class: Boss
+    Modes:
+      Mvp: true
+  - Id: 2103
+    AegisName: BG_SOLDIER_GUARDIAN2
+    Name: Soldier Guardian
+    Level: 56
+    Hp: 115670
+    BaseExp: 1
+    JobExp: 1
+    Attack: 873
+    Attack2: 1036
+    Defense: 35
+    Str: 85
+    Agi: 56
+    Vit: 100
+    Int: 45
+    Dex: 103
+    Luk: 43
+    AttackRange: 1
+    SkillRange: 10
+    ChaseRange: 12
+    Size: Small
+    Race: Insect
+    Element: Earth
+    ElementLevel: 1
+    WalkSpeed: 265
+    AttackDelay: 1288
+    AttackMotion: 288
+    DamageMotion: 384
+    Ai: 05
+    Class: Boss
+    Modes:
+      Mvp: true
+  - Id: 2104
+    AegisName: BG_CAPTAIN
+    Name: Captain
+    Level: 56
+    Hp: 215670
+    BaseExp: 1
+    JobExp: 1
+    Attack: 873
+    Attack2: 1036
+    Defense: 35
+    Str: 85
+    Agi: 56
+    Vit: 100
+    Int: 45
+    Dex: 103
+    Luk: 43
+    AttackRange: 1
+    SkillRange: 10
+    ChaseRange: 12
+    Size: Small
+    Race: Insect
+    Element: Earth
+    ElementLevel: 1
+    WalkSpeed: 265
+    AttackDelay: 1288
+    AttackMotion: 288
+    DamageMotion: 384
+    Ai: 05
+    Class: Boss
+    Modes:
+      Mvp: true
+  - Id: 2105
+    AegisName: BARRICADE_BG
+    Name: Barricade
+    Level: 98
+    Hp: 60
+    Defense: 127
+    MagicDefense: 99
+    Agi: 17
+    Int: 80
+    Dex: 126
+    Luk: 20
+    AttackRange: 1
+    SkillRange: 10
+    ChaseRange: 12
+    Size: Large
+    Race: Formless
+    Element: Neutral
+    ElementLevel: 1
+    WalkSpeed: 300
+    AttackDelay: 1288
+    AttackMotion: 288
+    DamageMotion: 384
+    Class: Boss
+    Modes:
+      IgnoreMagic: true
+      IgnoreMelee: true
+      IgnoreMisc: true
+      IgnoreRanged: true
+  - Id: 20400
+    AegisName: Guardian_Stone
+    Name: Guardian Stone
+    Level: 90
+    Hp: 50
+    Attack: 1
+    Attack2: 2
+    Defense: 40
+    MagicDefense: 50
+    Size: Small
+    Race: Formless
+    Element: Neutral
+    ElementLevel: 1
+    WalkSpeed: 300
+    AttackDelay: 1288
+    AttackMotion: 288
+    DamageMotion: 384
+    Modes:
+      IgnoreMelee: true
+      IgnoreMisc: true
+      Mvp: true
+  - Id: 20401
+    AegisName: Guardian_Stone2
+    Name: Guardian Stone
+    Level: 90
+    Hp: 50
+    Attack: 1
+    Attack2: 2
+    Defense: 40
+    MagicDefense: 50
+    Size: Small
+    Race: Formless
+    Element: Neutral
+    ElementLevel: 1
+    WalkSpeed: 300
+    AttackDelay: 1288
+    AttackMotion: 288
+    DamageMotion: 384
+    Modes:
+      IgnoreMelee: true
+      IgnoreMisc: true
+      Mvp: true
+  - Id: 20402
+    AegisName: Emperium_BG
+    Name: Emperium
+    Level: 90
+    Hp: 68430
+    Attack: 60
+    Attack2: 71
+    Defense: 40
+    MagicDefense: 50
+    Agi: 17
+    Vit: 80
+    Int: 50
+    Dex: 26
+    Luk: 20
+    AttackRange: 1
+    SkillRange: 10
+    ChaseRange: 12
+    Size: Small
+    Race: Angel
+    Element: Holy
+    ElementLevel: 1
+    WalkSpeed: 300
+    AttackDelay: 1288
+    AttackMotion: 288
+    DamageMotion: 384
+    Class: Boss
+    Modes:
+      Mvp: true
+  - Id: 20403
+    AegisName: BomberMan_Mushroom
+    Name: BomberMan Mushroom
+    Level: 1
+    Hp: 2000
+    Attack: 1
+    Attack2: 1
+    Defense: 100
+    MagicDefense: 99
+    Luk: 90
+    AttackRange: 1
+    SkillRange: 7
+    ChaseRange: 12
+    Size: Small
+    Race: Plant
+    Element: Holy
+    ElementLevel: 1
+    WalkSpeed: 1000
+    AttackDelay: 1
+    AttackMotion: 1
+    DamageMotion: 1
+    Modes:
+      NoCast: true
+      Assist: true
+      IgnoreMagic: true
+      IgnoreMelee: true
+      IgnoreMisc: true
+      IgnoreRanged: true
+      KnockBackImmune: true
+  - Id: 20404
+    AegisName: BomberMan_Xmas
+    Name: BomberMan Xmas
+    Level: 1
+    Hp: 2000
+    Attack: 1
+    Attack2: 1
+    Defense: 100
+    MagicDefense: 99
+    Luk: 90
+    AttackRange: 1
+    SkillRange: 7
+    ChaseRange: 12
+    Size: Small
+    Race: Plant
+    Element: Holy
+    ElementLevel: 1
+    WalkSpeed: 1000
+    AttackDelay: 1
+    AttackMotion: 1
+    DamageMotion: 1
+    Modes:
+      NoCast: true
+      Assist: true
+      IgnoreMagic: true
+      IgnoreMelee: true
+      IgnoreMisc: true
+      IgnoreRanged: true
+      KnockBackImmune: true
+  - Id: 3293
+    AegisName: BomberMan_Mushroom2
+    Name: BomberMan Mushroom
+    Level: 1
+    Hp: 2000
+    Attack: 1
+    Attack2: 1
+    Defense: 100
+    MagicDefense: 99
+    Luk: 90
+    AttackRange: 1
+    SkillRange: 7
+    ChaseRange: 12
+    Size: Small
+    Race: Plant
+    Element: Holy
+    ElementLevel: 1
+    WalkSpeed: 1000
+    AttackDelay: 1
+    AttackMotion: 1
+    DamageMotion: 1
+    Modes:
+      NoCast: true
+      Assist: true
+      IgnoreMagic: true
+      IgnoreMelee: true
+      IgnoreMisc: true
+      IgnoreRanged: true
+      KnockBackImmune: true
+  - Id: 20405
+    AegisName: BomberMan_bug
+    Name: BomberMan bug
+    Level: 1
+    Hp: 2000
+    Attack: 1
+    Attack2: 1
+    Defense: 100
+    MagicDefense: 99
+    Luk: 90
+    AttackRange: 1
+    SkillRange: 7
+    ChaseRange: 12
+    Size: Small
+    Race: Plant
+    Element: Holy
+    ElementLevel: 1
+    WalkSpeed: 1000
+    AttackDelay: 1
+    AttackMotion: 1
+    DamageMotion: 1
+    Modes:
+      NoCast: true
+      Assist: true
+      IgnoreMagic: true
+      IgnoreMelee: true
+      IgnoreMisc: true
+      IgnoreRanged: true
+      KnockBackImmune: true
+  - Id: 20574
+    AegisName: MD_C_WHITEKNIGHT
+    Name: White Knight
+    Level: 1
+    Hp: 60
+    BaseExp: 27
+    JobExp: 20
+    Attack: 8
+    Attack2: 1
+    Defense: 2
+    MagicDefense: 5
+    Str: 6
+    Dex: 6
+    Luk: 5
+    AttackRange: 1
+    SkillRange: 10
+    ChaseRange: 12
+    Size: Medium
+    Race: Plant
+    Element: Water
+    ElementLevel: 1
+    WalkSpeed: 400
+    AttackDelay: 1872
+    AttackMotion: 672
+    DamageMotion: 480
+    Ai: 02
+    Drops:
+      - Item: Jellopy
+        Rate: 7000
+      - Item: Knife_
+        Rate: 100
+      - Item: Sticky_Mucus
+        Rate: 400
+      - Item: Apple
+        Rate: 1000
+      - Item: Empty_Bottle
+        Rate: 1500
+      - Item: Apple
+        Rate: 150
+      - Item: Unripe_Apple
+        Rate: 20
+      - Item: Poring_Card
+        Rate: 1
+        StealProtected: true
+  - Id: 3805
+    AegisName: E_HAPPY_EGG
+    Name: Happy Egg
+    Level: 2
+    Hp: 45
+    BaseExp: 27
+    JobExp: 20
+    Attack: 12
+    Attack2: 13
+    Defense: 16
+    Str: 8
+    Dex: 6
+    Luk: 2
+    AttackRange: 1
+    SkillRange: 10
+    ChaseRange: 12
+    Size: Medium
+    Race: Plant
+    Element: Fire
+    ElementLevel: 1
+    WalkSpeed: 400
+    AttackDelay: 1372
+    AttackMotion: 672
+    DamageMotion: 480
+    Ai: 02
+    Drops:
+      - Item: Jellopy
+        Rate: 7500
+      - Item: Rod_
+        Rate: 80
+      - Item: Sticky_Mucus
+        Rate: 500
+      - Item: Apple
+        Rate: 1100
+      - Item: Empty_Bottle
+        Rate: 1700
+      - Item: Apple
+        Rate: 800
+      - Item: Orange_Juice
+        Rate: 20

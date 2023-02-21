@@ -1,0 +1,162 @@
+	[SKID.NPC_EARTHQUAKE] = {
+		"WZ_EARTHQUAKE",
+		SkillName = "Earthquake",
+		MaxLv = 10,
+		SpAmount = { 60, 64, 68, 72, 76, 80, 84, 88, 92, 96 },
+		bSeperateLv = true,
+		AttackRange = { 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 },
+		SkillScale = {
+			[1] = { x = 11, y = 11 },
+			[2] = { x = 13, y = 13 },
+			[3] = { x = 15, y = 15 },
+			[4] = { x = 17, y = 17 },
+			[5] = { x = 19, y = 19 },
+			[6] = { x = 19, y = 19 },
+			[7] = { x = 19, y = 19 },
+			[8] = { x = 19, y = 19 },
+			[9] = { x = 19, y = 19 },
+			[10] = { x = 19, y = 19 }
+		},
+		_NeedSkillList = {
+			{ SKID.WZ_HEAVENDRIVE, 5 },
+		}
+	},
+	[SKID.WZ_EARTHWALL] = {
+		"WZ_EARTHWALL",
+		SkillName = "Earth Wall",
+		MaxLv = 5,
+		SpAmount = { 30, 30, 30, 30, 30 },
+		bSeperateLv = false,
+		AttackRange = { 9, 9, 9, 9, 9 },
+		_NeedSkillList = {
+			{ SKID.NPC_EARTHQUAKE, 3 }
+		}
+	},
+	[SKID.WZ_FIREIVY] = {
+		"WZ_FIREIVY",
+		SkillName = "Wind Wall",
+		MaxLv = 5,
+		SpAmount = { 50, 50, 50, 50, 50 },
+		bSeperateLv = false,
+		AttackRange = { 9, 9, 9, 9, 9},
+		_NeedSkillList = {
+			{ SKID.MG_THUNDERSTORM, 5 },
+			{ SKID.MG_LIGHTNINGBOLT, 10 }
+		}
+	},
+	[SKID.LK_FURY] = {
+		"LK_FURY",
+		SkillName = "Fury",
+		MaxLv = 5,
+		SpAmount = { 100, 100, 100, 100, 100 },
+		bSeperateLv = false,
+		AttackRange = { 1, 1, 1, 1, 1},
+		_NeedSkillList = {
+			{ SKID.SM_ENDURE, 10 },
+			{ SKID.SM_PROVOKE, 10 }
+		}
+	},
+	[SKID.ASC_HALLUCINATION] = {
+		"ASC_HALLUCINATION",
+		SkillName = "Hallucination Walk",
+		MaxLv = 5,
+		SpAmount = { 50, 50, 50, 50, 50 },
+		bSeperateLv = false,
+		AttackRange = { 1, 1, 1, 1, 1},
+		_NeedSkillList = {
+			{ SKID.AS_CLOAKING, 10 }
+		}
+	},
+	[SKID.BD_RAGNAROK] = {
+		"BD_RAGNAROK",
+		SkillName = "Ragnarok",
+		MaxLv = 5,
+		SpAmount = { 40, 40, 40, 40, 40 },
+		bSeperateLv = false,
+		AttackRange = { 1, 1, 1, 1, 1},
+		_NeedSkillList = {
+			{ SKID.BD_RINGNIBELUNGEN, 1 }
+		}
+	},
+	[SKID.ST_STEALBACKPACK] = {
+		"ST_STEALBACKPACK",
+		SkillName = "Steal Backpack",
+		MaxLv = 5,
+		SpAmount = { 50, 50, 50, 50, 50 },
+		bSeperateLv = false,
+		AttackRange = { 1, 1, 1, 1, 1 },
+		_NeedSkillList = {
+			{ SKID.RG_SNATCHER, 10 },
+			{ SKID.TF_STEAL, 10 }
+		}
+	},
+	[SKID.CR_SYNTHESISPOTION] = {
+		"CR_SYNTHESISPOTION",
+		SkillName = "Synthesis Potion",
+		MaxLv = 1,
+		SpAmount = { 5, 5, 5, 5, 5 },
+		bSeperateLv = false,
+		AttackRange = { 1, 1, 1, 1, 1 },
+		_NeedSkillList = {
+			{ SKID.AM_LEARNINGPOTION, 10 },
+			{ SKID.AM_PHARMACY, 5 },
+			{ SKID.AM_POTIONPITCHER, 5 }
+		}
+	},
+	[SKID.AM_DRILLMASTER] = {
+		"AM_DRILLMASTER",
+		SkillName = "Drillmaster",
+		MaxLv = 10,
+		SpAmount = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
+		bSeperateLv = false,
+		AttackRange = { 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 },
+		_NeedSkillList = {
+			{ SKID.AM_BIOETHICS, 1 }
+		}
+	},
+	[SKID.AM_BIOTECHNOLOGY] = {
+		"AM_BIOTECHNOLOGY",
+		SkillName = "Biotechnology",
+		MaxLv = 10,
+		SpAmount = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
+		bSeperateLv = false,
+		AttackRange = { 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 },
+		_NeedSkillList = {
+			{ SKID.AM_BIOETHICS, 1 }
+		}
+	},
+	[SKID.AM_FLAMECONTROL] = {
+		"AM_FLAMECONTROL",
+		SkillName = "Flame Control",
+		MaxLv = 1,
+		SpAmount = { 0 },
+		bSeperateLv = false,
+		AttackRange = { 1 },
+		_NeedSkillList = {
+			{ SKID.AM_BIOTECHNOLOGY, 10 }
+		}
+	},
+	[SKID.WS_SYSTEMCREATE] = {
+		"WS_SYSTEMCREATE",
+		SkillName = "Create Auto-attack Device",
+		MaxLv = 5,
+		SpAmount = { 50, 50, 50, 50, 50 },
+		bSeperateLv = true,
+		AttackRange = { 9, 9, 9, 9, 9 },
+		_NeedSkillList = {
+			{ SKID.BS_WEAPONRESEARCH, 10 },
+			{ SKID.BS_WEAPONPERFECT, 3 }
+		}
+	},
+	[SKID.AM_TWILIGHT4] = {
+		"AM_TWILIGHT4",
+		SkillName = "Twilight Pharmacy",
+		MaxLv = 1,
+		Type = "Soul",
+		SpAmount = { 200 },
+		bSeperateLv = false,
+		AttackRange = { 1 },
+		_NeedSkillList = {
+			{ SKID.AM_PHARMACY, 10 }
+		}
+	},

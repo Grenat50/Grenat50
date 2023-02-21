@@ -1,0 +1,8 @@
+
+		[EFST_IDs.EFST_FURY2] = "ºº≈©∂Û∏‡∆Æ.tga",
+		[EFST_IDs.EFST_HALLUCINATIONWALK2] = "i_bunsin.tga",
+		[EFST_IDs.EFST_SYNTHESISPOTION] = "ancilla.tga",
+		[EFST_IDs.EFST_BUFF_HIT] = "humming.tga",
+		[EFST_IDs.EFST_BUFF_FLEE] = "whistle.tga",
+		[EFST_IDs.EFST_BUFF_ATK] = "add_atk_potion.tga",
+		[EFST_IDs.EFST_BUFF_MATK] = "add_matk_potion.tga",
